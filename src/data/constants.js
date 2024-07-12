@@ -200,7 +200,7 @@ export const projects = [
       MagicEden NFT Sniper, user set a price for a specific NFT, we handled searching the backend for it, and proccessed the transaction on the blockchain it as soon as it finds the matching parameters.
       Multi-Threaded CandyMachine NFT Minter, user set a NFT mint they wanted, we processed the transaction within a second as soon as it went live.`,
     image:
-      "https://private-user-images.githubusercontent.com/76854326/348047720-a19a4c19-416a-425c-aead-4970afef175f.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjA3NDQyMTEsIm5iZiI6MTcyMDc0MzkxMSwicGF0aCI6Ii83Njg1NDMyNi8zNDgwNDc3MjAtYTE5YTRjMTktNDE2YS00MjVjLWFlYWQtNDk3MGFmZWYxNzVmLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA3MTIlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwNzEyVDAwMjUxMVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWYxMGEwZjI5YTEyZGNiZjQ5ZDg2NDAxNDJhOTg2ZmY4ZjhhNWU5NDU2NTljZDNjMThlNjNkM2QwNWQxODEwYWEmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.W-cye72Z2lLADXlPM5-Sf5UnQOGLiU2tz6Qzah6F7iI",
+      "https://i.postimg.cc/y8HHWZG4/l1.png",
     tags: [
       "JavaScript",
       "TypeScript",
@@ -222,7 +222,7 @@ export const projects = [
 
       Currently, I am not sure what modules work but I'm sure the shopify autofill may not be depreciated.`,
     image:
-      "https://private-user-images.githubusercontent.com/76854326/348052074-56c08831-dc94-4dcf-bd24-2715cf26f01e.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjA3NDUzMjksIm5iZiI6MTcyMDc0NTAyOSwicGF0aCI6Ii83Njg1NDMyNi8zNDgwNTIwNzQtNTZjMDg4MzEtZGM5NC00ZGNmLWJkMjQtMjcxNWNmMjZmMDFlLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA3MTIlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwNzEyVDAwNDM0OVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWRlNjFmYTJhNDIyNDUwZjU0YzRkNTgxMjY1ZWM0ZTJjMTRmMzEyMWQ3NGE0Mzg1MTMxNTllZmUzYWE4MmI0YTAmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.WolY6kb2Iuw8vvqE4Mj4XqKdLCdlYDJ7nwd_KboB2q0",
+      "https://i.postimg.cc/9FPPH35P/t1.png",
     tags: ["Google Chrome Extension", "JavaScript", "HTML", "CSS", "jQuery"],
     category: "Chrome Extension",
     github: "https://github.com/naethun/Telios-AIO/",
