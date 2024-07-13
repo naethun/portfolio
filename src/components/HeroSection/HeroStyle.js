@@ -107,8 +107,8 @@ export const Title = styled.div`
   align-items: center;
 
   @media (max-width: 640px) {
-    font-size: 20px;
-    line-height: 20px;
+    font-size: 30px;
+    line-height: 25px;
   }
 `;
 
