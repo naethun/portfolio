@@ -8,7 +8,7 @@ export const Bio = {
   description: "While being a full-time student studying Computer Science & Engineering.",
   github: "https://github.com/naethun",
   resume:
-    "hhttps://drive.google.com/file/d/1Y2hwj59QZVRmYVfv0rEKobR-mcl5V7tE/view?usp=sharing",
+    "https://drive.google.com/file/d/1Y2hwj59QZVRmYVfv0rEKobR-mcl5V7tE/view?usp=sharing",
   linkedin: "https://www.linkedin.com/in/naethun/",
 };
 

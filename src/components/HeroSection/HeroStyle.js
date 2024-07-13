@@ -107,8 +107,8 @@ export const Title = styled.div`
   align-items: center;
 
   @media (max-width: 640px) {
-    font-size: 30px;
-    line-height: 25px;
+    font-size: 33px;
+    line-height: 30px;
   }
 `;
 
@@ -124,9 +124,9 @@ export const TextLoop = styled.div`
   align-items: center;
 
   @media (max-width: 640px) {
-    font-size: 10px;
+    font-size: 11px;
     line-height: 40px;
-    gap: 4px;
+    gap: 3px;
   }
 `;
 
