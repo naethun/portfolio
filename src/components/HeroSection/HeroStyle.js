@@ -107,9 +107,8 @@ export const Title = styled.div`
   align-items: center;
 
   @media (max-width: 640px) {
-    font-size: 25px;
-    line-height: 25px;
-    margin-bottom: 8px;
+    font-size: 20px;
+    line-height: 20px;
   }
 `;
 
@@ -126,7 +125,7 @@ export const TextLoop = styled.div`
 
   @media (max-width: 640px) {
     font-size: 10px;
-    line-height: 48px;
+    line-height: 40px;
     gap: 4px;
   }
 `;
@@ -157,8 +156,8 @@ export const SubTitle = styled.div`
 
 
   @media (max-width: 640px) {
-    font-size: 12px;
-    line-height: 28px;
+    font-size: 10px;
+    line-height: 14px;
   }
 `;
 
