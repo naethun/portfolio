@@ -165,7 +165,7 @@ const Button = styled.a`
     background-color: ${({ theme }) => theme.primary};
     ${({ dull, theme }) => dull && `
         background-color: ${theme.bgLight};
-        color: ${theme.text_secondary};
+        color: black;
         &:hover {
             background-color: ${({ theme }) => theme.bg + 99};
         }
