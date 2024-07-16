@@ -60,6 +60,11 @@ export const skills = [
           "https://ajeetchaulagain.com/static/7cb4af597964b0911fe71cb2f8148d64/87351/express-js.png",
       },
       {
+        name: "TypeScript",
+        image:
+          "https://static-00.iconduck.com/assets.00/typescript-icon-icon-1024x1024-vh3pfez8.png",
+      },
+      {
         name: "Python",
         image:
           "https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg",
