@@ -19,6 +19,7 @@ const Description = styled.div`
     font-weight: 400;
     color: ${({ theme }) => theme.text_primary + 99};
     margin-bottom: 10px;
+    white-space: pre-line; /* Add this line */
     @media only screen and (max-width: 768px){
         font-size: 12px;
     }

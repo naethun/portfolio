@@ -8,7 +8,7 @@ export const Bio = {
   description: "While being a full-time student studying Computer Science & Engineering.",
   github: "https://github.com/naethun",
   resume:
-    "https://drive.google.com/file/d/1Y2hwj59QZVRmYVfv0rEKobR-mcl5V7tE/view?usp=sharing",
+    "https://drive.google.com/file/d/1ndp38Y2KowzmQUK2nDX5-u5X-fJtj2n8/view?usp=sharing",
   linkedin: "https://www.linkedin.com/in/naethun/",
 };
 
@@ -130,7 +130,14 @@ export const experiences = [
     role: "Software Engineer",
     company: "LightningATC",
     date: "May 2022 - Jun 2023",
-    desc: "Engineered a Command-Line Interface software & Chrome Extension in TypeScript & Node.js, which automated tasks for users.",
+    desc: `A company which focuses on automating checkout proccesses for sneaker resellers to maximize profits. Focusing on engineering the backend, I developed modules that gave our clients a huge advantage compared to a normal human: 
+
+          - Reversed engineered a handful of famous shops websites such as, Nike, FinishLine, Footlocker, and many more, to automate the checkout processes.
+          
+          - Seamlessly integrated a real-time Shopify product monitor into a Chrome extension, which fetches data using clients keywords from a JSON endpoint on the desired stores. This was used by an average of 94 people daily. 
+          
+          - Reduced memory usage by nearly 500 MBs, after converting the browser automation into request-based automation.
+          `,
     skills: [
       "Reverse Engineering",
       "ReactJS",
@@ -146,7 +153,11 @@ export const experiences = [
     role: "Lead Coding Instructor",
     company: "Code Ninjas",
     date: "Dec 2022 - Present",
-    desc: "Organized business analytics and developed programs to optimize operations using Node.js and Python while continuing to educate our students.",
+    desc: `A place for students from ages 7-14 to learn basic Computer Science concepts and fundementals of software development. I am the lead instructor, handling the management of our daily team and optimizing operations for our location: 
+    
+          - Developed programs with Node JS and Python which automates certain tasks for our center director. A few programs I have made were, tracking quarterly attendance which resulted in a 20% increase in efficiency compared to manual methods, and a email filter which parsed through a list of over 1000 emails and got rid of duplicates and customers who don't want to be apart of the email list anymore.
+          
+          - Delegated tasks and managed other instructors to ensure each student is being educated efficiently and effectively.`,
     skills: [
       "JavaScript",
       "NodeJS",
@@ -157,18 +168,22 @@ export const experiences = [
   {
     id: 2,
     img: "https://img1.wsimg.com/isteam/ip/7230bf8c-78a3-4764-bbc6-b984344c2a04/Viet_Voices_Logo_Phrase.png/:/cr=t:0%25,l:0%25,w:100%25,h:100%25/rs=w:400,cg:true",
-    role: "Data Analyst",
-    company: "Viet Voices",
-    date: "Jan 2024 - Jun 2024",
-    desc: "Processed large data sets & visualized them to educate the Vietnamese community about our city.",
-  },
-  {
-    id: 2,
-    img: "https://img1.wsimg.com/isteam/ip/7230bf8c-78a3-4764-bbc6-b984344c2a04/Viet_Voices_Logo_Phrase.png/:/cr=t:0%25,l:0%25,w:100%25,h:100%25/rs=w:400,cg:true",
-    role: "Project Manager & Field Associate",
+    role: "Data Analyst & Project Manager Associate",
     company: "Viet Voices",
     date: "Jan 2024 - Present",
-    desc: "Learn a vast range of technologies, create documentation and guides for the team, and train new interns while developing project plans and complete the projects on time.",
+    desc: `A non-profit organization that focuses on representing marginalized Vietnamese and other AAPI communties within San Diego. We also help with other organizations as well. I parsed datasets while handling projects:
+          
+            - With the graphic design team, I provided statistics, numbers, ratios, and overall result analysis, for us to educate our communities. Which doubled traffic and a significant improvement in user feedback. 
+            
+            - Was flown out to Sacramento for three days, to conduct research on the PDI database for the team.
+            
+            - Integrated data from diverse internal & external sources, resulting in a nearly 50% enhancement in educating communities effectively.`,
+    skills: [
+      "PDI",
+      "SQL",
+      "Python",
+      "Excel",
+    ],
   },
 ];
 
