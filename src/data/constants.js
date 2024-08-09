@@ -220,7 +220,7 @@ export const projects = [
       MagicEden NFT Sniper, user set a price for a specific NFT, we handled searching the backend for it, and proccessed the transaction on the blockchain it as soon as it finds the matching parameters.
       Multi-Threaded CandyMachine NFT Minter, user set a NFT mint they wanted, we processed the transaction within a second as soon as it went live.`,
     image:
-      "https://private-user-images.githubusercontent.com/76854326/356048308-efea0118-ff3a-457c-a36b-817df37c2ab1.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjMwODA2NjMsIm5iZiI6MTcyMzA4MDM2MywicGF0aCI6Ii83Njg1NDMyNi8zNTYwNDgzMDgtZWZlYTAxMTgtZmYzYS00NTdjLWEzNmItODE3ZGYzN2MyYWIxLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA4MDglMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwODA4VDAxMjYwM1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPThjYzFkYzkzMTUwYmIzZTk3MzE0MGVjOWFiZTEzODJiZGUzMThhODk1NmYwNWRjM2M3YzcwMWY3MWE2NDU1YTMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.F8-EDpiLiBmmNjU4DjcxciV13itrDegV0wEXpzwkpFw",
+      "https://i.postimg.cc/nhCVVKbQ/Screenshot-2024-08-07-at-5-32-07-PM.png",
     tags: [
       "JavaScript",
       "TypeScript",
