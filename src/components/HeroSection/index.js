@@ -22,7 +22,7 @@ const HeroSection = () => {
                                     }}
                                 />
                             </Span>
-                            with a passion for <Span>technology</Span> and <Span>fashion</Span>
+                            with a passion for <Span>technology</Span> and <Span>innovation</Span>
                         </TextLoop>
                         <SubTitle>{Bio.description}</SubTitle>
                         <CenteredContainer>
