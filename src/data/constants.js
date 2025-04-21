@@ -8,7 +8,7 @@ export const Bio = {
   description: "While being a full-time student studying Computer Science & Engineering.",
   github: "https://github.com/naethun",
   resume:
-    "https://drive.google.com/file/d/19k2UMEyzNsmOXr81MObkOqZ3oYhYJCcC/view?usp=sharing",
+    "https://drive.google.com/file/d/16sJCDz2FepwzN0-YUV4WlB2DbDJo-xjp/view?usp=sharing",
   linkedin: "https://www.linkedin.com/in/naethun/",
 };
 
@@ -124,67 +124,73 @@ export const skills = [
 ];
 
 export const experiences = [
-  {
-    id: 0,
-    img: "https://pbs.twimg.com/profile_images/1549089349119139843/AuqvKpSs_400x400.png",
-    role: "Software Engineer",
-    company: "LightningATC",
-    date: "May 2022 - Jun 2023",
-    desc: `A company which focuses on automating checkout proccesses for sneaker resellers to maximize profits. Focusing on engineering the backend, I developed modules that gave our clients a huge advantage compared to a normal human: 
+	{
+		id: 0,
+		img: "https://img1.wsimg.com/isteam/ip/7230bf8c-78a3-4764-bbc6-b984344c2a04/Viet_Voices_Logo_Phrase.png/:/cr=t:0%25,l:0%25,w:100%25,h:100%25/rs=w:400,cg:true",
+		role: "Data Analyst & Software Engineer",
+		company: "Viet Voices",
+		date: "Jan 2024 - Present",
+		desc: `A non-profit organization that focuses on representing marginalized Vietnamese and other AAPI communties within San Diego:
+			  
+				- Developed a predictive machine learning model using logistic regression (scikit-learn) to classify voters based on their likelihood of consistent turnout. The model incorporated demographic, geographic, and behavioral features sourced from multiple datasets. Achieving measurable improvements in prediction accuracy over baseline heuristics.
+	
+				- Built a scalable Python data pipeline for historical election analysis. Utilizing Pandas and NumPy to ingest, clean, and transform voter turnout data from seven election cycles. The pipeline supported real-time querying and streamlined exploratory data analysis for civic trend detection.
+	
+				- Quantified civic engagement patterns using conditional probability analysis & tier-based classification.
+	
+				- Redesigned and prototyped the organization's web interface in Figma, focusing on accessibility, information hierarchy, and interactive data visualizations. Then deployed frontend enhancements.
+	
+				- Selected to represent the team in Sacramento for a 3-day field research initiative. Conducted in-person analysis of the Political Data Intelligence (PDI) voter file system, extracting high-impact features for use in the model and campaign planning.
+				`,
+				
+		skills: [
+		  "Machine Learning",
+		  "SQL",
+		  "Python",
+		  "Numeric Visualization",
+		],
+	  },
+	{
+		id: 1,
+		img: "https://yt3.googleusercontent.com/ytc/AIdro_nqJRBE-PvehwgWqiwAhPzjuDAi6kca33Z5mvp4UADlcyI=s900-c-k-c0x00ffffff-no-rj",
+		role: "Lead Coding Instructor",
+		company: "Code Ninjas",
+		date: "Dec 2022 - Present",
+		desc: `A place for students from ages 7-14 to learn basic Computer Science concepts and fundementals of software development. I am the lead instructor, handling the management of our daily team and optimizing operations for our location: 
+		
+			- Developed programs with Node JS and Python which automates certain tasks for our center director. A few programs I have made were, tracking quarterly attendance which resulted in a 20% increase in efficiency compared to manual methods, and a email filter which parsed through a list of over 1000 emails and got rid of duplicates and customers who don't want to be apart of the email list anymore.
+			
+			- Delegated tasks and managed other instructors to ensure each student is being educated efficiently and effectively.`,
+		skills: [
+		"JavaScript",
+		"NodeJS",
+		"C#",
+		"Python",
+		],
+	},
+	{
+		id: 2,
+		img: "https://pbs.twimg.com/profile_images/1549089349119139843/AuqvKpSs_400x400.png",
+		role: "Software Engineer",
+		company: "LightningATC",
+		date: "May 2022 - Jun 2023",
+		desc: `A company which focuses on automating checkout proccesses for sneaker resellers to maximize profits. Focusing on engineering the backend, I developed modules that gave our clients a huge advantage compared to a normal human: 
 
-          - Reversed engineered a handful of famous shops websites such as, Nike, FinishLine, Footlocker, and many more, to automate the checkout processes.
-          
-          - Seamlessly integrated a real-time Shopify product monitor into a Chrome extension, which fetches data using clients keywords from a JSON endpoint on the desired stores. This was used by an average of 94 people daily. 
-          
-          - Reduced memory usage by nearly 500 MBs, after converting the browser automation into request-based automation.
-          `,
-    skills: [
-      "Reverse Engineering",
-      "ReactJS",
-      "NodeJS",
-      "HTML",
-      "CSS",
-      "JavaScript",
-    ],
-  },
-  {
-    id: 1,
-    img: "https://yt3.googleusercontent.com/ytc/AIdro_nqJRBE-PvehwgWqiwAhPzjuDAi6kca33Z5mvp4UADlcyI=s900-c-k-c0x00ffffff-no-rj",
-    role: "Lead Coding Instructor",
-    company: "Code Ninjas",
-    date: "Dec 2022 - Present",
-    desc: `A place for students from ages 7-14 to learn basic Computer Science concepts and fundementals of software development. I am the lead instructor, handling the management of our daily team and optimizing operations for our location: 
-    
-          - Developed programs with Node JS and Python which automates certain tasks for our center director. A few programs I have made were, tracking quarterly attendance which resulted in a 20% increase in efficiency compared to manual methods, and a email filter which parsed through a list of over 1000 emails and got rid of duplicates and customers who don't want to be apart of the email list anymore.
-          
-          - Delegated tasks and managed other instructors to ensure each student is being educated efficiently and effectively.`,
-    skills: [
-      "JavaScript",
-      "NodeJS",
-      "C#",
-      "Python",
-    ],
-  },
-  {
-    id: 2,
-    img: "https://img1.wsimg.com/isteam/ip/7230bf8c-78a3-4764-bbc6-b984344c2a04/Viet_Voices_Logo_Phrase.png/:/cr=t:0%25,l:0%25,w:100%25,h:100%25/rs=w:400,cg:true",
-    role: "Data Analyst & Project Manager Associate",
-    company: "Viet Voices",
-    date: "Jan 2024 - Present",
-    desc: `A non-profit organization that focuses on representing marginalized Vietnamese and other AAPI communties within San Diego. We also help with other organizations as well. I parsed datasets while handling projects:
-          
-            - With the graphic design team, I provided statistics, numbers, ratios, and overall result analysis, for us to educate our communities. Which doubled traffic and a significant improvement in user feedback. 
-            
-            - Was flown out to Sacramento for three days, to conduct research on the PDI database for the team.
-            
-            - Integrated data from diverse internal & external sources, resulting in a nearly 50% enhancement in educating communities effectively.`,
-    skills: [
-      "PDI",
-      "SQL",
-      "Python",
-      "Excel",
-    ],
-  },
+			- Reversed engineered a handful of famous shops websites such as, Nike, FinishLine, Footlocker, and many more, to automate the checkout processes.
+			
+			- Seamlessly integrated a real-time Shopify product monitor into a Chrome extension, which fetches data using clients keywords from a JSON endpoint on the desired stores. This was used by an average of 94 people daily. 
+			
+			- Reduced memory usage by nearly 500 MBs, after converting the browser automation into request-based automation.
+			`,
+		skills: [
+		"Reverse Engineering",
+		"ReactJS",
+		"NodeJS",
+		"HTML",
+		"CSS",
+		"JavaScript",
+		],
+	},
 ];
 
 export const education = [
