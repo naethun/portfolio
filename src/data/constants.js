@@ -2,7 +2,7 @@ export const Bio = {
 	name: "Nathan",
 	roles: [
 		"Software Engineer",
-		"Project Manager",
+		"Data Analyst / Engineer",
 		"Coding Instructor",
 	],
 	description: "While being a full-time student studying Computer Science & Engineering.",
@@ -84,6 +84,11 @@ export const skills = [
 			image:
 			"https://cdn.iconscout.com/icon/free/png-256/free-c-58-1175247.png",
 		},
+		{
+			name: "Rust",
+			image:
+			"https://avatars.githubusercontent.com/u/5430905?s=200&v=4",
+		},
 		],
 	},
 	{
@@ -126,10 +131,33 @@ export const skills = [
 export const experiences = [
 	{
 		id: 0,
+		img: "https://media.licdn.com/dms/image/v2/D4E0BAQFFnQDKU-9RVw/company-logo_200_200/B4EZarxyFiHoAM-/0/1746638677031/familia_io_logo?e=1758153600&v=beta&t=drZcsA8ryAH-Yl4xPzrzkhWhtimPVM7SEF5_f-7R6Lk",
+		role: "Software Engineer",
+		company: "Familia",
+		date: "May 2024 - Present",
+		desc: `A start-up company that focuses on mental wellness, the app allows users to meditate with others with realtime communication:
+
+			- Designed & implemented a tiered matching algorithm combining dynamic user preference with manual partner selection to optimize user-to-user pairing logic.
+
+			- Architected a scalable PostgreSQL database with normalized schema design, index optimization, & full technical documentation.
+
+			- Led full-stack development of web & mobile applications in an Agile environment, ensuring rapid iteration & feature scalability.
+
+		`,
+				
+		skills: [
+		  "Next Js",
+		  "React Native",
+		  "PostgreSQL",
+		  "TypeScript",
+		],
+	},
+	{
+		id: 0,
 		img: "https://img1.wsimg.com/isteam/ip/7230bf8c-78a3-4764-bbc6-b984344c2a04/Viet_Voices_Logo_Phrase.png/:/cr=t:0%25,l:0%25,w:100%25,h:100%25/rs=w:400,cg:true",
-		role: "Data Analyst & Software Engineer",
+		role: "Data Analyst",
 		company: "Viet Voices",
-		date: "Jan 2024 - Present",
+		date: "Jan 2024 - Jul 2025",
 		desc: `A non-profit organization that focuses on representing marginalized Vietnamese and other AAPI communties within San Diego:
 			  
 				- Developed a predictive machine learning model using logistic regression (scikit-learn) to classify voters based on their likelihood of consistent turnout. The model incorporated demographic, geographic, and behavioral features sourced from multiple datasets. Achieving measurable improvements in prediction accuracy over baseline heuristics.
@@ -149,7 +177,7 @@ export const experiences = [
 		  "Python",
 		  "Numeric Visualization",
 		],
-	  },
+	},
 	{
 		id: 1,
 		img: "https://yt3.googleusercontent.com/ytc/AIdro_nqJRBE-PvehwgWqiwAhPzjuDAi6kca33Z5mvp4UADlcyI=s900-c-k-c0x00ffffff-no-rj",
