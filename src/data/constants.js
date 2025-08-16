@@ -198,7 +198,7 @@ export const experiences = [
 	{
 		id: 2,
 		img: "https://pbs.twimg.com/profile_images/1549089349119139843/AuqvKpSs_400x400.png",
-		role: "Software Engineer",
+		role: "Software Developer",
 		company: "LightningATC",
 		date: "May 2022 - Jun 2023",
 		desc: `A company which focuses on automating checkout proccesses for sneaker resellers to maximize profits. Focusing on engineering the backend, I developed modules that gave our clients a huge advantage compared to a normal human: 
