@@ -12,7 +12,7 @@ export const HeroContainer = styled.div`
   display: flex;
   justify-content: center;
   position: relative;
-  padding: clamp(32px, 20vw, 245px) clamp(16px, 5vw, 30px);
+  padding: clamp(32px, 20vw, 295px) clamp(16px, 5vw, 30px);
   z-index: 1;
   clip-path: polygon(0 0, 100% 0, 100% 100%, 70% 95%, 0 100%);
 `;
