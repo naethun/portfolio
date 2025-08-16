@@ -133,22 +133,22 @@ export const experiences = [
 		img: "https://media.licdn.com/dms/image/v2/D4E0BAQFFnQDKU-9RVw/company-logo_200_200/B4EZarxyFiHoAM-/0/1746638677031/familia_io_logo?e=1758153600&v=beta&t=drZcsA8ryAH-Yl4xPzrzkhWhtimPVM7SEF5_f-7R6Lk",
 		role: "Software Engineer",
 		company: "Familia",
-		date: "May 2024 - Present",
-		desc: `A start-up company that focuses on mental wellness, the app allows users to meditate with others with realtime communication:
+		date: "May 2025 - Present",
+		desc: `Familia is a start-up focused on mental wellness, building an app that enables users to meditate together with real-time communication and guided social experiences:
 
-			- Designed & implemented a tiered matching algorithm combining dynamic user preference with manual partner selection to optimize user-to-user pairing logic.
+		- Designed and implemented a tiered, intelligent matching algorithm that combines dynamic user preferences with manual partner selection, significantly improving accuracy and personalization in user-to-user pairing.
 
-			- Architected a scalable PostgreSQL database with normalized schema design, index optimization, & full technical documentation.
+		- Architected and deployed a scalable PostgreSQL database with fully normalized schema design, advanced index optimization, and detailed technical documentation to support high-volume concurrent users and long-term maintainability.
 
-			- Led full-stack development of web & mobile applications in an Agile environment, ensuring rapid iteration & feature scalability.
+		- Led end-to-end full-stack development of both web and mobile platforms (Next.js and React Native), driving feature development, UI/UX consistency, and backend integration within an Agile workflow, enabling rapid iteration and scalable feature rollout.
 
+		- Collaborated closely with cross-functional teams (design, product, and research) to translate mental health goals into technical solutions, ensuring that the platform remains user-centric, performant, and secure.
 		`,
-				
 		skills: [
-		  "Next Js",
-		  "React Native",
-		  "PostgreSQL",
-		  "TypeScript",
+		"Next.js",
+		"React Native",
+		"PostgreSQL",
+		"TypeScript",
 		],
 	},
 	{
