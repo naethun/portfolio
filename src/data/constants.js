@@ -136,13 +136,13 @@ export const experiences = [
 		date: "May 2025 - Present",
 		desc: `Familia is a start-up focused on mental wellness, building an app that enables users to meditate together with real-time communication and guided social experiences:
 
-		- Designed and implemented a tiered, intelligent matching algorithm that combines dynamic user preferences with manual partner selection, significantly improving accuracy and personalization in user-to-user pairing.
+		- Designed and implemented a tiered, intelligent matching algorithm that combines dynamic user preferences with manual partner selection. Significantly improving accuracy and personalization in user-to-user pairing.
 
-		- Architected and deployed a scalable PostgreSQL database with fully normalized schema design, advanced index optimization, and detailed technical documentation to support high-volume concurrent users and long-term maintainability.
+		- Architected, deployed, and maintained a scalable PostgreSQL database with fully normalized schema design, advanced index optimization, and detailed technical documentation. Supported high-volume concurrent users and long-term maintainability.
 
-		- Led end-to-end full-stack development of both web and mobile platforms (Next.js and React Native), driving feature development, UI/UX consistency, and backend integration within an Agile workflow, enabling rapid iteration and scalable feature rollout.
+		- Led end-to-end full-stack development of both web and mobile platforms (Next.js and React Native). Driving feature development, UI/UX consistency, and backend integration within an Agile workflow. Enabling a rapid iteration with scalable feature rollout.
 
-		- Collaborated closely with cross-functional teams (design, product, and research) to translate mental health goals into technical solutions, ensuring that the platform remains user-centric, performant, and secure.
+		- Collaborated closely with cross-functional teams (design, product, and research) to translate mental health goals into technical solutions. Ensuring that the platform remains user-centric, performant, and secure.
 		`,
 		skills: [
 		"Next.js",
