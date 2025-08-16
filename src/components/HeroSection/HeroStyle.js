@@ -87,7 +87,7 @@ export const TextLoop = styled.div`
   justify-content: center;
   align-items: center;
   @media (max-width: 768px) {
-        font-size: 12px;
+        font-size: 10px;
   }
 `;
 
@@ -98,7 +98,7 @@ export const Span = styled.span`
   align-items: center;
   background: url(${highlightImage}) no-repeat center;
   @media (max-width: 768px) {
-        font-size: 12px;
+        font-size: 10px;
 		background: "None";
   }
 `;

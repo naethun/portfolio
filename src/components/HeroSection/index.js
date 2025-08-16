@@ -21,8 +21,7 @@ const HeroSection = () => {
                                         loop: true,
                                     }}
                                 />
-                            </Span>
-                            with a passion for <Span>technology</Span> and <Span>innovation</Span>
+                            </Span> with a passion for <Span>technology</Span> and <Span>innovation</Span>
                         </TextLoop>
                         <SubTitle>{Bio.description}</SubTitle>
                         <CenteredContainer>

@@ -2,10 +2,9 @@ export const Bio = {
 	name: "Nathan",
 	roles: [
 		"Software Engineer",
-		"Data Analyst / Engineer",
+		"Data Analyst",
 		"Coding Instructor",
 	],
-	description: "While being a full-time student studying Computer Science & Engineering.",
 	github: "https://github.com/naethun",
 	resume:
 		"https://drive.google.com/file/d/16sJCDz2FepwzN0-YUV4WlB2DbDJo-xjp/view?usp=sharing",
