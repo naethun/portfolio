@@ -136,13 +136,13 @@ export const experiences = [
 		date: "May 2025 - Present",
 		desc: `Familia is a start-up focused on mental wellness, building an app that enables users to meditate together with real-time communication and guided social experiences:
 
-		- Designed and implemented a tiered, intelligent matching algorithm that combines dynamic user preferences with manual partner selection. Significantly improving accuracy and personalization in user-to-user pairing.
+		- Designed and implemented a tiered, matching algorithm that combines dynamic user preferences with manual partner selection. Significantly improving accuracy and personalization in user-to-user pairing for 100+ active users.
+
+		- Developed a real-time chat & internal notification system with WebSockets, boosting user retention by 22% through instant communication flows.
 
 		- Architected, deployed, and maintained a scalable PostgreSQL database with fully normalized schema design, advanced index optimization, and detailed technical documentation. Supported high-volume concurrent users and long-term maintainability.
 
 		- Led end-to-end full-stack development of both web and mobile platforms (Next.js and React Native). Driving feature development, UI/UX consistency, and backend integration within an Agile workflow. Enabling a rapid iteration with scalable feature rollout.
-
-		- Collaborated closely with cross-functional teams (design, product, and research) to translate mental health goals into technical solutions. Ensuring that the platform remains user-centric, performant, and secure.
 		`,
 		skills: [
 		"Next.js",
@@ -203,11 +203,11 @@ export const experiences = [
 		date: "May 2022 - Jun 2023",
 		desc: `A company which focuses on automating checkout proccesses for sneaker resellers to maximize profits. Focusing on engineering the backend, I developed modules that gave our clients a huge advantage compared to a normal human: 
 
-			- Reversed engineered a handful of famous shops websites such as, Nike, FinishLine, Footlocker, and many more, to automate the checkout processes.
-			
-			- Seamlessly integrated a real-time Shopify product monitor into a Chrome extension, which fetches data using clients keywords from a JSON endpoint on the desired stores. This was used by an average of 94 people daily. 
-			
-			- Reduced memory usage by nearly 500 MBs, after converting the browser automation into request-based automation.
+				- A high-performance Chrome extension optimized for low-latency data relaying and scalable concurrent user management, supporting a large active user base.
+
+				- Reverse-engineered private stock API endpoints on Supreme, architecting a real-time monitoring system capable of handling thousands of concurrent WebSocket connections with sub-20ms latency.
+
+				-Engineered automated checkout modules for Footlocker PH & ASOS using advanced DOM manipulation, regex-based scraping, client-side monitoring, and dynamic payment orchestration.
 			`,
 		skills: [
 		"Reverse Engineering",
