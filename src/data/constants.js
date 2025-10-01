@@ -207,7 +207,7 @@ export const experiences = [
 
 				- Reverse-engineered private stock API endpoints on Supreme, architecting a real-time monitoring system capable of handling thousands of concurrent WebSocket connections with sub-20ms latency.
 
-				-Engineered automated checkout modules for Footlocker PH & ASOS using advanced DOM manipulation, regex-based scraping, client-side monitoring, and dynamic payment orchestration.
+				- Engineered automated checkout modules for Footlocker PH & ASOS using advanced DOM manipulation, regex-based scraping, client-side monitoring, and dynamic payment orchestration.
 			`,
 		skills: [
 		"Reverse Engineering",
