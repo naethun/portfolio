@@ -2,13 +2,13 @@
 
 /* Custom Properties for Space Theme */
 :root {
-  --color-space-black: #050509;
-  --color-space-black-alt: #050505;
-  --color-charcoal: #101015;
-  --color-charcoal-mid: #181820;
-  --color-charcoal-light: #202029;
-  --color-accent: #6366f1;
-  --color-accent-glow: rgba(99, 102, 241, 0.5);
+  --color-space-black: #090905;
+  --color-space-black-alt: #0d0d09;
+  --color-charcoal: #141410;
+  --color-charcoal-mid: #181814;
+  --color-charcoal-light: #242420;
+  --color-accent: #d4c5a9;
+  --color-accent-glow: rgba(212, 197, 169, 0.5);
   --color-foreground: #ededed;
 }
 

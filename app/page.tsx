@@ -1,4 +1,3 @@
-import BackgroundAnimation from '@/components/BackgroundAnimation';
 import Navigation from '@/components/Navigation';
 import Hero from '@/components/Hero';
 import Skills from '@/components/Skills';
@@ -12,9 +11,6 @@ import { Bio, skills, experiences, education, projects } from '@/lib/data';
 export default function Home() {
   return (
     <>
-      {/* Background Animation Layer */}
-      <BackgroundAnimation />
-
       {/* Navigation */}
       <Navigation />
 

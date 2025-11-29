@@ -17,13 +17,13 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
       className="relative border border-[#202029] rounded-lg p-6 md:p-8
                  bg-[#101015]/30 backdrop-blur-sm
                  transition-all duration-300
-                 hover:border-[#6366f1] hover:-translate-y-1 hover:shadow-glow
+                 hover:border-[#d4c5a9] hover:-translate-y-1 hover:shadow-glow
                  group"
     >
       {/* Timeline dot accent */}
       <div
-        className="absolute -left-3 top-8 w-6 h-6 rounded-full bg-[#101015] border-2 border-[#6366f1]
-                   group-hover:bg-[#6366f1] transition-colors"
+        className="absolute -left-3 top-8 w-6 h-6 rounded-full bg-[#101015] border-2 border-[#d4c5a9]
+                   group-hover:bg-[#d4c5a9] transition-colors"
         aria-hidden="true"
       />
 
@@ -41,7 +41,7 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
           <h3 className="font-display text-xl md:text-2xl font-bold mb-1">
             {experience.role}
           </h3>
-          <p className="text-[#6366f1] font-display tracking-wide">
+          <p className="text-[#d4c5a9] font-display tracking-wide">
             {experience.company}
           </p>
           <p className="text-sm text-gray-400 mt-1">{experience.date}</p>
@@ -65,7 +65,7 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
             className="px-3 py-1 text-xs font-display tracking-wide
                      border border-[#202029] rounded-full
                      bg-[#050509]/50
-                     group-hover:border-[#6366f1]/50 transition-colors"
+                     group-hover:border-[#d4c5a9]/50 transition-colors"
           >
             {skill}
           </span>

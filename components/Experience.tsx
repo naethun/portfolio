@@ -20,7 +20,7 @@ export default function Experience({ experiences }: ExperienceProps) {
         <div className="relative">
           {/* Vertical timeline line */}
           <div
-            className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#6366f1] via-[#202029] to-[#6366f1]"
+            className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#d4c5a9] via-[#202029] to-[#d4c5a9]"
             aria-hidden="true"
           />
 

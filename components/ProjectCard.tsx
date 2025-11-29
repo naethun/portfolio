@@ -11,7 +11,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       className="border border-[#202029] rounded-lg overflow-hidden
                  bg-[#101015]/30 backdrop-blur-sm
                  transition-all duration-300
-                 hover:border-[#6366f1] hover:-translate-y-2 hover:shadow-glow
+                 hover:border-[#d4c5a9] hover:-translate-y-2 hover:shadow-glow
                  group"
     >
       {/* Project Image */}
@@ -24,7 +24,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         />
         {/* Category badge */}
         <div className="absolute top-4 right-4">
-          <span className="px-3 py-1 text-xs font-display tracking-wide bg-[#050509]/90 backdrop-blur-sm border border-[#6366f1] rounded-full">
+          <span className="px-3 py-1 text-xs font-display tracking-wide bg-[#050509]/90 backdrop-blur-sm border border-[#d4c5a9] rounded-full">
             {project.category}
           </span>
         </div>
@@ -63,9 +63,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-4 py-2
-                   border border-[#6366f1] rounded font-display text-sm tracking-wide
-                   hover:bg-[#6366f1] hover:shadow-glow transition-all duration-300
-                   focus:outline-none focus:ring-2 focus:ring-[#6366f1] focus:ring-offset-2 focus:ring-offset-[#101015]"
+                   border border-[#d4c5a9] rounded font-display text-sm tracking-wide
+                   hover:bg-[#d4c5a9] hover:shadow-glow transition-all duration-300
+                   focus:outline-none focus:ring-2 focus:ring-[#d4c5a9] focus:ring-offset-2 focus:ring-offset-[#101015]"
         >
           <svg
             className="w-4 h-4"

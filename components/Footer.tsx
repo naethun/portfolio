@@ -23,7 +23,7 @@ export default function Footer() {
               href={Bio.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-display tracking-wide hover:text-[#6366f1] transition-colors"
+              className="text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
               aria-label="GitHub Profile"
             >
               GITHUB
@@ -32,7 +32,7 @@ export default function Footer() {
               href={Bio.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-display tracking-wide hover:text-[#6366f1] transition-colors"
+              className="text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
               aria-label="LinkedIn Profile"
             >
               LINKEDIN
@@ -41,7 +41,7 @@ export default function Footer() {
               href={Bio.resume}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-display tracking-wide hover:text-[#6366f1] transition-colors"
+              className="text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
               aria-label="View Resume"
             >
               RESUME

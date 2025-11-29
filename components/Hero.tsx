@@ -35,7 +35,7 @@ export default function Hero({ bio }: HeroProps) {
               <span className="inline-block relative">
                 Hey, I'm {bio.name}
                 <span
-                  className="absolute bottom-0 left-0 w-full h-1 bg-[#6366f1] opacity-50 blur-sm"
+                  className="absolute bottom-0 left-0 w-full h-1 bg-[#d4c5a9] opacity-50 blur-sm"
                   aria-hidden="true"
                 />
               </span>
@@ -46,7 +46,7 @@ export default function Hero({ bio }: HeroProps) {
               {bio.roles.map((role, index) => (
                 <p
                   key={role}
-                  className={`absolute inset-0 flex items-start font-display text-xl md:text-2xl text-[#6366f1] transition-opacity duration-700 ${
+                  className={`absolute inset-0 flex items-start font-display text-xl md:text-2xl text-[#d4c5a9] transition-opacity duration-700 ${
                     index === roleIndex ? 'opacity-100' : 'opacity-0'
                   }`}
                 >
@@ -72,9 +72,9 @@ export default function Hero({ bio }: HeroProps) {
                 href={bio.resume}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-8 py-3 border-2 border-[#6366f1] rounded font-display text-sm tracking-wide text-center
-                         hover:bg-[#6366f1] hover:shadow-glow transition-all duration-300
-                         focus:outline-none focus:ring-2 focus:ring-[#6366f1] focus:ring-offset-2 focus:ring-offset-[#050509]"
+                className="px-8 py-3 border-2 border-[#d4c5a9] rounded font-display text-sm tracking-wide text-center
+                         hover:bg-[#d4c5a9] hover:shadow-glow transition-all duration-300
+                         focus:outline-none focus:ring-2 focus:ring-[#d4c5a9] focus:ring-offset-2 focus:ring-offset-[#050509]"
               >
                 VIEW RESUME
               </a>
@@ -83,8 +83,8 @@ export default function Hero({ bio }: HeroProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-3 border border-[#202029] rounded font-display text-sm tracking-wide text-center
-                         hover:border-[#6366f1] hover:text-[#6366f1] transition-all duration-300
-                         focus:outline-none focus:ring-2 focus:ring-[#6366f1] focus:ring-offset-2 focus:ring-offset-[#050509]"
+                         hover:border-[#d4c5a9] hover:text-[#d4c5a9] transition-all duration-300
+                         focus:outline-none focus:ring-2 focus:ring-[#d4c5a9] focus:ring-offset-2 focus:ring-offset-[#050509]"
               >
                 GITHUB
               </a>
@@ -93,8 +93,8 @@ export default function Hero({ bio }: HeroProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-3 border border-[#202029] rounded font-display text-sm tracking-wide text-center
-                         hover:border-[#6366f1] hover:text-[#6366f1] transition-all duration-300
-                         focus:outline-none focus:ring-2 focus:ring-[#6366f1] focus:ring-offset-2 focus:ring-offset-[#050509]"
+                         hover:border-[#d4c5a9] hover:text-[#d4c5a9] transition-all duration-300
+                         focus:outline-none focus:ring-2 focus:ring-[#d4c5a9] focus:ring-offset-2 focus:ring-offset-[#050509]"
               >
                 LINKEDIN
               </a>
@@ -104,7 +104,7 @@ export default function Hero({ bio }: HeroProps) {
             <div className="mt-16">
               <a
                 href="#skills"
-                className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-[#6366f1] transition-colors group"
+                className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-[#d4c5a9] transition-colors group"
                 aria-label="Scroll to skills section"
               >
                 <span className="font-display tracking-wide">SCROLL DOWN</span>
@@ -127,8 +127,8 @@ export default function Hero({ bio }: HeroProps) {
 
           {/* Right side - Tesseract Animation */}
           <div className="order-1 lg:order-2 flex items-center justify-center">
-            <div className="w-full max-w-md aspect-square relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#6366f1]/10 to-transparent rounded-lg blur-3xl" />
+            <div className="w-full max-w-2xl aspect-square relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#d4c5a9]/10 to-transparent rounded-lg blur-3xl" />
               <div className="relative w-full h-full flex items-center justify-center">
                 <Tesseract />
               </div>

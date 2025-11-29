@@ -12,7 +12,7 @@ export default function SkillChip({ name, image }: SkillChipProps) {
                  border border-[#202029] rounded-full
                  bg-[#101015]/50 backdrop-blur-sm
                  transition-all duration-300
-                 hover:border-[#6366f1] hover:shadow-glow hover:scale-105
+                 hover:border-[#d4c5a9] hover:shadow-glow hover:scale-105
                  cursor-default"
       role="listitem"
     >

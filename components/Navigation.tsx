@@ -25,7 +25,7 @@ export default function Navigation() {
           {/* Logo */}
           <a
             href="#"
-            className="font-display text-xl font-bold tracking-wide hover:text-[#6366f1] transition-colors"
+            className="font-display text-xl font-bold tracking-wide hover:text-[#d4c5a9] transition-colors"
           >
             {Bio.name.toUpperCase()}
           </a>
@@ -36,7 +36,7 @@ export default function Navigation() {
               <li key={link.href}>
                 <a
                   href={link.href}
-                  className="text-sm font-display tracking-wide hover:text-[#6366f1] transition-colors"
+                  className="text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
                 >
                   {link.label}
                 </a>
@@ -48,7 +48,7 @@ export default function Navigation() {
                 href={Bio.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-display text-yellow-500 tracking-wide hover:text-[#6366f1] transition-colors"
+                className="text-sm font-display text-yellow-500 tracking-wide hover:text-[#d4c5a9] transition-colors"
                 aria-label="GitHub Profile"
               >
                 GITHUB
@@ -59,7 +59,7 @@ export default function Navigation() {
                 href={Bio.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-display text-yellow-500 tracking-wide hover:text-[#6366f1] transition-colors"
+                className="text-sm font-display text-yellow-500 tracking-wide hover:text-[#d4c5a9] transition-colors"
                 aria-label="LinkedIn Profile"
               >
                 LINKEDIN
@@ -101,7 +101,7 @@ export default function Navigation() {
                   <a
                     href={link.href}
                     onClick={closeMenu}
-                    className="block text-sm font-display tracking-wide hover:text-[#6366f1] transition-colors"
+                    className="block text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
                   >
                     {link.label}
                   </a>
@@ -114,7 +114,7 @@ export default function Navigation() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={closeMenu}
-                  className="block text-sm font-display tracking-wide hover:text-[#6366f1] transition-colors"
+                  className="block text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
                   aria-label="GitHub Profile"
                 >
                   GITHUB
@@ -126,7 +126,7 @@ export default function Navigation() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={closeMenu}
-                  className="block text-sm font-display tracking-wide hover:text-[#6366f1] transition-colors"
+                  className="block text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
                   aria-label="LinkedIn Profile"
                 >
                   LINKEDIN
@@ -138,7 +138,7 @@ export default function Navigation() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={closeMenu}
-                  className="block text-sm font-display tracking-wide hover:text-[#6366f1] transition-colors"
+                  className="block text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
                   aria-label="View Resume"
                 >
                   RESUME

@@ -19,7 +19,7 @@ export default function Skills({ skills }: SkillsProps) {
         <div className="space-y-12">
           {skills.map((category) => (
             <div key={category.title}>
-              <h3 className="font-display text-xl md:text-2xl uppercase tracking-wide mb-6 text-[#6366f1] border-l-4 border-[#6366f1] pl-4">
+              <h3 className="font-display text-xl md:text-2xl uppercase tracking-wide mb-6 text-[#d4c5a9] border-l-4 border-[#d4c5a9] pl-4">
                 {category.title}
               </h3>
               <div className="flex flex-wrap gap-3" role="list">
