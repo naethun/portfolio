@@ -11,7 +11,7 @@ export const Bio = {
   ],
   github: "https://github.com/naethun",
   resume:
-    "https://drive.google.com/file/d/16sJCDz2FepwzN0-YUV4WlB2DbDJo-xjp/view?usp=sharing",
+    "https://drive.google.com/file/d/1ptcUhHXjPFcjKnvj1B39xJHiOIzAEUag/view?usp=drive_link",
   linkedin: "https://www.linkedin.com/in/naethun/",
 };
 
