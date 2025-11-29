@@ -199,7 +199,7 @@ function TesseractMesh({ reducedMotion }: TesseractMeshProps) {
     // Update rotation angles at different speeds for non-periodic, dynamic motion
     rotationRef.current.xw += delta * 0.4 * speedMultiplier;  // Primary 4D rotation
     rotationRef.current.yw += delta * 0.3 * speedMultiplier;  // Secondary 4D rotation
-    rotationRef.current.zw += delta * 0.2 * speedMultiplier;  // Tertiary 4D rotation
+    rotationRef.current.zw += delta * 0.4 * speedMultiplier;  // Tertiary 4D rotation
     rotationRef.current.xy += delta * 0.25 * speedMultiplier; // Traditional 3D spin
 
     // Apply rotations to all vertices and project to 3D
