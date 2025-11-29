@@ -1,0 +1,142 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import Tesseract from './Tesseract';
+import type { Bio } from '@/types/portfolio';
+
+interface HeroProps {
+  bio: Bio;
+}
+
+export default function Hero({ bio }: HeroProps) {
+  const [roleIndex, setRoleIndex] = useState(0);
+  const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+
+    const interval = setInterval(() => {
+      setRoleIndex((prev) => (prev + 1) % bio.roles.length);
+    }, 3000); // Change role every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [bio.roles.length, prefersReducedMotion]);
+
+  return (
+    <section id="about" className="relative z-10 min-h-screen flex items-center px-6 py-20">
+      <div className="max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+          {/* Left side - Introduction */}
+          <div className="text-left order-2 lg:order-1">
+            {/* Name with subtle glow effect */}
+            <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-medium mb-6 tracking-tight">
+              <span className="inline-block relative">
+                Hey, I'm {bio.name}
+                <span
+                  className="absolute bottom-0 left-0 w-full h-1 bg-[#6366f1] opacity-50 blur-sm"
+                  aria-hidden="true"
+                />
+              </span>
+            </h1>
+
+            {/* Animated roles with smooth crossfade */}
+            <div className="relative h-10 md:h-10 mb-4 overflow-hidden">
+              {bio.roles.map((role, index) => (
+                <p
+                  key={role}
+                  className={`absolute inset-0 flex items-start font-display text-xl md:text-2xl text-[#6366f1] transition-opacity duration-700 ${
+                    index === roleIndex ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  {role}
+                </p>
+              ))}
+            </div>
+
+            {/* Bio */}
+            <p className="text-gray-400 leading-relaxed mb-10 max-w-lg">
+            Former sneaker bot developer. Reverse-engineered anti-bot measures on Nike, Shopify, & many more. Achieved thousands of successful checkouts on profitable products. Also developed blockchain automation tools, including NFT minting bots & marketplace snipers. Generated over 6-figures in profit for users.
+
+            <br /> <br />
+            Currently engineering new software. Also, studying Cognitive Science with a specialization in Machine Learning & Neural Computation + Computer Science & Engineering at UCSD. 
+
+            <br /> <br />
+            Always open to opportunities to drive innovation.
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <a
+                href={bio.resume}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-8 py-3 border-2 border-[#6366f1] rounded font-display text-sm tracking-wide text-center
+                         hover:bg-[#6366f1] hover:shadow-glow transition-all duration-300
+                         focus:outline-none focus:ring-2 focus:ring-[#6366f1] focus:ring-offset-2 focus:ring-offset-[#050509]"
+              >
+                VIEW RESUME
+              </a>
+              <a
+                href={bio.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-8 py-3 border border-[#202029] rounded font-display text-sm tracking-wide text-center
+                         hover:border-[#6366f1] hover:text-[#6366f1] transition-all duration-300
+                         focus:outline-none focus:ring-2 focus:ring-[#6366f1] focus:ring-offset-2 focus:ring-offset-[#050509]"
+              >
+                GITHUB
+              </a>
+              <a
+                href={bio.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-8 py-3 border border-[#202029] rounded font-display text-sm tracking-wide text-center
+                         hover:border-[#6366f1] hover:text-[#6366f1] transition-all duration-300
+                         focus:outline-none focus:ring-2 focus:ring-[#6366f1] focus:ring-offset-2 focus:ring-offset-[#050509]"
+              >
+                LINKEDIN
+              </a>
+            </div>
+
+            {/* Scroll indicator */}
+            <div className="mt-16">
+              <a
+                href="#skills"
+                className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-[#6366f1] transition-colors group"
+                aria-label="Scroll to skills section"
+              >
+                <span className="font-display tracking-wide">SCROLL DOWN</span>
+                <svg
+                  className="w-4 h-4 group-hover:translate-y-1 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                  />
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          {/* Right side - Tesseract Animation */}
+          <div className="order-1 lg:order-2 flex items-center justify-center">
+            <div className="w-full max-w-md aspect-square relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#6366f1]/10 to-transparent rounded-lg blur-3xl" />
+              <div className="relative w-full h-full flex items-center justify-center">
+                <Tesseract />
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  );
+}
