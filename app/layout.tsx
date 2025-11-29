@@ -17,15 +17,14 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Nathan | Software Engineer Portfolio",
-  description: "Space-themed portfolio showcasing software engineering projects, experience, and skills in full-stack development, data analysis, and coding instruction.",
-  keywords: ["Nathan", "Software Engineer", "Portfolio", "Full Stack Developer", "Data Analyst", "React", "Next.js", "TypeScript"],
+  title: "Nathan Tran | Portfolio",
+  keywords: ["Nathan", "Software Engineer", "Portfolio", "Full Stack Developer", "Blockchain Developer", "Automation Developer", "Cognitive Science", "Machine Learning", "Neural Computation", "Computer Science", "Engineering", "UCSD",  "React", "Next.js", "TypeScript"],
   authors: [{ name: "Nathan" }],
   creator: "Nathan",
   openGraph: {
     type: "website",
     title: "Nathan | Software Engineer Portfolio",
-    description: "Explore my journey as a software engineer, data analyst, and coding instructor",
+    description: "Explore my journey as a software engineer, product developer, automation developer, cognitive science student, and more",
   },
 };
 
