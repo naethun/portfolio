@@ -77,12 +77,7 @@ export const skills: SkillCategory[] = [
         name: "C",
         image:
           "https://cdn.iconscout.com/icon/free/png-256/free-c-58-1175247.png",
-      },
-      {
-        name: "Rust",
-        image:
-          "https://avatars.githubusercontent.com/u/5430905?s=200&v=4",
-      },
+      }
     ],
   },
   {

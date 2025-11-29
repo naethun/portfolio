@@ -8,7 +8,7 @@ interface SkillChipProps {
 export default function SkillChip({ name, image }: SkillChipProps) {
   return (
     <span
-      className="inline-flex items-center gap-2 px-4 py-2.5
+      className="inline-flex items-center gap-2 px-8
                  border border-[#202029] rounded-full
                  bg-[#101015]/50 backdrop-blur-sm
                  transition-all duration-300

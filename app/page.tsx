@@ -17,10 +17,10 @@ export default function Home() {
       {/* Main Content */}
       <main className="relative">
         <Hero bio={Bio} />
-        <Skills skills={skills} />
         <Experience experiences={experiences} />
         <Education education={education} />
         <Projects projects={projects} />
+        <Skills skills={skills} />
       </main>
 
       {/* Footer */}

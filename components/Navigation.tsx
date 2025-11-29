@@ -5,10 +5,10 @@ import { Bio } from '@/lib/data';
 
 const navLinks = [
   { href: '#about', label: 'ABOUT' },
-  { href: '#skills', label: 'SKILLS' },
   { href: '#experience', label: 'EXPERIENCE' },
   { href: '#education', label: 'EDUCATION' },
   { href: '#projects', label: 'PROJECTS' },
+  { href: '#skills', label: 'SKILLS' },
 ];
 
 export default function Navigation() {
