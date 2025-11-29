@@ -48,7 +48,7 @@ export default function Navigation() {
                 href={Bio.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-display text-yellow-500 tracking-wide hover:text-[#d4c5a9] transition-colors"
+                className="text-sm font-display text-[#d4c5a9] tracking-wide hover:text-white transition-colors"
                 aria-label="GitHub Profile"
               >
                 GITHUB
@@ -59,7 +59,7 @@ export default function Navigation() {
                 href={Bio.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-display text-yellow-500 tracking-wide hover:text-[#d4c5a9] transition-colors"
+                className="text-sm font-display text-[#d4c5a9] tracking-wide hover:text-white transition-colors"
                 aria-label="LinkedIn Profile"
               >
                 LINKEDIN

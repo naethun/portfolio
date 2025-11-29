@@ -35,7 +35,7 @@ export default function Hero({ bio }: HeroProps) {
               <span className="inline-block relative">
                 Hey, I'm {bio.name}
                 <span
-                  className="absolute bottom-0 left-0 w-full h-1 bg-[#d4c5a9] opacity-50 blur-md"
+                  className="absolute bottom-0 left-0 w-full h-0.25 bg-[#d4c5a9] opacity-50"
                   aria-hidden="true"
                 />
               </span>
