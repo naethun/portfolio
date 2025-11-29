@@ -125,7 +125,7 @@ export const skills: SkillCategory[] = [
 export const experiences: Experience[] = [
   {
     id: 0,
-    img: "https://media.licdn.com/dms/image/v2/D4E0BAQFFnQDKU-9RVw/company-logo_200_200/B4EZarxyFiHoAM-/0/1746638677031/familia_io_logo?e=1758153600&v=beta&t=drZcsA8ryAH-Yl4xPzrzkhWhtimPVM7SEF5_f-7R6Lk",
+    img: "https://media.licdn.com/dms/image/v2/D4E0BAQGpif9l90Gmww/company-logo_100_100/B4EZcfGRU8HsAU-/0/1748573427276/energex_ai_logo?e=1766016000&v=beta&t=aT8qXXaa58KA4-5ypp-o2OWUG6gzzhvkz46IZKwlcrc",
     role: "Software Engineer",
     company: "EnergeX AI",
     date: "Sept 2025 - Present",
@@ -152,7 +152,7 @@ export const experiences: Experience[] = [
   },
   {
     id: 1,
-    img: "https://media.licdn.com/dms/image/v2/D4E0BAQFFnQDKU-9RVw/company-logo_200_200/B4EZarxyFiHoAM-/0/1746638677031/familia_io_logo?e=1758153600&v=beta&t=drZcsA8ryAH-Yl4xPzrzkhWhtimPVM7SEF5_f-7R6Lk",
+    img: "https://media.licdn.com/dms/image/v2/D4E0BAQFFnQDKU-9RVw/company-logo_100_100/B4EZarxyFiHoAU-/0/1746638677031/familia_io_logo?e=1766016000&v=beta&t=4aPxxBtVloGdJ920LN1XnLlJHkEBvyWWg-pYVjA2Zjo",
     role: "Software Engineer",
     company: "Familia",
     date: "May 2025 - Present",
