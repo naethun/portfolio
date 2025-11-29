@@ -150,7 +150,7 @@ export const experiences: Experience[] = [
     img: "https://media.licdn.com/dms/image/v2/D4E0BAQFFnQDKU-9RVw/company-logo_100_100/B4EZarxyFiHoAU-/0/1746638677031/familia_io_logo?e=1766016000&v=beta&t=4aPxxBtVloGdJ920LN1XnLlJHkEBvyWWg-pYVjA2Zjo",
     role: "Software Engineer",
     company: "Familia",
-    date: "May 2025 - Present",
+    date: "May 2025 - Oct 2025",
     desc: `Familia is a start-up focused on mental wellness, building an app that enables users to meditate together with real-time communication and guided social experiences:
 
     - Designed and implemented a tiered, matching algorithm that combines dynamic user preferences with manual partner selection. Significantly improving accuracy and personalization in user-to-user pairing for 150+ active users.
@@ -199,7 +199,7 @@ export const experiences: Experience[] = [
     img: "https://yt3.googleusercontent.com/ytc/AIdro_nqJRBE-PvehwgWqiwAhPzjuDAi6kca33Z5mvp4UADlcyI=s900-c-k-c0x00ffffff-no-rj",
     role: "Lead Coding Instructor",
     company: "Code Ninjas",
-    date: "Dec 2022 - Present",
+    date: "Dec 2022 - Sept 2025",
     desc: `A place for students from ages 7-14 to learn basic Computer Science concepts and fundementals of software development. I am the lead instructor, handling the management of our daily team and optimizing operations for our location:
 
       - Developed programs with Node JS and Python which automates certain tasks for our center director. A few programs I have made were, tracking quarterly attendance which resulted in a 20% increase in efficiency compared to manual methods, and a email filter which parsed through a list of over 1000 emails and got rid of duplicates and customers who don't want to be apart of the email list anymore.
