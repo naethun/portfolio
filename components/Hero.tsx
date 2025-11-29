@@ -18,7 +18,7 @@ export default function Hero({ bio }: HeroProps) {
 
     const interval = setInterval(() => {
       setRoleIndex((prev) => (prev + 1) % bio.roles.length);
-    }, 3000); // Change role every 3 seconds
+    }, 1500); // Change role every 1.5 seconds
 
     return () => clearInterval(interval);
   }, [bio.roles.length, prefersReducedMotion]);
