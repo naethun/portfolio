@@ -35,7 +35,7 @@ export default function Hero({ bio }: HeroProps) {
               <span className="inline-block relative">
                 Hey, I'm {bio.name}
                 <span
-                  className="absolute bottom-0 left-0 w-full h-1 bg-[#d4c5a9] opacity-50 blur-sm"
+                  className="absolute bottom-0 left-0 w-full h-1 bg-[#d4c5a9] opacity-50 blur-md"
                   aria-hidden="true"
                 />
               </span>
@@ -128,7 +128,7 @@ export default function Hero({ bio }: HeroProps) {
           {/* Right side - Tesseract Animation */}
           <div className="order-1 lg:order-2 flex items-center justify-center">
             <div className="w-full max-w-2xl aspect-square relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#d4c5a9]/10 to-transparent rounded-lg blur-3xl" />
+              <div className="absolute inset-30 bg-gradient-to-br from-[#d4c5a9]/10 to-transparent rounded-xl blur-2xl" />
               <div className="relative w-full h-full flex items-center justify-center">
                 <Tesseract />
               </div>
