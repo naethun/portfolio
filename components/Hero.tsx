@@ -103,11 +103,11 @@ export default function Hero({ bio }: HeroProps) {
             {/* Scroll indicator */}
             <div className="mt-16">
               <a
-                href="#skills"
+                href="#experience"
                 className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-[#d4c5a9] transition-colors group"
-                aria-label="Scroll to skills section"
+                aria-label="Learn more about me"
               >
-                <span className="font-display tracking-wide">SCROLL DOWN</span>
+                <span className="font-display tracking-wide">Learn more about me</span>
                 <svg
                   className="w-4 h-4 group-hover:translate-y-1 transition-transform"
                   fill="none"
