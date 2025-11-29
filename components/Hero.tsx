@@ -73,7 +73,7 @@ export default function Hero({ bio }: HeroProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-3 border-2 border-[#d4c5a9] rounded font-display text-sm tracking-wide text-center
-                         hover:bg-[#d4c5a9] hover:shadow-glow transition-all duration-300
+                         hover:bg-[#d4c5a9] hover:text-black hover:shadow-glow transition-all duration-300
                          focus:outline-none focus:ring-2 focus:ring-[#d4c5a9] focus:ring-offset-2 focus:ring-offset-[#050509]"
               >
                 VIEW RESUME
