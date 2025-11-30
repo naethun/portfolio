@@ -4,6 +4,7 @@ import { useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useTheme } from '@/hooks/useTheme';
 
 // ============================================================================
 // Type Definitions
@@ -242,10 +243,20 @@ function TesseractMesh({ reducedMotion }: TesseractMeshProps) {
     };
   }, [geometry]);
 
+  const { resolvedTheme } = useTheme();
+  const lineColor = resolvedTheme === 'dark' ? '#d4c5a9' : '#8B6914';
+
+  // Update material color when theme changes
+  useEffect(() => {
+    if (lineRef.current && lineRef.current.material) {
+      (lineRef.current.material as THREE.LineBasicMaterial).color.set(lineColor);
+    }
+  }, [lineColor]);
+
   return (
     <lineSegments ref={lineRef} geometry={geometry}>
       <lineBasicMaterial
-        color="#d4c5a9"
+        color={lineColor}
         opacity={0.9}
         transparent
         toneMapped={false}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Bio } from '@/lib/data';
+import ThemeToggle from './ThemeToggle';
 
 const navLinks = [
   { href: '#about', label: 'ABOUT' },
@@ -18,13 +19,13 @@ export default function Navigation() {
   const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-md bg-[#050509]/80 border-b border-[#202029]" aria-label="Main navigation">
+    <nav className="sticky top-0 z-50 backdrop-blur-md bg-background-primary/80 border-b border-border-primary" aria-label="Main navigation">
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
           <a
             href="#"
-            className="font-display text-xl font-bold tracking-wide hover:text-[#d4c5a9] transition-colors"
+            className="font-display text-xl font-bold tracking-wide hover:text-accent-primary transition-colors"
           >
             {Bio.name.toUpperCase()}
           </a>
@@ -35,7 +36,7 @@ export default function Navigation() {
               <li key={link.href}>
                 <a
                   href={link.href}
-                  className="text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
+                  className="text-sm font-display tracking-wide hover:text-accent-primary transition-colors"
                 >
                   {link.label}
                 </a>
@@ -47,7 +48,7 @@ export default function Navigation() {
                 href={Bio.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-display text-[#d4c5a9] tracking-wide hover:text-white transition-colors"
+                className="text-sm font-display text-accent-primary tracking-wide hover:text-accent-secondary transition-colors"
                 aria-label="GitHub Profile"
               >
                 GITHUB
@@ -58,11 +59,15 @@ export default function Navigation() {
                 href={Bio.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-display text-[#d4c5a9] tracking-wide hover:text-white transition-colors"
+                className="text-sm font-display text-accent-primary tracking-wide hover:text-accent-secondary transition-colors"
                 aria-label="LinkedIn Profile"
               >
                 LINKEDIN
               </a>
+            </li>
+            {/* Theme Toggle */}
+            <li>
+              <ThemeToggle />
             </li>
           </ul>
 
@@ -93,27 +98,27 @@ export default function Navigation() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden mt-4 pt-4 border-t border-[#202029]">
+          <div className="md:hidden mt-4 pt-4 border-t border-border-primary">
             <ul className="flex flex-col gap-4">
               {navLinks.map((link) => (
                 <li key={link.href}>
                   <a
                     href={link.href}
                     onClick={closeMenu}
-                    className="block text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
+                    className="block text-sm font-display tracking-wide hover:text-accent-primary transition-colors"
                   >
                     {link.label}
                   </a>
                 </li>
               ))}
               {/* Mobile Social Links */}
-              <li className="pt-2 border-t border-[#202029]">
+              <li className="pt-2 border-t border-border-primary">
                 <a
                   href={Bio.github}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={closeMenu}
-                  className="block text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
+                  className="block text-sm font-display tracking-wide hover:text-accent-primary transition-colors"
                   aria-label="GitHub Profile"
                 >
                   GITHUB
@@ -125,7 +130,7 @@ export default function Navigation() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={closeMenu}
-                  className="block text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
+                  className="block text-sm font-display tracking-wide hover:text-accent-primary transition-colors"
                   aria-label="LinkedIn Profile"
                 >
                   LINKEDIN
@@ -137,11 +142,15 @@ export default function Navigation() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={closeMenu}
-                  className="block text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
+                  className="block text-sm font-display tracking-wide hover:text-accent-primary transition-colors"
                   aria-label="View Resume"
                 >
                   RESUME
                 </a>
+              </li>
+              {/* Mobile Theme Toggle */}
+              <li className="pt-2 border-t border-border-primary flex justify-center">
+                <ThemeToggle />
               </li>
             </ul>
           </div>

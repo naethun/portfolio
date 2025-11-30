@@ -35,7 +35,7 @@ export default function Hero({ bio }: HeroProps) {
               <span className="inline-block relative">
                 Hey, I'm {bio.name}
                 <span
-                  className="absolute bottom-0 left-0 w-full h-0.25 bg-[#d4c5a9] opacity-50"
+                  className="absolute bottom-0 left-0 w-full h-0.25 bg-accent-primary opacity-50"
                   aria-hidden="true"
                 />
               </span>
@@ -46,7 +46,7 @@ export default function Hero({ bio }: HeroProps) {
               {bio.roles.map((role, index) => (
                 <p
                   key={role}
-                  className={`absolute inset-0 flex items-start font-display text-xl md:text-2xl text-[#d4c5a9] transition-opacity duration-700 ${
+                  className={`absolute inset-0 flex items-start font-display text-xl md:text-2xl text-accent-primary transition-opacity duration-700 ${
                     index === roleIndex ? 'opacity-100' : 'opacity-0'
                   }`}
                 >
@@ -56,7 +56,7 @@ export default function Hero({ bio }: HeroProps) {
             </div>
 
             {/* Bio */}
-            <p className="text-gray-400 leading-relaxed mb-10 max-w-lg">
+            <p className="text-text-tertiary leading-relaxed mb-10 max-w-lg">
             Former sneaker bot developer. Reverse-engineered anti-bot measures on Nike, Shopify, & many more. Achieved thousands of successful checkouts on profitable products. Also developed blockchain automation tools, including NFT minting bots & marketplace snipers. Generated over 6-figures in profit for users.
 
             <br /> <br />
@@ -72,9 +72,9 @@ export default function Hero({ bio }: HeroProps) {
                 href={bio.resume}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-8 py-3 border-2 border-[#d4c5a9] rounded font-display text-sm tracking-wide text-center
-                         hover:bg-[#d4c5a9] hover:text-black hover:shadow-glow transition-all duration-300
-                         focus:outline-none focus:ring-2 focus:ring-[#d4c5a9] focus:ring-offset-2 focus:ring-offset-[#050509]"
+                className="px-8 py-3 border-2 border-accent-primary rounded font-display text-sm tracking-wide text-center
+                         hover:bg-accent-primary hover:text-black hover:shadow-glow transition-all duration-300
+                         focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-2 focus:ring-offset-background-primary"
               >
                 VIEW RESUME
               </a>
@@ -82,9 +82,9 @@ export default function Hero({ bio }: HeroProps) {
                 href={bio.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-8 py-3 border border-[#202029] rounded font-display text-sm tracking-wide text-center
-                         hover:border-[#d4c5a9] hover:text-[#d4c5a9] transition-all duration-300
-                         focus:outline-none focus:ring-2 focus:ring-[#d4c5a9] focus:ring-offset-2 focus:ring-offset-[#050509]"
+                className="px-8 py-3 border border-border-primary rounded font-display text-sm tracking-wide text-center
+                         hover:border-accent-primary hover:text-accent-primary transition-all duration-300
+                         focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-2 focus:ring-offset-background-primary"
               >
                 GITHUB
               </a>
@@ -92,9 +92,9 @@ export default function Hero({ bio }: HeroProps) {
                 href={bio.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-8 py-3 border border-[#202029] rounded font-display text-sm tracking-wide text-center
-                         hover:border-[#d4c5a9] hover:text-[#d4c5a9] transition-all duration-300
-                         focus:outline-none focus:ring-2 focus:ring-[#d4c5a9] focus:ring-offset-2 focus:ring-offset-[#050509]"
+                className="px-8 py-3 border border-border-primary rounded font-display text-sm tracking-wide text-center
+                         hover:border-accent-primary hover:text-accent-primary transition-all duration-300
+                         focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-2 focus:ring-offset-background-primary"
               >
                 LINKEDIN
               </a>
@@ -104,7 +104,7 @@ export default function Hero({ bio }: HeroProps) {
             <div className="mt-16">
               <a
                 href="#experience"
-                className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-[#d4c5a9] transition-colors group"
+                className="inline-flex items-center gap-2 text-sm text-text-tertiary hover:text-accent-primary transition-colors group"
                 aria-label="Learn more about me"
               >
                 <span className="font-display tracking-wide">Learn more about me</span>
@@ -128,7 +128,7 @@ export default function Hero({ bio }: HeroProps) {
           {/* Right side - Tesseract Animation */}
           <div className="order-1 lg:order-2 flex items-center justify-center">
             <div className="w-40 md:w-96 lg:w-full max-w-2xl aspect-square relative">
-              <div className="absolute inset-30 bg-gradient-to-br from-[#d4c5a9]/10 to-transparent rounded-xl blur-2xl" />
+              <div className="absolute inset-30 bg-gradient-to-br from-accent-primary/10 to-transparent rounded-xl blur-2xl" />
               <div className="relative w-full h-full flex items-center justify-center">
                 <Tesseract />
               </div>

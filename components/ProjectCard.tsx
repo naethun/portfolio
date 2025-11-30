@@ -11,14 +11,14 @@ export default function ProjectCard({ project, onClick, className = '' }: Projec
   return (
     <article
       onClick={onClick}
-      className={`border border-[#202029] rounded-lg overflow-hidden
-                 bg-[#101015]/30 backdrop-blur-sm
+      className={`border border-border-primary rounded-lg overflow-hidden
+                 bg-background-card/30 backdrop-blur-sm
                  transition-all duration-300
-                 hover:border-[#d4c5a9] hover:-translate-y-2 hover:shadow-glow
+                 hover:border-accent-primary hover:-translate-y-2 hover:shadow-glow
                  group cursor-pointer ${className}`}
     >
       {/* Project Image */}
-      <div className="relative h-48 w-full overflow-hidden bg-[#050509]">
+      <div className="relative h-48 w-full overflow-hidden bg-background-primary">
         <Image
           src={project.image}
           alt={`${project.title} screenshot`}
@@ -27,7 +27,7 @@ export default function ProjectCard({ project, onClick, className = '' }: Projec
         />
         {/* Category badge */}
         <div className="absolute top-4 right-4">
-          <span className="px-3 py-1 text-xs font-display tracking-wide bg-[#050509]/90 backdrop-blur-sm border border-[#d4c5a9] rounded-full">
+          <span className="px-3 py-1 text-xs font-display tracking-wide bg-background-primary/90 backdrop-blur-sm border border-accent-primary rounded-full">
             {project.category}
           </span>
         </div>
@@ -40,11 +40,11 @@ export default function ProjectCard({ project, onClick, className = '' }: Projec
           <h3 className="font-display text-xl md:text-2xl font-bold mb-1">
             {project.title}
           </h3>
-          <p className="text-sm text-gray-400">{project.date}</p>
+          <p className="text-sm text-text-tertiary">{project.date}</p>
         </div>
 
         {/* Description */}
-        <p className="text-sm text-gray-300 leading-relaxed mb-4 line-clamp-3">
+        <p className="text-sm text-text-secondary leading-relaxed mb-4 line-clamp-3">
           {project.description}
         </p>
 
@@ -53,7 +53,7 @@ export default function ProjectCard({ project, onClick, className = '' }: Projec
           {project.tags.map((tag) => (
             <span
               key={tag}
-              className="px-2 py-1 text-xs border border-[#202029] rounded bg-[#050509]/50"
+              className="px-2 py-1 text-xs border border-border-primary rounded bg-background-primary/50"
             >
               {tag}
             </span>
@@ -67,9 +67,9 @@ export default function ProjectCard({ project, onClick, className = '' }: Projec
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
           className="inline-flex items-center gap-2 px-4 py-2
-                   border border-[#d4c5a9] rounded font-display text-sm tracking-wide
-                   hover:bg-[#d4c5a9] hover:shadow-glow transition-all duration-300
-                   focus:outline-none focus:ring-2 focus:ring-[#d4c5a9] focus:ring-offset-2 focus:ring-offset-[#101015]"
+                   border border-accent-primary rounded font-display text-sm tracking-wide
+                   hover:bg-accent-primary hover:shadow-glow transition-all duration-300
+                   focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-2 focus:ring-offset-background-card"
         >
           <svg
             className="w-4 h-4"

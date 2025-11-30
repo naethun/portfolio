@@ -20,16 +20,16 @@ export default function ExperienceCard({ experience, onClick, className }: Exper
   return (
     <article
       onClick={onClick}
-      className={`relative border border-[#202029] rounded-lg p-6 md:p-8
-                 bg-[#101015]/30 backdrop-blur-sm
+      className={`relative border border-border-primary rounded-lg p-6 md:p-8
+                 bg-background-card/30 backdrop-blur-sm
                  transition-all duration-300
-                 hover:border-[#d4c5a9] hover:-translate-y-1 hover:shadow-glow
+                 hover:border-accent-primary hover:-translate-y-1 hover:shadow-glow
                  group ${onClick ? 'cursor-pointer' : ''} ${className || ''}`}
     >
 
       {/* Company Logo */}
       <div className="flex items-start gap-4 mb-4">
-        <div className="flex-shrink-0 w-16 h-16 relative rounded-lg overflow-hidden bg-white/5 p-2">
+        <div className="flex-shrink-0 w-16 h-16 relative rounded-lg overflow-hidden bg-[var(--color-image-bg)] p-2">
           <Image
             src={experience.img}
             alt={`${experience.company} logo`}
@@ -41,15 +41,15 @@ export default function ExperienceCard({ experience, onClick, className }: Exper
           <h3 className="font-display text-lg md:text-lg font-bold mb-1">
             {experience.role}
           </h3>
-          <p className="text-[#d4c5a9] font-display text-md tracking-wide">
+          <p className="text-accent-primary font-display text-md tracking-wide">
             {experience.company}
           </p>
-          <p className="text-sm text-gray-400 mt-1">{experience.date}</p>
+          <p className="text-sm text-text-tertiary mt-1">{experience.date}</p>
         </div>
       </div>
 
       {/* Description */}
-      <div className="text-gray-300 mb-6">
+      <div className="text-text-secondary mb-6">
         <p className="text-sm leading-relaxed line-clamp-3">
           {firstSentence}
         </p>
@@ -61,15 +61,15 @@ export default function ExperienceCard({ experience, onClick, className }: Exper
           <span
             key={skill}
             className="px-3 py-1 text-xs font-display tracking-wide
-                     border border-[#202029] rounded-full
-                     bg-[#050509]/50
-                     group-hover:border-[#d4c5a9]/50 transition-colors"
+                     border border-border-primary rounded-full
+                     bg-background-primary/50
+                     group-hover:border-accent-primary/50 transition-colors"
           >
             {skill}
           </span>
         ))}
         {experience.skills.length > 4 && (
-          <span className="px-3 py-1 text-xs text-gray-400">
+          <span className="px-3 py-1 text-xs text-text-tertiary">
             +{experience.skills.length - 4} more
           </span>
         )}
@@ -77,7 +77,7 @@ export default function ExperienceCard({ experience, onClick, className }: Exper
 
       {/* View Details Indicator */}
       {onClick && (
-        <div className="text-xs text-[#d4c5a9] flex items-center gap-1">
+        <div className="text-xs text-accent-primary flex items-center gap-1">
           <span>View Details</span>
           <svg
             className="w-4 h-4"

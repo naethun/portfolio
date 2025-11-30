@@ -1,43 +1,129 @@
 @import "tailwindcss";
 
-/* Custom Properties for Space Theme */
-:root {
-  --color-space-black: #090905;
-  --color-space-black-alt: #0d0d09;
-  --color-charcoal: #141410;
-  --color-charcoal-mid: #181814;
-  --color-charcoal-light: #242420;
-  --color-accent: #d4c5a9;
+/* ========================================
+   SEMANTIC COLOR VARIABLES
+   ======================================== */
+
+/* Default (Dark Mode) */
+:root, [data-theme="dark"] {
+  /* Backgrounds */
+  --color-bg-primary: #050509;
+  --color-bg-secondary: #101015;
+  --color-bg-tertiary: #141410;
+  --color-bg-elevated: #181814;
+  --color-bg-card: #101015;
+
+  /* Borders */
+  --color-border-primary: #202029;
+  --color-border-secondary: #242420;
+
+  /* Accent */
+  --color-accent-primary: #d4c5a9;
+  --color-accent-secondary: #e5d6ba;
   --color-accent-glow: rgba(212, 197, 169, 0.5);
-  --color-foreground: #ededed;
+
+  /* Text */
+  --color-text-primary: #ededed;
+  --color-text-secondary: #d1d1d1;
+  --color-text-tertiary: #9ca3af;
+
+  /* Special */
+  --color-scrollbar-track: #141410;
+  --color-scrollbar-thumb: #242420;
+  --color-scrollbar-hover: #d4c5a9;
+  --color-image-bg: rgba(255, 255, 255, 0.05);
+
+  /* Overlays */
+  --grain-opacity: 0.15;
+  --modal-backdrop: rgba(0, 0, 0, 0.8);
 }
 
-/* Tailwind v4 Theme Configuration */
-@theme inline {
-  --color-background: var(--color-space-black);
-  --color-foreground: var(--color-foreground);
-  --color-accent: var(--color-accent);
+/* Light Mode */
+[data-theme="light"] {
+  /* Backgrounds */
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F8F6F3;
+  --color-bg-tertiary: #F0EDE8;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-card: #F8F6F3;
 
-  /* Font families - Modern tech aesthetic */
+  /* Borders */
+  --color-border-primary: #C4B8A8;
+  --color-border-secondary: #9D8E7A;
+
+  /* Accent */
+  --color-accent-primary: #7A5A0F;
+  --color-accent-secondary: #936814;
+  --color-accent-glow: rgba(122, 90, 15, 0.4);
+
+  /* Text */
+  --color-text-primary: #0D0B09;
+  --color-text-secondary: #2A221C;
+  --color-text-tertiary: #4A4035;
+
+  /* Special */
+  --color-scrollbar-track: #F0EDE8;
+  --color-scrollbar-thumb: #9D8E7A;
+  --color-scrollbar-hover: #7A5A0F;
+  --color-image-bg: rgba(0, 0, 0, 0.05);
+
+  /* Overlays */
+  --grain-opacity: 0.06;
+  --modal-backdrop: rgba(0, 0, 0, 0.5);
+}
+
+/* ========================================
+   TAILWIND THEME CONFIGURATION
+   ======================================== */
+
+@theme inline {
+  /* Backgrounds */
+  --color-background-primary: var(--color-bg-primary);
+  --color-background-secondary: var(--color-bg-secondary);
+  --color-background-tertiary: var(--color-bg-tertiary);
+  --color-background-elevated: var(--color-bg-elevated);
+  --color-background-card: var(--color-bg-card);
+
+  /* Borders */
+  --color-border-primary: var(--color-border-primary);
+  --color-border-secondary: var(--color-border-secondary);
+
+  /* Accent */
+  --color-accent-primary: var(--color-accent-primary);
+  --color-accent-secondary: var(--color-accent-secondary);
+
+  /* Text */
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-tertiary: var(--color-text-tertiary);
+
+  /* Fonts */
   --font-sans: var(--font-inter);
   --font-display: var(--font-dm-sans);
 }
 
-/* Base Styles */
+/* ========================================
+   BASE STYLES
+   ======================================== */
+
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  background: var(--color-space-black);
-  color: var(--color-foreground);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
   font-family: var(--font-sans);
-  font-weight: 300; /* Lighter default weight */
+  font-weight: 300;
   overflow-x: hidden;
   position: relative;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* CSS Grain/Noise Overlay */
+/* ========================================
+   GRAIN OVERLAY (Theme-Aware)
+   ======================================== */
+
 .grain-overlay {
   position: fixed;
   top: 0;
@@ -47,12 +133,15 @@ body {
   pointer-events: none;
   z-index: 100;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-  opacity: 0.15;
+  opacity: var(--grain-opacity);
   mix-blend-mode: overlay;
   animation: grain 8s steps(10) infinite;
 }
 
-/* Animation Keyframes */
+/* ========================================
+   ANIMATION KEYFRAMES
+   ======================================== */
+
 @keyframes grain {
   0%, 100% { transform: translate(0, 0); }
   10% { transform: translate(-5%, -10%); }
@@ -81,7 +170,10 @@ body {
   }
 }
 
-/* Utility Classes */
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
 .animate-float {
   animation: float 8s ease-in-out infinite;
 }
@@ -90,31 +182,42 @@ body {
   box-shadow: 0 0 10px var(--color-accent-glow), 0 0 20px var(--color-accent-glow);
 }
 
-/* Custom Scrollbar */
+/* ========================================
+   SCROLLBAR (Theme-Aware)
+   ======================================== */
+
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-charcoal);
+  background: var(--color-scrollbar-track);
+  transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-charcoal-light);
+  background: var(--color-scrollbar-thumb);
   border-radius: 4px;
+  transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent);
+  background: var(--color-scrollbar-hover);
 }
 
-/* Focus Visible Styles for Accessibility */
+/* ========================================
+   FOCUS STYLES FOR ACCESSIBILITY
+   ======================================== */
+
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-accent-primary);
   outline-offset: 2px;
 }
 
-/* Reduced Motion Support */
+/* ========================================
+   REDUCED MOTION SUPPORT
+   ======================================== */
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

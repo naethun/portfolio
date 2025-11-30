@@ -4,7 +4,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative z-10 border-t border-[#202029] bg-[#050509]/50 backdrop-blur-sm">
+    <footer className="relative z-10 border-t border-border-primary bg-background-primary/50 backdrop-blur-sm">
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           {/* Left side - Name and tagline */}
@@ -12,7 +12,7 @@ export default function Footer() {
             <p className="font-display text-lg font-bold tracking-wide mb-1">
               {Bio.name}
             </p>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-text-tertiary">
               Built with Next.js · {currentYear}
             </p>
           </div>
@@ -23,7 +23,7 @@ export default function Footer() {
               href={Bio.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
+              className="text-sm font-display tracking-wide hover:text-accent-primary transition-colors"
               aria-label="GitHub Profile"
             >
               GITHUB
@@ -32,7 +32,7 @@ export default function Footer() {
               href={Bio.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
+              className="text-sm font-display tracking-wide hover:text-accent-primary transition-colors"
               aria-label="LinkedIn Profile"
             >
               LINKEDIN
@@ -41,7 +41,7 @@ export default function Footer() {
               href={Bio.resume}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-display tracking-wide hover:text-[#d4c5a9] transition-colors"
+              className="text-sm font-display tracking-wide hover:text-accent-primary transition-colors"
               aria-label="View Resume"
             >
               RESUME
@@ -50,8 +50,8 @@ export default function Footer() {
         </div>
 
         {/* Bottom copyright */}
-        <div className="mt-8 pt-6 border-t border-[#202029]/50 text-center">
-          <p className="text-xs text-gray-500">
+        <div className="mt-8 pt-6 border-t border-border-primary/50 text-center">
+          <p className="text-xs text-text-tertiary">
             © {currentYear} {Bio.name}. All rights reserved.
           </p>
         </div>

@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { useTheme } from '@/hooks/useTheme';
 import type { Experience } from '@/types/portfolio';
 
 interface ExperienceModalProps {
@@ -12,6 +13,8 @@ interface ExperienceModalProps {
 }
 
 export default function ExperienceModal({ experience, onClose }: ExperienceModalProps) {
+  const { resolvedTheme } = useTheme();
+
   // Split description into paragraphs
   const descriptionLines = experience.desc
     .split('\n')
@@ -56,7 +59,7 @@ export default function ExperienceModal({ experience, onClose }: ExperienceModal
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          className={`absolute inset-0 backdrop-blur-sm ${resolvedTheme === 'dark' ? 'bg-black/80' : 'bg-black/40'}`}
           onClick={handleBackdropClick}
           aria-hidden="true"
         />
@@ -68,7 +71,7 @@ export default function ExperienceModal({ experience, onClose }: ExperienceModal
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto
-                     bg-[#101015]/95 backdrop-blur-md border border-[#202029] rounded-lg
+                     bg-background-card/95 backdrop-blur-md border border-border-primary rounded-lg
                      shadow-2xl"
           role="dialog"
           aria-modal="true"
@@ -78,13 +81,13 @@ export default function ExperienceModal({ experience, onClose }: ExperienceModal
           <button
             onClick={onClose}
             className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center
-                       rounded-full bg-[#050509]/80 border border-[#202029]
-                       hover:border-[#d4c5a9] hover:bg-[#050509] transition-all
+                       rounded-full bg-background-primary/80 border border-border-primary
+                       hover:border-accent-primary hover:bg-background-primary transition-all
                        group"
             aria-label="Close modal"
           >
             <svg
-              className="w-5 h-5 text-gray-400 group-hover:text-[#d4c5a9] transition-colors"
+              className="w-5 h-5 text-text-tertiary group-hover:text-accent-primary transition-colors"
               fill="none"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -100,7 +103,7 @@ export default function ExperienceModal({ experience, onClose }: ExperienceModal
           <div className="p-6 md:p-8">
             {/* Header */}
             <div className="flex items-start gap-4 mb-6">
-              <div className="flex-shrink-0 w-16 h-16 relative rounded-lg overflow-hidden bg-white/5 p-2">
+              <div className="flex-shrink-0 w-16 h-16 relative rounded-lg overflow-hidden bg-[var(--color-image-bg)] p-2">
                 <Image
                   src={experience.img}
                   alt={`${experience.company} logo`}
@@ -115,15 +118,15 @@ export default function ExperienceModal({ experience, onClose }: ExperienceModal
                 >
                   {experience.role}
                 </h3>
-                <p className="text-[#d4c5a9] font-display tracking-wide text-lg">
+                <p className="text-accent-primary font-display tracking-wide text-lg">
                   {experience.company}
                 </p>
-                <p className="text-sm text-gray-400 mt-1">{experience.date}</p>
+                <p className="text-sm text-text-tertiary mt-1">{experience.date}</p>
               </div>
             </div>
 
             {/* Description */}
-            <div className="space-y-3 text-gray-300 mb-6">
+            <div className="space-y-3 text-text-secondary mb-6">
               {descriptionLines.map((line, index) => (
                 <p key={index} className="text-sm leading-relaxed">
                   {line}
@@ -137,9 +140,9 @@ export default function ExperienceModal({ experience, onClose }: ExperienceModal
                 <span
                   key={skill}
                   className="px-3 py-1 text-xs font-display tracking-wide
-                           border border-[#202029] rounded-full
-                           bg-[#050509]/50
-                           hover:border-[#d4c5a9]/50 transition-colors"
+                           border border-border-primary rounded-full
+                           bg-background-primary/50
+                           hover:border-accent-primary/50 transition-colors"
                 >
                   {skill}
                 </span>
