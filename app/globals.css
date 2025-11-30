@@ -48,23 +48,23 @@
   --color-bg-card: #F8F6F3;
 
   /* Borders */
-  --color-border-primary: #C4B8A8;
-  --color-border-secondary: #9D8E7A;
+  --color-border-primary: #B8A895;
+  --color-border-secondary: #8B7A66;
 
   /* Accent */
-  --color-accent-primary: #7A5A0F;
-  --color-accent-secondary: #936814;
-  --color-accent-glow: rgba(122, 90, 15, 0.4);
+  --color-accent-primary: #6B5010;
+  --color-accent-secondary: #7E6217;
+  --color-accent-glow: rgba(107, 80, 16, 0.4);
 
-  /* Text */
-  --color-text-primary: #0D0B09;
-  --color-text-secondary: #2A221C;
-  --color-text-tertiary: #4A4035;
+  /* Text - Much darker for better contrast */
+  --color-text-primary: #000000;
+  --color-text-secondary: #1A1612;
+  --color-text-tertiary: #2E2820;
 
   /* Special */
   --color-scrollbar-track: #F0EDE8;
-  --color-scrollbar-thumb: #9D8E7A;
-  --color-scrollbar-hover: #7A5A0F;
+  --color-scrollbar-thumb: #8B7A66;
+  --color-scrollbar-hover: #6B5010;
   --color-image-bg: rgba(0, 0, 0, 0.05);
 
   /* Overlays */
