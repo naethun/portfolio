@@ -56,7 +56,8 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          className="absolute inset-0 backdrop-blur-sm"
+          style={{ backgroundColor: 'var(--modal-backdrop)' }}
           onClick={handleBackdropClick}
           aria-hidden="true"
         />
@@ -68,7 +69,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto
-                     bg-[#101015]/95 backdrop-blur-md border border-[#202029] rounded-lg
+                     bg-background-card/95 backdrop-blur-md border border-border-primary rounded-lg
                      shadow-2xl"
           role="dialog"
           aria-modal="true"
@@ -78,13 +79,13 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           <button
             onClick={onClose}
             className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center
-                       rounded-full bg-[#050509]/80 border border-[#202029]
-                       hover:border-[#d4c5a9] hover:bg-[#050509] transition-all
+                       rounded-full bg-background-primary/80 border border-border-primary
+                       hover:border-accent-primary hover:bg-background-primary transition-all
                        group"
             aria-label="Close modal"
           >
             <svg
-              className="w-5 h-5 text-gray-400 group-hover:text-[#d4c5a9] transition-colors"
+              className="w-5 h-5 text-text-tertiary group-hover:text-accent-primary transition-colors"
               fill="none"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -99,7 +100,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           {/* Modal Content */}
           <div className="p-6 md:p-8">
             {/* Project Image */}
-            <div className="relative h-54 md:h-94 w-full rounded-lg overflow-hidden mb-6 bg-[#050509]">
+            <div className="relative h-54 md:h-94 w-full rounded-lg overflow-hidden mb-6 bg-background-primary">
               <Image
                 src={project.image}
                 alt={`${project.title} screenshot`}
@@ -108,7 +109,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
               />
               {/* Category badge */}
               <div className="absolute top-4 right-4">
-                <span className="px-3 py-1 text-xs font-display tracking-wide bg-[#050509]/90 backdrop-blur-sm border border-[#d4c5a9] rounded-full">
+                <span className="px-3 py-1 text-xs font-display tracking-wide bg-background-primary/90 backdrop-blur-sm border border-accent-primary rounded-full">
                   {project.category}
                 </span>
               </div>
@@ -122,11 +123,11 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
               >
                 {project.title}
               </h3>
-              <p className="text-sm text-gray-400">{project.date}</p>
+              <p className="text-sm text-text-tertiary">{project.date}</p>
             </div>
 
             {/* Description */}
-            <div className="space-y-3 text-gray-300 mb-6">
+            <div className="space-y-3 text-text-secondary mb-6">
               {descriptionLines.map((line, index) => (
                 <p key={index} className="text-sm leading-relaxed">
                   {line}
@@ -140,9 +141,9 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 <span
                   key={tag}
                   className="px-3 py-1 text-xs font-display tracking-wide
-                           border border-[#202029] rounded-full
-                           bg-[#050509]/50
-                           hover:border-[#d4c5a9]/50 transition-colors"
+                           border border-border-primary rounded-full
+                           bg-background-primary/50
+                           hover:border-accent-primary/50 transition-colors"
                 >
                   {tag}
                 </span>
@@ -155,9 +156,18 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2
-                       border border-[#d4c5a9] rounded font-display text-sm tracking-wide
-                       hover:bg-[#d4c5a9] hover:shadow-glow transition-all duration-300
-                       focus:outline-none focus:ring-2 focus:ring-[#d4c5a9] focus:ring-offset-2 focus:ring-offset-[#101015]"
+                       border border-accent-primary rounded font-display text-sm tracking-wide
+                       hover:bg-accent-primary hover:shadow-glow transition-all duration-300
+                       focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-2 focus:ring-offset-background-card"
+              style={{
+                color: 'var(--color-accent-primary)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--color-bg-primary)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--color-accent-primary)';
+              }}
             >
               <svg
                 className="w-4 h-4"
