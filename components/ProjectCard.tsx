@@ -3,16 +3,19 @@ import type { Project } from '@/types/portfolio';
 
 interface ProjectCardProps {
   project: Project;
+  onClick?: () => void;
+  className?: string;
 }
 
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default function ProjectCard({ project, onClick, className = '' }: ProjectCardProps) {
   return (
     <article
-      className="border border-[#202029] rounded-lg overflow-hidden
+      onClick={onClick}
+      className={`border border-[#202029] rounded-lg overflow-hidden
                  bg-[#101015]/30 backdrop-blur-sm
                  transition-all duration-300
                  hover:border-[#d4c5a9] hover:-translate-y-2 hover:shadow-glow
-                 group"
+                 group cursor-pointer ${className}`}
     >
       {/* Project Image */}
       <div className="relative h-48 w-full overflow-hidden bg-[#050509]">
@@ -62,6 +65,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           href={project.github}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
           className="inline-flex items-center gap-2 px-4 py-2
                    border border-[#d4c5a9] rounded font-display text-sm tracking-wide
                    hover:bg-[#d4c5a9] hover:shadow-glow transition-all duration-300
