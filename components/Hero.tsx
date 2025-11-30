@@ -127,7 +127,7 @@ export default function Hero({ bio }: HeroProps) {
 
           {/* Right side - Tesseract Animation */}
           <div className="order-1 lg:order-2 flex items-center justify-center">
-            <div className="w-full max-w-2xl aspect-square relative">
+            <div className="w-40 md:w-96 lg:w-full max-w-2xl aspect-square relative">
               <div className="absolute inset-30 bg-gradient-to-br from-[#d4c5a9]/10 to-transparent rounded-xl blur-2xl" />
               <div className="relative w-full h-full flex items-center justify-center">
                 <Tesseract />

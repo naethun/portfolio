@@ -6,7 +6,7 @@ export const Bio = {
     "Full-Stack Software Engineer",
     "Product Engineer",
     "Startup Focused",
-    "Blockchain Enthusiast",
+    "Web3 Believer",
     "Automation Enthusiast",
   ],
   github: "https://github.com/naethun",
@@ -15,108 +15,6 @@ export const Bio = {
   linkedin: "https://www.linkedin.com/in/naethun/",
 };
 
-export const skills: SkillCategory[] = [
-  {
-    title: "Frontend",
-    skills: [
-      {
-        name: "React Js",
-        image:
-          "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0xMS41IC0xMC4yMzE3NCAyMyAyMC40NjM0OCI+CiAgPHRpdGxlPlJlYWN0IExvZ288L3RpdGxlPgogIDxjaXJjbGUgY3g9IjAiIGN5PSIwIiByPSIyLjA1IiBmaWxsPSIjNjFkYWZiIi8+CiAgPGcgc3Ryb2tlPSIjNjFkYWZiIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiPgogICAgPGVsbGlwc2Ugcng9IjExIiByeT0iNC4yIi8+CiAgICA8ZWxsaXBzZSByeD0iMTEiIHJ5PSI0LjIiIHRyYW5zZm9ybT0icm90YXRlKDYwKSIvPgogICAgPGVsbGlwc2Ugcng9IjExIiByeT0iNC4yIiB0cmFuc2Zvcm09InJvdGF0ZSgxMjApIi8+CiAgPC9nPgo8L3N2Zz4K",
-      },
-      {
-        name: "Next Js",
-        image:
-          "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACTklEQVR4Ab1XAaQqURB9DyohSykREpRIQSAlBCoECKUFCSRCBBEAaSEABQEoCIEASCwAUICALgCo83do0//9v819XX845O7VnDkzOzP7JWGaBd3C3IJpQVjAHeJ+Rs9a97vKLGrBsB1KgMhEP3FMUUwt4ENMfxr1yQIU4SSjRkbeOZtERmHk6pXQVDlnkHh9S+QLTm1hkiz4n/gzFQuny9FoFLquE+i34x+n02k0m00UCoV3BIzn3MMJrVYLtp1OJ0cS/X4f5/MZhmG8IyDsWtDfEaDIn2232/3zbrvdxuFwwGg04qRBt+VnETBNE0IIkE2n07/erdfrWK/X6Ha73Hb9ZXII3G43ivy3dNRqtZe7lUoFs9mM6oBDwCQCgquALT1FT3a5XF7qIZ/PYzgcolqtcggIIgBZAgRKB6lCRalp2uM8k8mAVMrlchwC+DEBipycE4n5fP44j8ViKJVKSCaTbAJCpgaez4vFIsjoWa/XA50FAgEkEgmEw2F2CkxZBZ5Br5tt1ITcbjd8Ph88Hg+7CBefECCsVitS4aVJcV9D/VMCVITk/Hq9YrPZyBBo2a1YMGvAcQYcj0cCtWMugcdYNhjDiBrP25mx3++x3W6RzWZZ8isfxzQLlsslJpMJpYY5jhkqcOH1ejEYDDAej9FoNOByuZxGsfqVzC7KTqcDSkkqleKsZOqX0mAwiHK5DGrJfr+fs5SqX8sjkQji8ThCoRC+v78Za7l6JagrUh3YkUuZpqgwDaecc9VYSDoV5Fg+at7n+eLN57kuE/EvzHr/Kvs31aYAAAAASUVORK5CYII=",
-      },
-      {
-        name: "JavaScript",
-        image:
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/JavaScript-logo.png/800px-JavaScript-logo.png",
-      },
-      {
-        name: "Tailwind",
-        image:
-          "https://static-00.iconduck.com/assets.00/tailwind-css-icon-1024x615-fdeis5r1.png",
-      }
-    ],
-  },
-  {
-    title: "Backend",
-    skills: [
-      {
-        name: "Node Js",
-        image: "https://nodejs.org/static/images/logo.svg",
-      },
-      {
-        name: "Express Js",
-        image:
-          "https://ajeetchaulagain.com/static/7cb4af597964b0911fe71cb2f8148d64/87351/express-js.png",
-      },
-      {
-        name: "TypeScript",
-        image:
-          "https://static-00.iconduck.com/assets.00/typescript-icon-icon-1024x1024-vh3pfez8.png",
-      },
-      {
-        name: "Python",
-        image:
-          "https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg",
-      },
-      {
-        name: "Java",
-        image:
-          "https://education.oracle.com/file/general/p-80-java.png",
-      },
-      {
-        name: "C#",
-        image:
-          "https://static-00.iconduck.com/assets.00/c-sharp-c-icon-456x512-9sej0lrz.png",
-      },
-      {
-        name: "C",
-        image:
-          "https://cdn.iconscout.com/icon/free/png-256/free-c-58-1175247.png",
-      }
-    ],
-  },
-  {
-    title: "Other Technologies",
-    skills: [
-      {
-        name: "Git",
-        image:
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Git_icon.svg/2048px-Git_icon.svg.png",
-      },
-      {
-        name: "GitHub",
-        image:
-          "https://cdn1.iconfinder.com/data/icons/smallicons-logotypes/32/github-512.png",
-      },
-      {
-        name: "VS Code",
-        image:
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Visual_Studio_Code_1.35_icon.svg/512px-Visual_Studio_Code_1.35_icon.svg.png?20210804221519",
-      },
-      {
-        name: "Figma",
-        image:
-          "https://static-00.iconduck.com/assets.00/apps-figma-icon-2048x2048-ctjj5ab7.png",
-      },
-      {
-        name: "Shell, Bash, Terminal",
-        image:
-          "https://www.svgrepo.com/show/376359/bash.svg",
-      },
-      {
-        name: "Linux",
-        image:
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Icons8_flat_linux.svg/1200px-Icons8_flat_linux.svg.png",
-      },
-    ],
-  },
-];
-
 export const experiences: Experience[] = [
   {
     id: 0,
@@ -124,7 +22,7 @@ export const experiences: Experience[] = [
     role: "Software Engineer",
     company: "EnergeX AI",
     date: "Sept 2025 - Present",
-    desc: `EnergeX AI is an AI-driven CRM platform that automates outbound sales calls and real-time analytics for high-volume teams:
+    desc: `EnergeX AI is an AI-driven CRM platform that automates outbound sales calls and real-time analytics for high-volume teams.
 
     - Optimized core CRM systems powering 6-figure ARR by improving outreach automation, pipeline reliability, and analytics performance for sales teams.
 
@@ -137,21 +35,47 @@ export const experiences: Experience[] = [
     - Improved database schema, composite indexing, and high-throughput query paths for 50k+ call events, bringing average query latency below 50ms.
     `,
     skills: [
-      "Next.js",
       "Node.js",
       "PostgreSQL",
-      "OpenAI",
       "Docker",
       "Git",
+      "OpenAI",
+      "Next.js",
     ],
   },
   {
     id: 1,
+    img: "https://media.licdn.com/dms/image/v2/D560BAQGI0qD01ndvwQ/company-logo_200_200/B56ZnpbPqYKIAI-/0/1760557858762/daedastream_logo?e=1766016000&v=beta&t=M1J97L1SXQpuhlGJfALIhfueIaW9roT6JgkIAcX6idU",
+    role: "Software Engineer",
+    company: "Daedastream",
+    date: "June 2025 - Present (Contracted)",
+    desc: `Daedastream is a software agency that automates processes for clients, provides full-stack development, & AI-driven operations.
+  
+    - Contributed to a multi-agent orchestration framework using tmux + Redis Streams, enabling dynamic spawning, coordination, & messaging between frontend, backend, & DevOps agents.
+  
+    - Engineered console-capture automation using Playwright + NDJSON streaming to classify browser errors in real time & route them into the Redis-tmux loop for automated debugging workflows.
+  
+    - Developed custom automation solutions for multiple clients, improving their analytics pipelines, system reliability, & operational efficiency through tailored data-processing & monitoring tools.
+  
+    - Designed modular service components & internal APIs to support scalable automation, easier agent lifecycle management, & extensible event-driven architecture.
+  
+    - Enhanced developer tooling by integrating test harnesses, logging utilities, & environment setups that accelerated iteration velocity across the engineering team.
+    `,
+    skills: [
+      "Python",
+      "Redis",
+      "Tmux",
+      "Playwright",
+      "Git",
+    ],
+  },  
+  {
+    id: 2,
     img: "https://media.licdn.com/dms/image/v2/D4E0BAQFFnQDKU-9RVw/company-logo_100_100/B4EZarxyFiHoAU-/0/1746638677031/familia_io_logo?e=1766016000&v=beta&t=4aPxxBtVloGdJ920LN1XnLlJHkEBvyWWg-pYVjA2Zjo",
     role: "Software Engineer",
     company: "Familia",
     date: "May 2025 - Oct 2025",
-    desc: `Familia is a start-up focused on mental wellness, building an app that enables users to meditate together with real-time communication and guided social experiences:
+    desc: `Familia is a start-up focused on mental wellness, building an app that enables users to meditate together.
 
     - Designed and implemented a tiered, matching algorithm that combines dynamic user preferences with manual partner selection. Significantly improving accuracy and personalization in user-to-user pairing for 150+ active users.
 
@@ -162,19 +86,22 @@ export const experiences: Experience[] = [
     - Led end-to-end full-stack development of both web and mobile platforms (Next.js and React Native). Driving feature development, UI/UX consistency, and backend integration within an Agile workflow. Enabling a rapid iteration with scalable feature rollout.
     `,
     skills: [
-      "Next.js",
+      "Node.js",
+      "AWS",
       "React Native",
       "PostgreSQL",
-      "TypeScript",
+      "Railway",
+      "Git",
+      "Figma",
     ],
   },
   {
-    id: 2,
+    id: 3,
     img: "https://img1.wsimg.com/isteam/ip/7230bf8c-78a3-4764-bbc6-b984344c2a04/Viet_Voices_Logo_Phrase.png/:/cr=t:0%25,l:0%25,w:100%25,h:100%25/rs=w:400,cg:true",
     role: "Data Analyst",
     company: "Viet Voices",
     date: "Jan 2024 - Jul 2025",
-    desc: `A non-profit organization that focuses on representing marginalized Vietnamese and other AAPI communties within San Diego:
+    desc: `A non-profit organization that focuses on representing marginalized Vietnamese & other AAPI communities within San Diego.
 
         - Developed a predictive machine learning model using logistic regression (scikit-learn) to classify voters based on their likelihood of consistent turnout. The model incorporated demographic, geographic, and behavioral features sourced from multiple datasets. Achieving measurable improvements in prediction accuracy over baseline heuristics.
 
@@ -189,18 +116,25 @@ export const experiences: Experience[] = [
 
     skills: [
       "Machine Learning",
-      "SQL",
       "Python",
-      "Numeric Visualization",
+      "Pandas",
+      "NumPy",
+      "Matplotlib",
+      "Seaborn",
+      "Plotly",
+      "SciPy",
+      "Scikit-learn",
     ],
   },
   {
-    id: 3,
+    id: 4,
     img: "https://yt3.googleusercontent.com/ytc/AIdro_nqJRBE-PvehwgWqiwAhPzjuDAi6kca33Z5mvp4UADlcyI=s900-c-k-c0x00ffffff-no-rj",
     role: "Lead Coding Instructor",
     company: "Code Ninjas",
     date: "Dec 2022 - Sept 2025",
-    desc: `A place for students from ages 7-14 to learn basic Computer Science concepts and fundementals of software development. I am the lead instructor, handling the management of our daily team and optimizing operations for our location:
+    desc: `A place for students from ages 7-14 to learn basic Computer Science concepts & fundementals of software development.
+
+      - Lead instructor, handling the management of our daily team & optimizing operations for our location.
 
       - Developed programs with Node JS and Python which automates certain tasks for our center director. A few programs I have made were, tracking quarterly attendance which resulted in a 20% increase in efficiency compared to manual methods, and a email filter which parsed through a list of over 1000 emails and got rid of duplicates and customers who don't want to be apart of the email list anymore.
 
@@ -213,26 +147,26 @@ export const experiences: Experience[] = [
     ],
   },
   {
-    id: 4,
+    id: 5,
     img: "https://pbs.twimg.com/profile_images/1549089349119139843/AuqvKpSs_400x400.png",
     role: "Software Developer",
     company: "LightningATC",
     date: "May 2022 - Jun 2023",
-    desc: `A company which focuses on automating checkout proccesses for sneaker resellers to maximize profits. Focusing on engineering the backend, I developed modules that gave our clients a huge advantage compared to a normal human:
+    desc: `A software that focuses on automating checkout proccesses for sneaker resellers to maximize profits.
 
-        - A high-performance Chrome extension optimized for low-latency data relaying and scalable concurrent user management, supporting a large active user base.
+        - Developed a high-performance Chrome extension optimized for low-latency data relaying & scalable concurrent user management, supporting a large active user base.
 
         - Reverse-engineered private stock API endpoints on Supreme, architecting a real-time monitoring system capable of handling thousands of concurrent WebSocket connections with sub-20ms latency.
 
-        - Engineered automated checkout modules for Footlocker PH & ASOS using advanced DOM manipulation, regex-based scraping, client-side monitoring, and dynamic payment orchestration.
+        - Engineered automated checkout modules for Footlocker PH & ASOS using advanced DOM manipulation, regex-based scraping, client-side monitoring, & dynamic payment orchestration.
       `,
     skills: [
       "Reverse Engineering",
-      "ReactJS",
-      "NodeJS",
-      "HTML",
-      "CSS",
-      "JavaScript",
+      "Node.js",
+      "DOM Manipulation",
+      "Regex",
+      "Client-side Monitoring",
+      "Chrome Extension",
     ],
   },
 ];

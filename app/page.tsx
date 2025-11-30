@@ -1,12 +1,11 @@
 import Navigation from '@/components/Navigation';
 import Hero from '@/components/Hero';
-import Skills from '@/components/Skills';
 import Experience from '@/components/Experience';
 import Education from '@/components/Education';
 import Projects from '@/components/Projects';
 import Footer from '@/components/Footer';
 
-import { Bio, skills, experiences, education, projects } from '@/lib/data';
+import { Bio, experiences, education, projects } from '@/lib/data';
 
 export default function Home() {
   return (
@@ -20,7 +19,6 @@ export default function Home() {
         <Experience experiences={experiences} />
         <Education education={education} />
         <Projects projects={projects} />
-        <Skills skills={skills} />
       </main>
 
       {/* Footer */}
