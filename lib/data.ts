@@ -177,7 +177,7 @@ export const education: Education[] = [
     img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQLZWQOYPjTdus9VobVJyBjjPdyc0tOGwOpA&s",
     school: "Southwestern Community College",
     date: "Aug 2022 - May 2025",
-    grade: "3.6 GPA",
+    grade: "3.6",
     desc: "Relevant coursework: Data Structures & Algorithms, Computer Organization & Architecture, Discrete Structures, Linear Algebra, Calculus 1 & 2, Physics (Mechanics & Electromagnetism), Statistics",
     degree: "Associate Degree for Transfer, Computer Science",
   },
@@ -187,7 +187,7 @@ export const education: Education[] = [
     school: "University of California, San Diego",
     date: "Sept 2025 - June 2027",
     grade: "3.6",
-    desc: "Scholarships: NSF EMPOWERs Engineering, Chancellor's Associates Scholarship",
+    desc: `Scholarships: NSF EMPOWERs Engineering, Chancellor's Associates Scholarship`,
     degree: "Bachelor's of Science, Cognitive Science Spec. Machine Learning & Neural Computation",
   },
 ];
