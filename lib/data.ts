@@ -240,7 +240,7 @@ export const projects: Project[] = [
 
       Frontend/Backend: Next.js for high performance, API and App routing, SSR, and TypeScript + TailwindCSS
 
-      Database: PostgreSQL (Supabase) for highly consistent & horizontal data storage, user authentication, RLS policies for security, and real-time subscriptions / webhooks
+      Database: PostgreSQL for highly consistent & horizontal data storage, user authentication, RLS policies for security, and real-time subscriptions / webhooks
 
       AI + Analysis: We used OpenAI Vision (specifically gpt-4o-mini) to analyzing uploaded images. We have another agent for also the recommendation process too. Out of a list of 100 products, we send the agent 40 unique & well matched products (tier-based classification based on ingredients list) to the agent and have it write the list of recommended products and measure through a confidence scale.
 
@@ -262,8 +262,8 @@ export const projects: Project[] = [
       `,
     image:
       "https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/003/966/990/datas/original.png",
-    tags: ["React", "Node.js", "PostgreSQL", "OpenAI", "Docker", "Git"],
-    category: "Chrome Extension",
-    github: "https://github.com/naethun/Telios-AIO/",
+    tags: ["Next.js", "Node.js", "PostgreSQL", "OpenAI", "Docker", "Git"],
+    category: "Web Application",
+    github: "https://devpost.com/software/carefi",
   }
 ];
