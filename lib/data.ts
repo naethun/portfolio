@@ -184,9 +184,9 @@ export const education: Education[] = [
     img: "https://i.pinimg.com/originals/fd/fd/bb/fdfdbb35dc080581686e32a94d67c7ad.jpg",
     school: "University of California, San Diego",
     date: "Sept 2025 - June 2027",
-    grade: "3.6",
-    desc: `Scholarships: NSF EMPOWERs Engineering, Chancellor's Associates Scholarship`,
+    desc: `Scholarships: NSF EMPOWERs Engineering, Chancellor's Associates Scholarship, Kathleen W. Denno Scholarship`,
     degree: "Bachelor's of Science, Cognitive Science Spec. Machine Learning & Neural Computation",
+    grade: '3.87'
   },
 ];
 
