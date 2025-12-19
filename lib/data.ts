@@ -228,5 +228,42 @@ export const projects: Project[] = [
     tags: ["Google Chrome Extension", "JavaScript", "HTML", "CSS", "jQuery"],
     category: "Chrome Extension",
     github: "https://github.com/naethun/Telios-AIO/",
+  },
+  {
+    id: 2,
+    title: "CareFi (LIVE AI BEST COAST 2025 HACKATHON WINNER)",
+    date: "3 day hackathon",
+    description:
+      `We were inspired by a friend’s dermatology club that asked us to create a website for skincare analysis. This sparked our idea to build an AI-powered platform that makes personalized skincare accessible and affordable for everyone.
+
+      CareFi uses advanced AI to analyze a user’s skin from photos and detect common conditions such as acne, dryness, oiliness, and sensitivity. It then recommends a customized skincare routine tailored to each user’s unique needs and budget, providing insights often associated with dermatologist-quality results.
+
+      Frontend/Backend: Next.js for high performance, API and App routing, SSR, and TypeScript + TailwindCSS
+
+      Database: PostgreSQL (Supabase) for highly consistent & horizontal data storage, user authentication, RLS policies for security, and real-time subscriptions / webhooks
+
+      AI + Analysis: We used OpenAI Vision (specifically gpt-4o-mini) to analyzing uploaded images. We have another agent for also the recommendation process too. Out of a list of 100 products, we send the agent 40 unique & well matched products (tier-based classification based on ingredients list) to the agent and have it write the list of recommended products and measure through a confidence scale.
+
+      Architecture: RESTful API routes in /app/api/ Endpoints include:
+      /api/signup - User registration
+      /api/signin - User authentication
+      /api/analysis/start - Start face analysis
+      /api/analysis/latest - Get latest analysis results
+      /api/recommendations - Get personalized recommendations
+      /api/uploadImage - Upload face images
+      /api/settings/* - User settings management
+
+      Key Features Built with This Stack:
+      Product Image Analysis - Upload photos → AI extracts ingredients
+      Personalized Dashboard - View analysis, recommendations, KPIs
+      Budget Optimizer - Track spending on skincare products
+      Routine Planner - Morning/evening skincare routines
+      Onboarding Flow - Collect user skin profile (type, concerns, allergies
+      `,
+    image:
+      "https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/003/966/990/datas/original.png",
+    tags: ["React", "Node.js", "PostgreSQL", "OpenAI", "Docker", "Git"],
+    category: "Chrome Extension",
+    github: "https://github.com/naethun/Telios-AIO/",
   }
 ];
