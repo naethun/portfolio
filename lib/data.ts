@@ -18,10 +18,37 @@ export const Bio = {
 export const experiences: Experience[] = [
   {
     id: 0,
-    img: "https://media.licdn.com/dms/image/v2/D4E0BAQGpif9l90Gmww/company-logo_100_100/B4EZcfGRU8HsAU-/0/1748573427276/energex_ai_logo?e=1766016000&v=beta&t=aT8qXXaa58KA4-5ypp-o2OWUG6gzzhvkz46IZKwlcrc",
+    img: "https://media.licdn.com/dms/image/v2/D560BAQGFoZOgu9BJkw/company-logo_100_100/company-logo_100_100/0/1730333417498/aestheticai_logo?e=1773273600&v=beta&t=P1d-xNZ-mJ07P2Yc0n3ODUwm2XlCmy_-fSiYE4f5uVs",
+    role: "Founding Software Engineer",
+    company: "Aesthetic",
+    date: "December 2025 - Present",
+    desc: `Aesthetic is a all-in-one shopping platform that allows users to buy products through our fully autounomus shopping assistant. 100k+ users, 250k+ GMV, 160k+ on Instagram
+
+    - Users can upload a image, send social media links of posts, and our app finds all similar products on the web that is inside of the image or posts. Users can then buy the products directly from the app, never having to leave the app.
+
+    - We are mapping human taste by analyzing user's internet activity into vectorized identity models. Scraping user's Instagram, Pinterest, and Gmail data to recommend products to users based on their taste profiles.
+
+    - Built the core visual search experience across web and mobile — interactive gesture-driven bounding box selection (60fps via Reanimated shared values), coordinate system transformation between platforms, race condition elimination via AbortController lifecycle management, and a product condition classifier with 40+ domain priors — plus an app-wide offline resilience layer with graceful degradation
+
+    - Architected a full-stack AI product intelligence pipeline across 3 codebases — Firecrawl web scraping → LLM-powered structured extraction (Schematron 8B) → two-tier async caching (sync top-5 + backgroundLambda for 6-15) → mobile delivery with graceful fallback, reducing product detail load times from seconds toinstant for returning users 
+
+    - Led zero-downtime migration from DynamoDB to PostgreSQL for the entire backend, built migration that processed 4.6M + records, feature flags for safe rollout, & comprehensive tests.
+    `,
+    skills: [
+      "Node.js",
+      "PostgreSQL",
+      "Docker",
+      "Git",
+      "OpenAI",
+      "Next.js",
+    ],
+  },
+  {
+    id: 1,
+    img: "https://media.licdn.com/dms/image/v2/D4E0BAQGpif9l90Gmww/company-logo_100_100/B4EZcfGRU8HsAU-/0/1748573427276/energex_ai_logo?e=1773273600&v=beta&t=WYlSn4AxhAXpI6lg_bpu1Sq6qiyqkOJ7kUZVN9iEll8",
     role: "Software Engineer",
     company: "EnergeX AI",
-    date: "Sept 2025 - Present",
+    date: "September 2025 - Present",
     desc: `EnergeX AI is an AI-driven CRM platform that automates outbound sales calls & real-time analytics for high-volume teams.
 
     - Architected & shipped a multi-campaign calling system, enabling concurrent campaign execution with isolated queue runners, safe concurrency controls, & automated pause/resume logic based on real-time agent availability. Increased effective call throughput by 2-3x without additional infrastructure.
@@ -42,11 +69,11 @@ export const experiences: Experience[] = [
     ],
   },
   {
-    id: 1,
-    img: "https://media.licdn.com/dms/image/v2/D560BAQGI0qD01ndvwQ/company-logo_200_200/B56ZnpbPqYKIAI-/0/1760557858762/daedastream_logo?e=1766016000&v=beta&t=M1J97L1SXQpuhlGJfALIhfueIaW9roT6JgkIAcX6idU",
+    id: 2,
+    img: "https://media.licdn.com/dms/image/v2/D560BAQGI0qD01ndvwQ/company-logo_200_200/B56ZnpbPqYKIAI-/0/1760557858762/daedastream_logo?e=1773273600&v=beta&t=RkttNoFWeGXza1YmSHmBrx9wzD47T2O21KE7E5HInfg",
     role: "Software Engineer",
     company: "Daedastream",
-    date: "June 2025 - Present (Contracted)",
+    date: "June 2025 - December 2025",
     desc: `Daedastream is a software agency that automates processes for clients, provides full-stack development, & AI-driven operations.
   
     - Contributed to a multi-agent orchestration framework using tmux + Redis Streams, enabling dynamic spawning, coordination, & messaging between frontend, backend, & DevOps agents.
@@ -68,8 +95,8 @@ export const experiences: Experience[] = [
     ],
   },  
   {
-    id: 2,
-    img: "https://media.licdn.com/dms/image/v2/D4E0BAQFFnQDKU-9RVw/company-logo_100_100/B4EZarxyFiHoAU-/0/1746638677031/familia_io_logo?e=1766016000&v=beta&t=4aPxxBtVloGdJ920LN1XnLlJHkEBvyWWg-pYVjA2Zjo",
+    id: 3,
+    img: "https://media.licdn.com/dms/image/v2/D4E0BAQFFnQDKU-9RVw/company-logo_100_100/B4EZarxyFiHoAU-/0/1746638677031/familia_io_logo?e=1773273600&v=beta&t=45xKagSmcntaMwtggdntFvK8hvTuEKMYaU0k0GDJTGo",
     role: "Software Engineer",
     company: "Familia",
     date: "May 2025 - Oct 2025",
@@ -94,7 +121,7 @@ export const experiences: Experience[] = [
     ],
   },
   {
-    id: 3,
+    id: 4,
     img: "https://img1.wsimg.com/isteam/ip/7230bf8c-78a3-4764-bbc6-b984344c2a04/Viet_Voices_Logo_Phrase.png/:/cr=t:0%25,l:0%25,w:100%25,h:100%25/rs=w:400,cg:true",
     role: "Data Analyst",
     company: "Viet Voices",
@@ -125,7 +152,7 @@ export const experiences: Experience[] = [
     ],
   },
   {
-    id: 4,
+    id: 5,
     img: "https://yt3.googleusercontent.com/ytc/AIdro_nqJRBE-PvehwgWqiwAhPzjuDAi6kca33Z5mvp4UADlcyI=s900-c-k-c0x00ffffff-no-rj",
     role: "Lead Coding Instructor",
     company: "Code Ninjas",
@@ -145,7 +172,7 @@ export const experiences: Experience[] = [
     ],
   },
   {
-    id: 5,
+    id: 6,
     img: "https://pbs.twimg.com/profile_images/1549089349119139843/AuqvKpSs_400x400.png",
     role: "Software Developer",
     company: "LightningATC",
