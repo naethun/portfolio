@@ -36,11 +36,11 @@ export const experiences: Experience[] = [
     `,
     skills: [
       "Node.js",
-      "PostgreSQL",
-      "Docker",
-      "Git",
-      "OpenAI",
+      "Expo",
       "Next.js",
+      "AWS",
+      "PostgreSQL",
+      "DynamoDB",
     ],
   },
   {
