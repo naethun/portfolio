@@ -11,7 +11,7 @@ export const Bio = {
   ],
   github: "https://github.com/naethun",
   resume:
-    "https://drive.google.com/file/d/1ptcUhHXjPFcjKnvj1B39xJHiOIzAEUag/view?usp=drive_link",
+    "https://drive.google.com/file/d/1dXH2o6HOp3X6Pr5aMPaT3GttSuygP4Bn/view?usp=sharing",
   linkedin: "https://www.linkedin.com/in/naethun/",
 };
 
@@ -199,7 +199,7 @@ export const experiences: Experience[] = [
 export const education: Education[] = [
   {
     id: 0,
-    img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:&9GcQQLZWQOYPjTdus9VobVJyBjjPdyc0tOGwOpA&s",
+    img: "https://media.licdn.com/dms/image/v2/C4D0BAQGUTAD8Stf2Rg/company-logo_100_100/company-logo_100_100/0/1631342110538?e=1773273600&v=beta&t=SPR7pOlguP_Y4mvbMPlU8ehk0WWsKXgQrbIx5Nf6Ccg",
     school: "Southwestern Community College",
     date: "Aug 2022 - May 2025",
     grade: "3.6",
@@ -210,9 +210,9 @@ export const education: Education[] = [
     id: 1,
     img: "https://i.pinimg.com/originals/fd/fd/bb/fdfdbb35dc080581686e32a94d67c7ad.jpg",
     school: "University of California, San Diego",
-    date: "Sept 2025 - June 2027",
+    date: "Sept 2025 - May 2027",
     desc: `Scholarships: NSF EMPOWERs Engineering, Chancellor's Associates Scholarship, Kathleen W. Denno Scholarship`,
-    degree: "Bachelor's of Science, Cognitive Science Spec. Machine Learning & Neural Computation",
+    degree: "Bachelor's of Science, Cognitive Science, Spec. Design & Interaction. Minor in Computer Science",
     grade: '3.87'
   },
 ];
