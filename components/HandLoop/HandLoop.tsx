@@ -250,7 +250,7 @@ export default function HandLoop({ images }: Props) {
 
   const current = images[timelineMode === 'cluster' ? index : frontIndex];
   const filename = current.filename;
-  const mainTitle = `loop.app — ${filename}`;
+  const mainTitle = `moodboard.app — ${filename}`;
 
   return (
     <div className="relative h-full w-full overflow-hidden">
