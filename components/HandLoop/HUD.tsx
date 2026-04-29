@@ -43,24 +43,33 @@ export function HUD({ videoRef, landmarksRef, cameraEnabled }: Props) {
 
         const result = landmarksRef.current;
         if (result && result.landmarks.length > 0) {
-          const lm = result.landmarks[0];
-          const px = (i: number) => (1 - lm[i].x) * PREVIEW_W;
-          const py = (i: number) => lm[i].y * PREVIEW_H;
+          for (let h = 0; h < result.landmarks.length; h++) {
+            const lm = result.landmarks[h];
+            const label = result.handedness?.[h]?.[0]?.categoryName;
+            // "Right" = user's primary hand (under selfie-mirror).
+            const isPrimary = label === 'Right';
+            const stroke = isPrimary
+              ? 'rgba(255,255,255,0.95)'
+              : 'rgba(255,180,80,0.95)';
+            const fill = isPrimary ? 'rgba(255,255,255,1)' : 'rgba(255,180,80,1)';
+            const px = (i: number) => (1 - lm[i].x) * PREVIEW_W;
+            const py = (i: number) => lm[i].y * PREVIEW_H;
 
-          ctx.strokeStyle = 'rgba(255,255,255,0.9)';
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          for (const [a, b] of HAND_CONNECTIONS) {
-            ctx.moveTo(px(a), py(a));
-            ctx.lineTo(px(b), py(b));
-          }
-          ctx.stroke();
-
-          ctx.fillStyle = 'rgba(255,255,255,1)';
-          for (let i = 0; i < lm.length; i++) {
+            ctx.strokeStyle = stroke;
+            ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.arc(px(i), py(i), 2, 0, Math.PI * 2);
-            ctx.fill();
+            for (const [a, b] of HAND_CONNECTIONS) {
+              ctx.moveTo(px(a), py(a));
+              ctx.lineTo(px(b), py(b));
+            }
+            ctx.stroke();
+
+            ctx.fillStyle = fill;
+            for (let i = 0; i < lm.length; i++) {
+              ctx.beginPath();
+              ctx.arc(px(i), py(i), 2, 0, Math.PI * 2);
+              ctx.fill();
+            }
           }
         }
       } else {
