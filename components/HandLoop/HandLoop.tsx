@@ -233,8 +233,8 @@ export default function HandLoop({ images }: Props) {
 
   if (total === 0) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-black font-mono text-white">
-        <div className="text-sm opacity-70">
+      <div className="flex h-full w-full items-center justify-center font-mono text-neutral-500">
+        <div className="text-sm">
           NO IMAGES FOUND IN public/portfolio/loop-imgs/
         </div>
       </div>
@@ -243,9 +243,10 @@ export default function HandLoop({ images }: Props) {
 
   const current = images[timelineMode === 'open' ? frontIndex : index];
   const filename = current.filename;
+  const mainTitle = `loop.app — ${filename}`;
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-black">
+    <div className="relative h-full w-full overflow-hidden">
       <Timeline
         ref={timelineRef}
         images={images}
@@ -253,6 +254,16 @@ export default function HandLoop({ images }: Props) {
         mode={timelineMode}
         clusterAngle={clusterAngle}
         onFrontChange={setFrontIndex}
+        title={mainTitle}
+        info={{
+          frontIndex,
+          total,
+          handShape,
+          pinching,
+          gesture,
+          fps,
+          status,
+        }}
       />
 
       {/* Hidden video element used as input for HandLandmarker. */}
@@ -269,7 +280,7 @@ export default function HandLoop({ images }: Props) {
           <button
             type="button"
             onClick={enableCamera}
-            className="border border-white/60 bg-black/40 px-6 py-3 font-mono text-xs tracking-[0.2em] text-white backdrop-blur-sm transition hover:bg-white hover:text-black"
+            className="rounded-md border border-black/20 bg-white px-6 py-3 font-mono text-xs tracking-[0.2em] text-neutral-700 shadow-lg transition hover:border-black hover:bg-black hover:text-white"
           >
             ENABLE CAMERA
           </button>
@@ -280,16 +291,6 @@ export default function HandLoop({ images }: Props) {
         videoRef={videoRef}
         landmarksRef={landmarksRef}
         cameraEnabled={cameraEnabled}
-        index={index}
-        frontIndex={frontIndex}
-        total={total}
-        gesture={gesture}
-        fps={fps}
-        filename={filename}
-        status={status}
-        mode={timelineMode}
-        handShape={handShape}
-        pinching={pinching}
       />
     </div>
   );

@@ -2,9 +2,7 @@
 
 import { useEffect, useRef, type RefObject } from 'react';
 import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
-import type { GestureState } from './useSwipeGesture';
-import type { TimelineMode } from './Timeline';
-import type { HandShape } from './useHandShape';
+import { MacWindow } from './MacWindow';
 
 const HAND_CONNECTIONS: ReadonlyArray<readonly [number, number]> = [
   [0, 1], [1, 2], [2, 3], [3, 4],          // thumb
@@ -22,33 +20,9 @@ interface Props {
   videoRef: RefObject<HTMLVideoElement | null>;
   landmarksRef: RefObject<HandLandmarkerResult | null>;
   cameraEnabled: boolean;
-  index: number;
-  frontIndex: number;
-  total: number;
-  gesture: GestureState;
-  fps: number;
-  filename: string;
-  status: string;
-  mode: TimelineMode;
-  handShape: HandShape;
-  pinching: boolean;
 }
 
-export function HUD({
-  videoRef,
-  landmarksRef,
-  cameraEnabled,
-  index,
-  frontIndex,
-  total,
-  gesture,
-  fps,
-  filename,
-  status,
-  mode,
-  handShape,
-  pinching,
-}: Props) {
+export function HUD({ videoRef, landmarksRef, cameraEnabled }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -70,8 +44,6 @@ export function HUD({
         const result = landmarksRef.current;
         if (result && result.landmarks.length > 0) {
           const lm = result.landmarks[0];
-          // landmarks are in 0..1 (already in camera POV); we draw onto the
-          // mirrored preview, so flip x to match.
           const px = (i: number) => (1 - lm[i].x) * PREVIEW_W;
           const py = (i: number) => lm[i].y * PREVIEW_H;
 
@@ -101,39 +73,23 @@ export function HUD({
     return () => cancelAnimationFrame(rafId);
   }, [cameraEnabled, videoRef, landmarksRef]);
 
-  const gestureLabel =
-    gesture === 'right' ? 'SWIPE →' : gesture === 'left' ? 'SWIPE ←' : 'IDLE';
+  if (!cameraEnabled) return null;
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-20 font-mono text-[11px] tracking-wider text-white">
-      {cameraEnabled && (
-        <div className="absolute left-4 top-4 border border-white/40">
-          <canvas
-            ref={canvasRef}
-            width={PREVIEW_W}
-            height={PREVIEW_H}
-            className="block"
-          />
-        </div>
-      )}
-
-      <div className="absolute bottom-4 left-4 leading-relaxed">
-        <div>
-          {mode === 'open'
-            ? `FRONT  [${String(frontIndex + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}]`
-            : `IDX    [${String(index + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}]`}
-        </div>
-        <div>{`MODE   ${mode === 'open' ? 'OPEN   ' : 'CLUSTER'}`}</div>
-        <div>{`HAND   ${handShape.toUpperCase()}`}</div>
-        <div>{`PINCH  ${pinching ? 'YES' : 'NO '}`}</div>
-        <div>{`STATE  ${gestureLabel}`}</div>
-        <div>{`FPS    ${String(fps).padStart(2, '0')}`}</div>
-        <div className="mt-2 opacity-60">{status}</div>
-      </div>
-
-      <div className="absolute bottom-4 right-4 opacity-80">
-        {`loop-imgs/${filename}`}
-      </div>
+    <div className="pointer-events-auto absolute left-4 top-4 z-20 md:left-8 md:top-8">
+      <MacWindow size="sm" title="Camera">
+        <canvas
+          ref={canvasRef}
+          width={PREVIEW_W}
+          height={PREVIEW_H}
+          className="block bg-black"
+          style={{
+            width: 'clamp(140px, 18vw, 220px)',
+            height: 'auto',
+            aspectRatio: '4 / 3',
+          }}
+        />
+      </MacWindow>
     </div>
   );
 }

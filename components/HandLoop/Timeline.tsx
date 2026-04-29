@@ -10,6 +10,9 @@ import {
   useRef,
   useState,
 } from 'react';
+import { MacWindow } from './MacWindow';
+import type { GestureState } from './useSwipeGesture';
+import type { HandShape } from './useHandShape';
 
 interface LoopImage {
   src: string;
@@ -23,12 +26,24 @@ export interface TimelineHandle {
   setPicked: (index: number | null) => void;
 }
 
+interface InfoData {
+  frontIndex: number;
+  total: number;
+  handShape: HandShape;
+  pinching: boolean;
+  gesture: GestureState;
+  fps: number;
+  status: string;
+}
+
 interface Props {
   images: LoopImage[];
   index: number;
   mode: TimelineMode;
   clusterAngle: number;
   onFrontChange?: (i: number) => void;
+  title?: string;
+  info?: InfoData;
 }
 
 interface Tx {
@@ -117,7 +132,7 @@ function pickedTransform(): Tx {
 }
 
 export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
-  { images, index, mode, clusterAngle, onFrontChange },
+  { images, index, mode, clusterAngle, onFrontChange, title, info },
   ref
 ) {
   const total = images.length;
@@ -226,17 +241,17 @@ export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
   }, [images, mode, total, clusterAngle, index, phase, geo, picked]);
 
   return (
-    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-      <div
-        className="relative bg-white shadow-2xl"
-        style={{
-          width: 'min(90vw, 1280px)',
-          height: 'min(70vh, 800px)',
-          perspective: '1200px',
-          transformStyle: 'preserve-3d',
-          overflow: 'hidden',
-        }}
-      >
+    <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 py-6 md:px-12 md:py-10">
+      <MacWindow size="md" title={title} contentClassName="relative bg-white">
+        <div
+          style={{
+            width: 'min(86vw, 1180px)',
+            height: 'min(70vh, 760px)',
+            perspective: '1200px',
+            transformStyle: 'preserve-3d',
+            overflow: 'hidden',
+          }}
+        >
         {images.map((img, i) => {
           const t = transforms[i];
           const isPicked = picked === i;
@@ -281,7 +296,32 @@ export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
             </motion.div>
           );
         })}
-      </div>
+
+        {info && (
+          <div className="pointer-events-none absolute bottom-3 left-3 font-mono text-[11px] leading-relaxed tracking-wider text-neutral-500 md:bottom-4 md:left-4">
+            <div>
+              {mode === 'open'
+                ? `FRONT  [${String(info.frontIndex + 1).padStart(2, '0')} / ${String(info.total).padStart(2, '0')}]`
+                : `IDX    [${String(index + 1).padStart(2, '0')} / ${String(info.total).padStart(2, '0')}]`}
+            </div>
+            <div>{`MODE   ${mode === 'open' ? 'OPEN   ' : 'CLUSTER'}`}</div>
+            <div>{`HAND   ${info.handShape.toUpperCase()}`}</div>
+            <div>{`PINCH  ${info.pinching ? 'YES' : 'NO '}`}</div>
+            <div>
+              {`STATE  ${
+                info.gesture === 'right'
+                  ? 'SWIPE →'
+                  : info.gesture === 'left'
+                    ? 'SWIPE ←'
+                    : 'IDLE'
+              }`}
+            </div>
+            <div>{`FPS    ${String(info.fps).padStart(2, '0')}`}</div>
+            <div className="mt-2 opacity-70">{info.status}</div>
+          </div>
+        )}
+        </div>
+      </MacWindow>
     </div>
   );
 });
