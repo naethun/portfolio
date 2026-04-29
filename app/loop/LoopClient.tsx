@@ -17,5 +17,9 @@ const HandLoop = dynamic(() => import('@/components/HandLoop/HandLoop'), {
 });
 
 export default function LoopClient({ images }: { images: LoopImage[] }) {
-  return <HandLoop images={images} />;
+  return (
+    <div className="relative min-h-screen w-full">
+      <HandLoop images={images} />
+    </div>
+  );
 }

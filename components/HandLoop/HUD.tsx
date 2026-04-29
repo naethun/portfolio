@@ -15,8 +15,8 @@ const HAND_CONNECTIONS: ReadonlyArray<readonly [number, number]> = [
   [0, 17],                                  // palm
 ];
 
-const PREVIEW_W = 160;
-const PREVIEW_H = 120;
+const PREVIEW_W = 240;
+const PREVIEW_H = 180;
 
 interface Props {
   videoRef: RefObject<HTMLVideoElement | null>;
@@ -105,7 +105,7 @@ export function HUD({
     gesture === 'right' ? 'SWIPE →' : gesture === 'left' ? 'SWIPE ←' : 'IDLE';
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-20 font-mono text-[11px] tracking-wider text-white">
+    <div className="pointer-events-none absolute inset-0 z-20 font-mono text-[11px] tracking-wider text-white">
       {cameraEnabled && (
         <div className="absolute left-4 top-4 border border-white/40">
           <canvas

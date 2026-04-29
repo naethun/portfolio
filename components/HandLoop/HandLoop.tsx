@@ -233,7 +233,7 @@ export default function HandLoop({ images }: Props) {
 
   if (total === 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black font-mono text-white">
+      <div className="flex h-full w-full items-center justify-center bg-black font-mono text-white">
         <div className="text-sm opacity-70">
           NO IMAGES FOUND IN public/portfolio/loop-imgs/
         </div>
@@ -245,7 +245,7 @@ export default function HandLoop({ images }: Props) {
   const filename = current.filename;
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black">
+    <div className="relative h-full w-full overflow-hidden bg-black">
       <Timeline
         ref={timelineRef}
         images={images}
