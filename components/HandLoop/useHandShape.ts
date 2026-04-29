@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type RefObject } from 'react';
-import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
+import type { HandLandmarks } from './usePinch';
 
 // Open/closed palm detection from MediaPipe hand landmarks.
 // A finger is "extended" when its tip is meaningfully farther from the wrist
@@ -27,7 +27,7 @@ function dist3D(a: Pt, b: Pt): number {
   return Math.sqrt(dx * dx + dy * dy + dz * dz);
 }
 
-function classify(lm: ReadonlyArray<Pt>): HandShape {
+function classify(lm: HandLandmarks): HandShape {
   const wrist = lm[0];
   let count = 0;
   for (const [tip, mcp] of FINGERS) {
@@ -41,7 +41,7 @@ function classify(lm: ReadonlyArray<Pt>): HandShape {
 }
 
 export function useHandShape(
-  landmarksRef: RefObject<HandLandmarkerResult | null>,
+  handRef: RefObject<HandLandmarks | null>,
   enabled: boolean
 ): HandShape {
   const [shape, setShape] = useState<HandShape>('unknown');
@@ -57,11 +57,8 @@ export function useHandShape(
     }
     let rafId = 0;
     const tick = (t: number) => {
-      const result = landmarksRef.current;
-      const raw: HandShape =
-        result && result.landmarks.length > 0
-          ? classify(result.landmarks[0] as ReadonlyArray<Pt>)
-          : 'unknown';
+      const lm = handRef.current;
+      const raw: HandShape = lm && lm.length >= 21 ? classify(lm) : 'unknown';
 
       const pending = pendingRef.current;
       if (!pending || pending.shape !== raw) {
@@ -77,7 +74,7 @@ export function useHandShape(
     };
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [enabled, landmarksRef]);
+  }, [enabled, handRef]);
 
   return shape;
 }

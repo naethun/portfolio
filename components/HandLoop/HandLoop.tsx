@@ -5,7 +5,7 @@ import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
 import { useHandTracking } from './useHandTracking';
 import { useSwipeGesture, type SwipeDirection } from './useSwipeGesture';
 import { useHandShape } from './useHandShape';
-import { usePinch } from './usePinch';
+import { usePinch, type HandLandmarks } from './usePinch';
 import { HUD } from './HUD';
 import { Timeline, type TimelineHandle, type TimelineMode } from './Timeline';
 
@@ -39,6 +39,8 @@ export default function HandLoop({ images }: Props) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const landmarksRef = useRef<HandLandmarkerResult | null>(null);
+  const primaryHandRef = useRef<HandLandmarks | null>(null);
+  const secondaryHandRef = useRef<HandLandmarks | null>(null);
   const timelineRef = useRef<TimelineHandle | null>(null);
 
   const total = images.length;
@@ -63,8 +65,8 @@ export default function HandLoop({ images }: Props) {
 
   const onSwipe = useCallback(
     (dir: SwipeDirection) => {
-      if (timelineMode === 'open') scrubHelix(dir);
-      else spinCluster(dir);
+      if (timelineMode === 'cluster') spinCluster(dir);
+      else scrubHelix(dir);
     },
     [timelineMode, scrubHelix, spinCluster]
   );
@@ -74,12 +76,25 @@ export default function HandLoop({ images }: Props) {
   const handleResult = useCallback(
     (result: HandLandmarkerResult, t: number) => {
       landmarksRef.current = result;
-      if (result.landmarks.length === 0) return;
-      const wrist = result.landmarks[0][0];
-      // Mirror raw x so dx>0 corresponds to the user's perceived "swipe right"
-      // (raw landmark x increases L→R from the camera's POV; we mirror the
-      // preview, so the user's right edge of frame is x=0 in raw coords).
-      pushSample(1 - wrist.x, t);
+
+      // Split detected hands by handedness label. With selfie-mirrored input,
+      // MediaPipe's "Right" is the user's right hand — we make that primary.
+      let primary: HandLandmarks | null = null;
+      let secondary: HandLandmarks | null = null;
+      const hands = result.handedness ?? [];
+      for (let i = 0; i < hands.length; i++) {
+        const label = hands[i]?.[0]?.categoryName;
+        const lm = result.landmarks[i] as HandLandmarks | undefined;
+        if (!lm) continue;
+        if (label === 'Right' && !primary) primary = lm;
+        else if (label === 'Left' && !secondary) secondary = lm;
+      }
+      primaryHandRef.current = primary;
+      secondaryHandRef.current = secondary;
+
+      // Swipes are driven by the primary hand's wrist x. Mirror raw x so the
+      // user's perceived "swipe right" produces dx > 0.
+      if (primary) pushSample(1 - primary[0].x, t);
     },
     [pushSample]
   );
@@ -91,30 +106,25 @@ export default function HandLoop({ images }: Props) {
     onResult: handleResult,
   });
 
-  const handShape = useHandShape(landmarksRef, cameraEnabled);
-  const pinching = usePinch(landmarksRef, cameraEnabled);
+  const handShape = useHandShape(primaryHandRef, cameraEnabled);
+  const primaryPinch = usePinch(primaryHandRef, cameraEnabled);
+  const secondaryPinch = usePinch(secondaryHandRef, cameraEnabled);
 
-  // Drive timelineMode from palm shape. 'unknown' is sticky — we only flip on
-  // a confirmed open or closed hand.
+  // Mode is derived deterministically from per-hand state. 'unknown' shape is
+  // sticky so the mode doesn't flicker when the hand momentarily blurs out.
   useEffect(() => {
-    if (handShape === 'open') setTimelineMode('open');
-    else if (handShape === 'closed') setTimelineMode('cluster');
-  }, [handShape]);
-
-  // Pinch-to-pluck: only meaningful in open mode. Closing the palm forces a
-  // pick-clear via the same path (timelineMode flips to 'cluster').
-  useEffect(() => {
-    if (timelineMode !== 'open') {
-      timelineRef.current?.setPicked(null);
-      return;
+    if (handShape === 'closed') {
+      setTimelineMode('cluster');
+    } else if (handShape === 'open') {
+      if (primaryPinch && secondaryPinch) setTimelineMode('ring-zoom');
+      else if (primaryPinch) setTimelineMode('ring');
+      else setTimelineMode('helix');
     }
-    if (pinching) timelineRef.current?.setPicked(frontIndex);
-    else timelineRef.current?.setPicked(null);
-  }, [pinching, timelineMode, frontIndex]);
+  }, [handShape, primaryPinch, secondaryPinch]);
 
-  // Mobile / coarse pointer: no palm-shape input, default to open carousel.
+  // Mobile / coarse pointer: no palm-shape input, default to helix.
   useEffect(() => {
-    if (isCoarsePointer) setTimelineMode('open');
+    if (isCoarsePointer) setTimelineMode('helix');
   }, [isCoarsePointer]);
 
   // Detect coarse pointer (mobile). Skip camera UI; touch swipe instead.
@@ -127,15 +137,14 @@ export default function HandLoop({ images }: Props) {
     return () => mq.removeEventListener('change', update);
   }, []);
 
-  // Keyboard arrow nav — always active. In open mode, scrubs the helix one
-  // slot; in cluster mode, advances the (invisible) index — Phase 2 behavior.
+  // Keyboard arrow nav — always active.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const dir: SwipeDirection | null =
         e.key === 'ArrowRight' ? 'right' : e.key === 'ArrowLeft' ? 'left' : null;
       if (!dir) return;
-      if (timelineMode === 'open') scrubHelix(dir);
-      else advance(dir);
+      if (timelineMode === 'cluster') advance(dir);
+      else scrubHelix(dir);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -170,7 +179,7 @@ export default function HandLoop({ images }: Props) {
     };
   }, [isCoarsePointer, scrubHelix]);
 
-  // Camera teardown on unmount or state change away from granted.
+  // Camera teardown on unmount.
   useEffect(() => {
     return () => {
       const s = streamRef.current;
@@ -184,8 +193,6 @@ export default function HandLoop({ images }: Props) {
   const enableCamera = useCallback(async () => {
     if (typeof window === 'undefined') return;
     if (window.isSecureContext === false) {
-      // getUserMedia is only exposed on https / localhost. If the dev server is
-      // reached via a LAN IP, mediaDevices will be undefined here.
       setCameraState('insecure');
       return;
     }
@@ -241,7 +248,7 @@ export default function HandLoop({ images }: Props) {
     );
   }
 
-  const current = images[timelineMode === 'open' ? frontIndex : index];
+  const current = images[timelineMode === 'cluster' ? index : frontIndex];
   const filename = current.filename;
   const mainTitle = `loop.app — ${filename}`;
 
@@ -259,7 +266,7 @@ export default function HandLoop({ images }: Props) {
           frontIndex,
           total,
           handShape,
-          pinching,
+          pinch: { primary: primaryPinch, secondary: secondaryPinch },
           gesture,
           fps,
           status,

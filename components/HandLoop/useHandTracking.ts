@@ -43,7 +43,7 @@ export function useHandTracking({ videoRef, enabled, onResult }: Options) {
         landmarker = await HandLandmarker.createFromOptions(fileset, {
           baseOptions: { modelAssetPath: MODEL_URL, delegate: 'GPU' },
           runningMode: 'VIDEO',
-          numHands: 1,
+          numHands: 2,
         });
         if (cancelled) {
           landmarker.close();
