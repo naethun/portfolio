@@ -125,7 +125,7 @@ function pickedTransform(): Tx {
     z: 200,
     rotate: 0,
     rotateY: 0,
-    scale: 2,
+    scale: 3,
     opacity: 1,
     zIndex: 10000,
   };
@@ -137,13 +137,28 @@ export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
 ) {
   const total = images.length;
 
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const [stageSize, setStageSize] = useState({ w: CARD_W, h: CARD_H });
+
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const obs = new ResizeObserver((entries) => {
+      const r = entries[0]?.contentRect;
+      if (!r) return;
+      setStageSize({ w: r.width || CARD_W, h: r.height || CARD_H });
+    });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
   const geo = useMemo<HelixGeo>(
     () => ({
-      turns: Math.max(1, total / 6),
-      radius: CARD_W * 0.2,
-      verticalSpan: CARD_H * 0.55,
+      turns: Math.max(1.5, total / 5),
+      radius: stageSize.w * 0.28,
+      verticalSpan: stageSize.h * 0.78,
     }),
-    [total]
+    [total, stageSize]
   );
 
   // Phase as React state — re-renders at ~60Hz when in open mode. With ~20
@@ -244,6 +259,7 @@ export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
     <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 py-6 md:px-12 md:py-10">
       <MacWindow size="md" title={title} contentClassName="relative bg-white">
         <div
+          ref={stageRef}
           style={{
             width: 'min(86vw, 1180px)',
             height: 'min(70vh, 760px)',
@@ -266,8 +282,8 @@ export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
               key={img.src}
               className="absolute left-1/2 top-1/2"
               style={{
-                width: '38%',
-                height: '56%',
+                width: 'clamp(72px, 11%, 150px)',
+                height: 'clamp(96px, 18%, 200px)',
                 translate: '-50% -50%',
                 transformStyle: 'preserve-3d',
                 zIndex: t.zIndex,
