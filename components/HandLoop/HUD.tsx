@@ -3,6 +3,8 @@
 import { useEffect, useRef, type RefObject } from 'react';
 import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
 import type { GestureState } from './useSwipeGesture';
+import type { TimelineMode } from './Timeline';
+import type { HandShape } from './useHandShape';
 
 const HAND_CONNECTIONS: ReadonlyArray<readonly [number, number]> = [
   [0, 1], [1, 2], [2, 3], [3, 4],          // thumb
@@ -26,6 +28,8 @@ interface Props {
   fps: number;
   filename: string;
   status: string;
+  mode: TimelineMode;
+  handShape: HandShape;
 }
 
 export function HUD({
@@ -38,6 +42,8 @@ export function HUD({
   fps,
   filename,
   status,
+  mode,
+  handShape,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -95,7 +101,7 @@ export function HUD({
     gesture === 'right' ? 'SWIPE →' : gesture === 'left' ? 'SWIPE ←' : 'IDLE';
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-20 font-mono text-[11px] tracking-wider text-white mix-blend-difference">
+    <div className="pointer-events-none fixed inset-0 z-20 font-mono text-[11px] tracking-wider text-white">
       {cameraEnabled && (
         <div className="absolute left-4 top-4 border border-white/40">
           <canvas
@@ -109,6 +115,8 @@ export function HUD({
 
       <div className="absolute bottom-4 left-4 leading-relaxed">
         <div>{`[${String(index + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}]`}</div>
+        <div>{`MODE   ${mode === 'open' ? 'OPEN   ' : 'CLUSTER'}`}</div>
+        <div>{`HAND   ${handShape.toUpperCase()}`}</div>
         <div>{`STATE  ${gestureLabel}`}</div>
         <div>{`FPS    ${String(fps).padStart(2, '0')}`}</div>
         <div className="mt-2 opacity-60">{status}</div>

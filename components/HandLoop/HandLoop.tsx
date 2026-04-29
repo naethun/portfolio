@@ -1,11 +1,12 @@
 'use client';
 
-import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
 import { useHandTracking } from './useHandTracking';
 import { useSwipeGesture, type SwipeDirection } from './useSwipeGesture';
+import { useHandShape } from './useHandShape';
 import { HUD } from './HUD';
+import { Timeline, type TimelineMode } from './Timeline';
 
 interface LoopImage {
   src: string;
@@ -30,6 +31,8 @@ export default function HandLoop({ images }: Props) {
   const [index, setIndex] = useState(0);
   const [cameraState, setCameraState] = useState<CameraState>('idle');
   const [isCoarsePointer, setIsCoarsePointer] = useState(false);
+  const [timelineMode, setTimelineMode] = useState<TimelineMode>('cluster');
+  const [clusterAngle, setClusterAngle] = useState(0);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -47,7 +50,19 @@ export default function HandLoop({ images }: Props) {
     [total]
   );
 
-  const { pushSample, gesture } = useSwipeGesture(advance);
+  const spinCluster = useCallback((dir: SwipeDirection) => {
+    setClusterAngle((a) => a + (dir === 'right' ? 25 : -25));
+  }, []);
+
+  const onSwipe = useCallback(
+    (dir: SwipeDirection) => {
+      if (timelineMode === 'open') advance(dir);
+      else spinCluster(dir);
+    },
+    [timelineMode, advance, spinCluster]
+  );
+
+  const { pushSample, gesture } = useSwipeGesture(onSwipe);
 
   const handleResult = useCallback(
     (result: HandLandmarkerResult, t: number) => {
@@ -68,6 +83,20 @@ export default function HandLoop({ images }: Props) {
     enabled: cameraEnabled,
     onResult: handleResult,
   });
+
+  const handShape = useHandShape(landmarksRef, cameraEnabled);
+
+  // Drive timelineMode from palm shape. 'unknown' is sticky — we only flip on
+  // a confirmed open or closed hand.
+  useEffect(() => {
+    if (handShape === 'open') setTimelineMode('open');
+    else if (handShape === 'closed') setTimelineMode('cluster');
+  }, [handShape]);
+
+  // Mobile / coarse pointer: no palm-shape input, default to open carousel.
+  useEffect(() => {
+    if (isCoarsePointer) setTimelineMode('open');
+  }, [isCoarsePointer]);
 
   // Detect coarse pointer (mobile). Skip camera UI; touch swipe instead.
   useEffect(() => {
@@ -193,33 +222,12 @@ export default function HandLoop({ images }: Props) {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
-      {/* Image stack — current + neighbors preloaded for instant crossfade */}
-      <div className="absolute inset-0">
-        {images.map((img, i) => {
-          const isCurrent = i === index;
-          const isNeighbor =
-            i === (index + 1) % total || i === (index - 1 + total) % total;
-          if (!isCurrent && !isNeighbor) {
-            return null;
-          }
-          return (
-            <div
-              key={img.src}
-              className="absolute inset-0 transition-opacity duration-150 ease-out"
-              style={{ opacity: isCurrent ? 1 : 0 }}
-            >
-              <Image
-                src={img.src}
-                alt={img.filename}
-                fill
-                priority={isCurrent}
-                sizes="100vw"
-                className="object-contain"
-              />
-            </div>
-          );
-        })}
-      </div>
+      <Timeline
+        images={images}
+        index={index}
+        mode={timelineMode}
+        clusterAngle={clusterAngle}
+      />
 
       {/* Hidden video element used as input for HandLandmarker. */}
       <video
@@ -252,6 +260,8 @@ export default function HandLoop({ images }: Props) {
         fps={fps}
         filename={filename}
         status={status}
+        mode={timelineMode}
+        handShape={handShape}
       />
     </div>
   );
