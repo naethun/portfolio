@@ -23,6 +23,7 @@ interface Props {
   landmarksRef: RefObject<HandLandmarkerResult | null>;
   cameraEnabled: boolean;
   index: number;
+  frontIndex: number;
   total: number;
   gesture: GestureState;
   fps: number;
@@ -30,6 +31,7 @@ interface Props {
   status: string;
   mode: TimelineMode;
   handShape: HandShape;
+  pinching: boolean;
 }
 
 export function HUD({
@@ -37,6 +39,7 @@ export function HUD({
   landmarksRef,
   cameraEnabled,
   index,
+  frontIndex,
   total,
   gesture,
   fps,
@@ -44,6 +47,7 @@ export function HUD({
   status,
   mode,
   handShape,
+  pinching,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -114,9 +118,14 @@ export function HUD({
       )}
 
       <div className="absolute bottom-4 left-4 leading-relaxed">
-        <div>{`[${String(index + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}]`}</div>
+        <div>
+          {mode === 'open'
+            ? `FRONT  [${String(frontIndex + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}]`
+            : `IDX    [${String(index + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}]`}
+        </div>
         <div>{`MODE   ${mode === 'open' ? 'OPEN   ' : 'CLUSTER'}`}</div>
         <div>{`HAND   ${handShape.toUpperCase()}`}</div>
+        <div>{`PINCH  ${pinching ? 'YES' : 'NO '}`}</div>
         <div>{`STATE  ${gestureLabel}`}</div>
         <div>{`FPS    ${String(fps).padStart(2, '0')}`}</div>
         <div className="mt-2 opacity-60">{status}</div>

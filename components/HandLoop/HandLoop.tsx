@@ -5,8 +5,9 @@ import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
 import { useHandTracking } from './useHandTracking';
 import { useSwipeGesture, type SwipeDirection } from './useSwipeGesture';
 import { useHandShape } from './useHandShape';
+import { usePinch } from './usePinch';
 import { HUD } from './HUD';
-import { Timeline, type TimelineMode } from './Timeline';
+import { Timeline, type TimelineHandle, type TimelineMode } from './Timeline';
 
 interface LoopImage {
   src: string;
@@ -29,6 +30,7 @@ const TOUCH_SWIPE_PX = 50;
 
 export default function HandLoop({ images }: Props) {
   const [index, setIndex] = useState(0);
+  const [frontIndex, setFrontIndex] = useState(0);
   const [cameraState, setCameraState] = useState<CameraState>('idle');
   const [isCoarsePointer, setIsCoarsePointer] = useState(false);
   const [timelineMode, setTimelineMode] = useState<TimelineMode>('cluster');
@@ -37,6 +39,7 @@ export default function HandLoop({ images }: Props) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const landmarksRef = useRef<HandLandmarkerResult | null>(null);
+  const timelineRef = useRef<TimelineHandle | null>(null);
 
   const total = images.length;
 
@@ -54,12 +57,16 @@ export default function HandLoop({ images }: Props) {
     setClusterAngle((a) => a + (dir === 'right' ? 25 : -25));
   }, []);
 
+  const scrubHelix = useCallback((dir: SwipeDirection) => {
+    timelineRef.current?.scrub(dir);
+  }, []);
+
   const onSwipe = useCallback(
     (dir: SwipeDirection) => {
-      if (timelineMode === 'open') advance(dir);
+      if (timelineMode === 'open') scrubHelix(dir);
       else spinCluster(dir);
     },
-    [timelineMode, advance, spinCluster]
+    [timelineMode, scrubHelix, spinCluster]
   );
 
   const { pushSample, gesture } = useSwipeGesture(onSwipe);
@@ -85,6 +92,7 @@ export default function HandLoop({ images }: Props) {
   });
 
   const handShape = useHandShape(landmarksRef, cameraEnabled);
+  const pinching = usePinch(landmarksRef, cameraEnabled);
 
   // Drive timelineMode from palm shape. 'unknown' is sticky — we only flip on
   // a confirmed open or closed hand.
@@ -92,6 +100,17 @@ export default function HandLoop({ images }: Props) {
     if (handShape === 'open') setTimelineMode('open');
     else if (handShape === 'closed') setTimelineMode('cluster');
   }, [handShape]);
+
+  // Pinch-to-pluck: only meaningful in open mode. Closing the palm forces a
+  // pick-clear via the same path (timelineMode flips to 'cluster').
+  useEffect(() => {
+    if (timelineMode !== 'open') {
+      timelineRef.current?.setPicked(null);
+      return;
+    }
+    if (pinching) timelineRef.current?.setPicked(frontIndex);
+    else timelineRef.current?.setPicked(null);
+  }, [pinching, timelineMode, frontIndex]);
 
   // Mobile / coarse pointer: no palm-shape input, default to open carousel.
   useEffect(() => {
@@ -108,15 +127,19 @@ export default function HandLoop({ images }: Props) {
     return () => mq.removeEventListener('change', update);
   }, []);
 
-  // Keyboard arrow nav — always active.
+  // Keyboard arrow nav — always active. In open mode, scrubs the helix one
+  // slot; in cluster mode, advances the (invisible) index — Phase 2 behavior.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') advance('right');
-      else if (e.key === 'ArrowLeft') advance('left');
+      const dir: SwipeDirection | null =
+        e.key === 'ArrowRight' ? 'right' : e.key === 'ArrowLeft' ? 'left' : null;
+      if (!dir) return;
+      if (timelineMode === 'open') scrubHelix(dir);
+      else advance(dir);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [advance]);
+  }, [advance, scrubHelix, timelineMode]);
 
   // Touch swipe fallback on coarse-pointer devices.
   useEffect(() => {
@@ -135,7 +158,8 @@ export default function HandLoop({ images }: Props) {
       const dx = t.clientX - startX;
       const dt = e.timeStamp - startT;
       if (Math.abs(dx) >= TOUCH_SWIPE_PX && dt < 800) {
-        advance(dx > 0 ? 'left' : 'right'); // touch convention: swipe right = previous
+        // touch convention: swipe right = previous
+        scrubHelix(dx > 0 ? 'left' : 'right');
       }
     };
     window.addEventListener('touchstart', onStart, { passive: true });
@@ -144,7 +168,7 @@ export default function HandLoop({ images }: Props) {
       window.removeEventListener('touchstart', onStart);
       window.removeEventListener('touchend', onEnd);
     };
-  }, [isCoarsePointer, advance]);
+  }, [isCoarsePointer, scrubHelix]);
 
   // Camera teardown on unmount or state change away from granted.
   useEffect(() => {
@@ -217,16 +241,18 @@ export default function HandLoop({ images }: Props) {
     );
   }
 
-  const current = images[index];
+  const current = images[timelineMode === 'open' ? frontIndex : index];
   const filename = current.filename;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
       <Timeline
+        ref={timelineRef}
         images={images}
         index={index}
         mode={timelineMode}
         clusterAngle={clusterAngle}
+        onFrontChange={setFrontIndex}
       />
 
       {/* Hidden video element used as input for HandLandmarker. */}
@@ -255,6 +281,7 @@ export default function HandLoop({ images }: Props) {
         landmarksRef={landmarksRef}
         cameraEnabled={cameraEnabled}
         index={index}
+        frontIndex={frontIndex}
         total={total}
         gesture={gesture}
         fps={fps}
@@ -262,6 +289,7 @@ export default function HandLoop({ images }: Props) {
         status={status}
         mode={timelineMode}
         handShape={handShape}
+        pinching={pinching}
       />
     </div>
   );
