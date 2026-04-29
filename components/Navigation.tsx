@@ -1,160 +1,182 @@
 'use client';
 
-import { useState } from 'react';
+import Image from 'next/image';
 import { Bio } from '@/lib/data';
-import ThemeToggle from './ThemeToggle';
+import type { Tab } from '@/types/portfolio';
 
-const navLinks = [
-  { href: '#about', label: 'ABOUT' },
-  { href: '#experience', label: 'EXPERIENCE' },
-  { href: '#education', label: 'EDUCATION' },
-  { href: '#projects', label: 'PROJECTS' },
+const navLinks: { id: Tab; label: string }[] = [
+  { id: 'about', label: 'ABOUT' },
+  { id: 'experience', label: 'EXPERIENCE' },
+  { id: 'projects', label: 'PROJECTS' },
 ];
 
-export default function Navigation() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+interface NavigationProps {
+  activeTab: Tab;
+  onTabChange: (tab: Tab) => void;
+}
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
-  const closeMenu = () => setIsMenuOpen(false);
+export default function Navigation({ activeTab, onTabChange }: NavigationProps) {
+  const selectTab = (tab: Tab) => {
+    onTabChange(tab);
+  };
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-md bg-background-primary/80 border-b border-border-primary" aria-label="Main navigation">
-      <div className="max-w-6xl mx-auto px-6 py-4">
-        <div className="flex justify-between items-center">
-          {/* Logo */}
-          <a
-            href="#"
-            className="font-display text-xl font-bold tracking-wide hover:text-accent-primary transition-colors"
+    <nav className="relative z-50 px-6 md:px-10 pt-6 md:pt-10" aria-label="Main navigation">
+      <div className="max-w-[1800px] mx-auto">
+        {/* Desktop layout: 3 columns — logo / centered nav / bio */}
+        <div className="hidden md:grid grid-cols-3 items-start gap-8">
+          {/* Left — large logo */}
+          <button
+            type="button"
+            onClick={() => selectTab('about')}
+            className="flex items-start transition-opacity hover:opacity-70 justify-self-start"
+            aria-label={`${Bio.name} — go to about`}
           >
-            {Bio.name.toUpperCase()}
-          </a>
+            <Image
+              src="/logo.png"
+              alt={Bio.name}
+              width={2172}
+              height={937}
+              priority
+              className="h-44 md:h-46 lg:h-62 w-auto max-w-none"
+            />
+          </button>
 
-          {/* Desktop Navigation */}
-          <ul className="hidden md:flex gap-8 items-center">
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  className="text-sm font-display tracking-wide hover:text-accent-primary transition-colors"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
-            {/* Social Links */}
-            <li>
+          {/* Center — tab buttons */}
+          <ul className="flex gap-8 items-center justify-center pt-6 lg:pt-10">
+            {navLinks.map((link) => {
+              const isActive = activeTab === link.id;
+              return (
+                <li key={link.id}>
+                  <button
+                    type="button"
+                    onClick={() => selectTab(link.id)}
+                    className={`text-sm font-display tracking-wide transition-colors ${
+                      isActive
+                        ? 'text-accent-primary underline underline-offset-8 decoration-1'
+                        : 'hover:text-accent-primary'
+                    }`}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    {link.label}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Right — bio tagline + social links */}
+          <div className="justify-self-end text-right max-w-md">
+            <p className="text-sm text-text-secondary leading-relaxed">
+                i love anything tech &amp; innovative!
+                <br></br><br></br> 
+                im a former sneaker bot dev. reverse-engineered anti-bot measures on nike, shopify, supreme &amp; many more. also automated tons on web3 as well. 
+                generated 7-figures in profit for users.
+    
+                <br></br><br></br> 
+                currently changing how influencers monetize content @ aesthetic. backed by tier 1 VCs along with the greatest tastemakers.
+    
+                <br></br><br></br> 
+                &amp; im on a full ride studying cognitive science with a specialization in design &amp; interaction + computer science @ UCSD :) 
+            </p>
+            <div className="mt-3 flex justify-end gap-5">
               <a
                 href={Bio.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-display text-accent-primary tracking-wide hover:text-accent-secondary transition-colors"
+                className="text-xs font-display underline tracking-wide text-accent-primary hover:text-accent-secondary transition-colors"
                 aria-label="GitHub Profile"
               >
-                GITHUB
+                github
               </a>
-            </li>
-            <li>
               <a
                 href={Bio.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-display text-accent-primary tracking-wide hover:text-accent-secondary transition-colors"
+                className="text-xs font-display underline tracking-wide text-accent-primary hover:text-accent-secondary transition-colors"
                 aria-label="LinkedIn Profile"
               >
-                LINKEDIN
+                linkedin
               </a>
-            </li>
-            {/* Theme Toggle */}
-            <li>
-              <ThemeToggle />
-            </li>
-          </ul>
-
-          {/* Mobile Hamburger Button */}
-          <button
-            className="md:hidden flex flex-col gap-1.5 w-6 h-6 justify-center items-center group"
-            onClick={toggleMenu}
-            aria-label="Toggle navigation menu"
-            aria-expanded={isMenuOpen}
-          >
-            <span
-              className={`w-full h-0.5 bg-current transition-all duration-300 ${
-                isMenuOpen ? 'rotate-45 translate-y-2' : ''
-              }`}
-            />
-            <span
-              className={`w-full h-0.5 bg-current transition-all duration-300 ${
-                isMenuOpen ? 'opacity-0' : ''
-              }`}
-            />
-            <span
-              className={`w-full h-0.5 bg-current transition-all duration-300 ${
-                isMenuOpen ? '-rotate-45 -translate-y-2' : ''
-              }`}
-            />
-          </button>
+            </div>
+          </div>
         </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden mt-4 pt-4 border-t border-border-primary">
-            <ul className="flex flex-col gap-4">
-              {navLinks.map((link) => (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    onClick={closeMenu}
-                    className="block text-sm font-display tracking-wide hover:text-accent-primary transition-colors"
+        {/* Mobile layout: nav row on top, logo left, paragraph right */}
+        <div className="md:hidden flex flex-col gap-6">
+          {/* Top — nav buttons row */}
+          <ul className="flex gap-6 items-center">
+            {navLinks.map((link) => {
+              const isActive = activeTab === link.id;
+              return (
+                <li key={link.id}>
+                  <button
+                    type="button"
+                    onClick={() => selectTab(link.id)}
+                    className={`text-xs font-display tracking-wide transition-colors ${
+                      isActive
+                        ? 'text-accent-primary underline underline-offset-4 decoration-1'
+                        : 'hover:text-accent-primary'
+                    }`}
+                    aria-current={isActive ? 'page' : undefined}
                   >
                     {link.label}
-                  </a>
+                  </button>
                 </li>
-              ))}
-              {/* Mobile Social Links */}
-              <li className="pt-2 border-t border-border-primary">
-                <a
-                  href={Bio.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={closeMenu}
-                  className="block text-sm font-display tracking-wide hover:text-accent-primary transition-colors"
-                  aria-label="GitHub Profile"
-                >
-                  GITHUB
-                </a>
-              </li>
-              <li>
-                <a
-                  href={Bio.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={closeMenu}
-                  className="block text-sm font-display tracking-wide hover:text-accent-primary transition-colors"
-                  aria-label="LinkedIn Profile"
-                >
-                  LINKEDIN
-                </a>
-              </li>
-              <li>
-                <a
-                  href={Bio.resume}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={closeMenu}
-                  className="block text-sm font-display tracking-wide hover:text-accent-primary transition-colors"
-                  aria-label="View Resume"
-                >
-                  RESUME
-                </a>
-              </li>
-              {/* Mobile Theme Toggle */}
-              <li className="pt-2 border-t border-border-primary flex justify-center">
-                <ThemeToggle />
-              </li>
-            </ul>
+              );
+            })}
+          </ul>
+
+          {/* Logo — left aligned, big */}
+          <button
+            type="button"
+            onClick={() => selectTab('about')}
+            className="flex items-start transition-opacity hover:opacity-70 self-start"
+            aria-label={`${Bio.name} — go to about`}
+          >
+            <Image
+              src="/logo.png"
+              alt={Bio.name}
+              width={2172}
+              height={937}
+              priority
+              className="h-44 w-auto max-w-none"
+            />
+          </button>
+
+          {/* Paragraph — right aligned */}
+          <div className="text-right">
+            <p className="text-xs text-text-secondary leading-relaxed">
+              i love anything tech &amp; innovative!
+              <br /><br />
+              im a former sneaker bot dev. reverse-engineered anti-bot measures on nike, shopify, supreme &amp; many more. also automated tons on web3 as well. generated 7-figures in profit for users.
+              <br /><br />
+              currently changing how influencers monetize content @ aesthetic. backed by tier 1 VCs along with the greatest tastemakers.
+              <br /><br />
+              &amp; im on a full ride studying cognitive science with a specialization in design &amp; interaction + computer science @ UCSD :)
+            </p>
+            <div className="mt-3 flex justify-end gap-5">
+              <a
+                href={Bio.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-display underline tracking-wide text-accent-primary hover:text-accent-secondary transition-colors"
+                aria-label="GitHub Profile"
+              >
+                github
+              </a>
+              <a
+                href={Bio.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-display underline tracking-wide text-accent-primary hover:text-accent-secondary transition-colors"
+                aria-label="LinkedIn Profile"
+              >
+                linkedin
+              </a>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </nav>
   );

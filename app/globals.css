@@ -1,74 +1,39 @@
 @import "tailwindcss";
 
 /* ========================================
-   SEMANTIC COLOR VARIABLES
+   SEMANTIC COLOR VARIABLES — Pure white minimalist
    ======================================== */
 
-/* Default (Dark Mode) */
-:root, [data-theme="dark"] {
+:root {
   /* Backgrounds */
-  --color-bg-primary: #050509;
-  --color-bg-secondary: #101015;
-  --color-bg-tertiary: #141410;
-  --color-bg-elevated: #181814;
-  --color-bg-card: #101015;
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #ffffff;
+  --color-bg-tertiary: #fafafa;
+  --color-bg-elevated: #ffffff;
+  --color-bg-card: #ffffff;
 
   /* Borders */
-  --color-border-primary: #202029;
-  --color-border-secondary: #242420;
+  --color-border-primary: #e5e5e5;
+  --color-border-secondary: #d4d4d4;
 
   /* Accent */
-  --color-accent-primary: #d4c5a9;
-  --color-accent-secondary: #e5d6ba;
-  --color-accent-glow: rgba(212, 197, 169, 0.5);
+  --color-accent-primary: #000000;
+  --color-accent-secondary: #404040;
+  --color-accent-glow: rgba(0, 0, 0, 0.15);
 
   /* Text */
-  --color-text-primary: #ededed;
-  --color-text-secondary: #d1d1d1;
-  --color-text-tertiary: #9ca3af;
-
-  /* Special */
-  --color-scrollbar-track: #141410;
-  --color-scrollbar-thumb: #242420;
-  --color-scrollbar-hover: #d4c5a9;
-  --color-image-bg: rgba(255, 255, 255, 0.05);
-
-  /* Overlays */
-  --grain-opacity: 0.15;
-  --modal-backdrop: rgba(0, 0, 0, 0.8);
-}
-
-/* Light Mode */
-[data-theme="light"] {
-  /* Backgrounds */
-  --color-bg-primary: #FFFFFF;
-  --color-bg-secondary: #F8F6F3;
-  --color-bg-tertiary: #F0EDE8;
-  --color-bg-elevated: #FFFFFF;
-  --color-bg-card: #F8F6F3;
-
-  /* Borders */
-  --color-border-primary: #B8A895;
-  --color-border-secondary: #8B7A66;
-
-  /* Accent */
-  --color-accent-primary: #6B5010;
-  --color-accent-secondary: #7E6217;
-  --color-accent-glow: rgba(107, 80, 16, 0.4);
-
-  /* Text - Much darker for better contrast */
   --color-text-primary: #000000;
-  --color-text-secondary: #1A1612;
-  --color-text-tertiary: #2E2820;
+  --color-text-secondary: #1a1a1a;
+  --color-text-tertiary: #525252;
 
   /* Special */
-  --color-scrollbar-track: #F0EDE8;
-  --color-scrollbar-thumb: #8B7A66;
-  --color-scrollbar-hover: #6B5010;
-  --color-image-bg: rgba(0, 0, 0, 0.05);
+  --color-scrollbar-track: #fafafa;
+  --color-scrollbar-thumb: #d4d4d4;
+  --color-scrollbar-hover: #000000;
+  --color-image-bg: rgba(0, 0, 0, 0.03);
 
   /* Overlays */
-  --grain-opacity: 0.06;
+  --grain-opacity: 0;
   --modal-backdrop: rgba(0, 0, 0, 0.5);
 }
 
@@ -117,11 +82,10 @@ body {
   font-weight: 300;
   overflow-x: hidden;
   position: relative;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ========================================
-   GRAIN OVERLAY (Theme-Aware)
+   GRAIN OVERLAY (kept for compat — neutralized via --grain-opacity: 0)
    ======================================== */
 
 .grain-overlay {
@@ -183,7 +147,7 @@ body {
 }
 
 /* ========================================
-   SCROLLBAR (Theme-Aware)
+   SCROLLBAR
    ======================================== */
 
 ::-webkit-scrollbar {
@@ -192,13 +156,11 @@ body {
 
 ::-webkit-scrollbar-track {
   background: var(--color-scrollbar-track);
-  transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-scrollbar-thumb);
   border-radius: 4px;
-  transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {

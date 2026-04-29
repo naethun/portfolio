@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { useTheme } from '@/hooks/useTheme';
 import type { Experience } from '@/types/portfolio';
 
 interface ExperienceModalProps {
@@ -13,8 +12,6 @@ interface ExperienceModalProps {
 }
 
 export default function ExperienceModal({ experience, onClose }: ExperienceModalProps) {
-  const { resolvedTheme } = useTheme();
-
   // Split description into paragraphs
   const descriptionLines = experience.desc
     .split('\n')
@@ -59,7 +56,7 @@ export default function ExperienceModal({ experience, onClose }: ExperienceModal
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className={`absolute inset-0 backdrop-blur-sm ${resolvedTheme === 'dark' ? 'bg-black/80' : 'bg-black/40'}`}
+          className="absolute inset-0 backdrop-blur-sm bg-black/40"
           onClick={handleBackdropClick}
           aria-hidden="true"
         />

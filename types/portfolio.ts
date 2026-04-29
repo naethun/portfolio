@@ -1,3 +1,5 @@
+export type Tab = 'about' | 'experience' | 'projects';
+
 export interface Bio {
   name: string;
   roles: string[];

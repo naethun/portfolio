@@ -1,61 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
 import Tesseract from './Tesseract';
-import type { Bio } from '@/types/portfolio';
+import type { Bio, Tab } from '@/types/portfolio';
 
 interface HeroProps {
   bio: Bio;
+  onTabChange?: (tab: Tab) => void;
 }
 
-export default function Hero({ bio }: HeroProps) {
-  const [roleIndex, setRoleIndex] = useState(0);
-  const prefersReducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (prefersReducedMotion) return;
-
-    const interval = setInterval(() => {
-      setRoleIndex((prev) => (prev + 1) % bio.roles.length);
-    }, 1500); // Change role every 1.5 seconds
-
-    return () => clearInterval(interval);
-  }, [bio.roles.length, prefersReducedMotion]);
-
+export default function Hero({ bio, onTabChange }: HeroProps) {
   return (
-    <section id="about" className="relative z-10 min-h-screen flex items-center px-6 py-20">
+    <section id="about" className="relative z-10 flex items-center px-6 py-12 md:py-16">
       <div className="max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
-          {/* Left side - Introduction */}
+          {/* Left side - Bio + CTAs */}
           <div className="text-left order-2 lg:order-1">
-            {/* Name with subtle glow effect */}
-            <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-medium mb-6 tracking-tight">
-              <span className="inline-block relative">
-                Hey, I'm {bio.name}
-                <span
-                  className="absolute bottom-0 left-0 w-full h-0.25 bg-accent-primary opacity-50"
-                  aria-hidden="true"
-                />
-              </span>
-            </h1>
-
-            {/* Animated roles with smooth crossfade */}
-            <div className="relative h-10 md:h-10 mb-4 overflow-hidden">
-              {bio.roles.map((role, index) => (
-                <p
-                  key={role}
-                  className={`absolute inset-0 flex items-start font-display text-xl md:text-2xl text-accent-primary transition-opacity duration-700 ${
-                    index === roleIndex ? 'opacity-100' : 'opacity-0'
-                  }`}
-                >
-                  {role}
-                </p>
-              ))}
-            </div>
-
-            {/* Bio */}
             <p className="text-text-tertiary leading-relaxed mb-10 max-w-lg">
             Former sneaker bot developer. Reverse-engineered anti-bot measures on Nike, Shopify, & many more. Achieved thousands of successful checkouts on profitable products. Also developed blockchain automation tools, including NFT minting bots & marketplace snipers. Generated over 6-figures in profit for users.
 
@@ -73,7 +33,7 @@ export default function Hero({ bio }: HeroProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-3 border-2 border-accent-primary rounded font-display text-sm tracking-wide text-center
-                         hover:bg-[#d4c5a9] hover:text-black hover:shadow-glow transition-all duration-300
+                         hover:bg-accent-primary hover:text-background-primary hover:shadow-glow transition-all duration-300
                          focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-2 focus:ring-offset-background-primary"
               >
                 VIEW RESUME
@@ -102,8 +62,9 @@ export default function Hero({ bio }: HeroProps) {
 
             {/* Scroll indicator */}
             <div className="mt-16">
-              <a
-                href="#experience"
+              <button
+                type="button"
+                onClick={() => onTabChange?.('experience')}
                 className="inline-flex items-center gap-2 text-sm text-text-tertiary hover:text-accent-primary transition-colors group"
                 aria-label="Learn more about me"
               >
@@ -121,7 +82,7 @@ export default function Hero({ bio }: HeroProps) {
                     d="M19 14l-7 7m0 0l-7-7m7 7V3"
                   />
                 </svg>
-              </a>
+              </button>
             </div>
           </div>
 
