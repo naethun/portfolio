@@ -43,6 +43,7 @@ interface Props {
   onFrontChange?: (i: number) => void;
   title?: string;
   info?: InfoData;
+  frameless?: boolean;
 }
 
 interface Tx {
@@ -164,7 +165,7 @@ function ringZoomTransform(
 }
 
 export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
-  { images, index, mode, clusterAngle, onFrontChange, title, info },
+  { images, index, mode, clusterAngle, onFrontChange, title, info, frameless = false },
   ref
 ) {
   const total = images.length;
@@ -292,19 +293,18 @@ export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
           ? 'RING-ZOOM'
           : 'CLUSTER  ';
 
-  return (
-    <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 py-6 md:px-12 md:py-10">
-      <MacWindow size="md" title={title} contentClassName="relative bg-white">
-        <div
-          ref={stageRef}
-          style={{
-            width: 'min(86vw, 1180px)',
-            height: 'min(70vh, 760px)',
-            perspective: '1200px',
-            transformStyle: 'preserve-3d',
-            overflow: 'hidden',
-          }}
-        >
+  const stage = (
+    <div
+      ref={stageRef}
+      style={{
+        width: frameless ? '100%' : 'min(86vw, 1180px)',
+        height: frameless ? '100%' : 'min(70vh, 760px)',
+        perspective: '1200px',
+        transformStyle: 'preserve-3d',
+        overflow: 'hidden',
+        position: 'relative',
+      }}
+    >
         {images.map((img, i) => {
           const t = transforms[i];
           const transition = mode === 'cluster'
@@ -369,7 +369,21 @@ export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
             <div className="mt-2 opacity-70">{info.status}</div>
           </div>
         )}
-        </div>
+    </div>
+  );
+
+  if (frameless) {
+    return (
+      <div className="pointer-events-none absolute inset-0">
+        {stage}
+      </div>
+    );
+  }
+
+  return (
+    <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 py-6 md:px-12 md:py-10">
+      <MacWindow size="md" title={title} contentClassName="relative bg-white">
+        {stage}
       </MacWindow>
     </div>
   );

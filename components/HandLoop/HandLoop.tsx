@@ -16,6 +16,7 @@ interface LoopImage {
 
 interface Props {
   images: LoopImage[];
+  frameless?: boolean;
 }
 
 type CameraState =
@@ -28,7 +29,7 @@ type CameraState =
 
 const TOUCH_SWIPE_PX = 50;
 
-export default function HandLoop({ images }: Props) {
+export default function HandLoop({ images, frameless = false }: Props) {
   const [index, setIndex] = useState(0);
   const [frontIndex, setFrontIndex] = useState(0);
   const [cameraState, setCameraState] = useState<CameraState>('idle');
@@ -262,6 +263,7 @@ export default function HandLoop({ images }: Props) {
         clusterAngle={clusterAngle}
         onFrontChange={setFrontIndex}
         title={mainTitle}
+        frameless={frameless}
         info={{
           frontIndex,
           total,

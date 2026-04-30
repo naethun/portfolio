@@ -1,4 +1,4 @@
-export type Tab = 'about' | 'experience' | 'projects';
+export type Folder = 'work' | 'moodboard' | 'contact';
 
 export interface Bio {
   name: string;
@@ -18,6 +18,17 @@ export interface SkillCategory {
   skills: Skill[];
 }
 
+export type CaseStudySection =
+  | { type: 'heading'; content: string }
+  | { type: 'text'; content: string }
+  | { type: 'image'; content: string; alt?: string };
+
+export interface CaseStudy {
+  hero?: string;
+  subtitle?: string;
+  sections: CaseStudySection[];
+}
+
 export interface Experience {
   id: number;
   img: string;
@@ -26,16 +37,7 @@ export interface Experience {
   date: string;
   desc: string;
   skills: string[];
-}
-
-export interface Education {
-  id: number;
-  img: string;
-  school: string;
-  date: string;
-  grade: string;
-  desc: string;
-  degree: string;
+  caseStudy?: CaseStudy;
 }
 
 export interface Project {
@@ -47,4 +49,11 @@ export interface Project {
   tags: string[];
   category: string;
   github: string;
+  caseStudy?: CaseStudy;
 }
+
+export type WorkKind = 'role' | 'project';
+
+export type WorkItem =
+  | { kind: 'role'; data: Experience }
+  | { kind: 'project'; data: Project };

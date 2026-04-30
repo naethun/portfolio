@@ -1,4 +1,4 @@
-import type { SkillCategory, Experience, Education, Project } from '@/types/portfolio';
+import type { Experience, Project } from '@/types/portfolio';
 
 export const Bio = {
   name: "Nathan",
@@ -193,27 +193,6 @@ export const experiences: Experience[] = [
       "Client-side Monitoring",
       "Chrome Extension",
     ],
-  },
-];
-
-export const education: Education[] = [
-  {
-    id: 0,
-    img: "https://media.licdn.com/dms/image/v2/C4D0BAQGUTAD8Stf2Rg/company-logo_100_100/company-logo_100_100/0/1631342110538?e=1773273600&v=beta&t=SPR7pOlguP_Y4mvbMPlU8ehk0WWsKXgQrbIx5Nf6Ccg",
-    school: "Southwestern Community College",
-    date: "Aug 2022 - May 2025",
-    grade: "3.6",
-    desc: "Relevant coursework: Data Structures & Algorithms, Computer Organization & Architecture, Discrete Structures, Linear Algebra, Calculus 1 & 2, Physics (Mechanics & Electromagnetism), Statistics",
-    degree: "Associate Degree for Transfer, Computer Science",
-  },
-  {
-    id: 1,
-    img: "https://i.pinimg.com/originals/fd/fd/bb/fdfdbb35dc080581686e32a94d67c7ad.jpg",
-    school: "University of California, San Diego",
-    date: "Sept 2025 - May 2027",
-    desc: `Scholarships: NSF EMPOWERs Engineering, Chancellor's Associates Scholarship, Kathleen W. Denno Scholarship`,
-    degree: "Bachelor's of Science, Cognitive Science, Spec. Design & Interaction. Minor in Computer Science",
-    grade: '3.87'
   },
 ];
 
