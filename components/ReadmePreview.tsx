@@ -10,7 +10,7 @@ export default function ReadmePreview() {
       </p>
       <div className="space-y-3 font-mono text-[12.5px] leading-relaxed text-neutral-800 md:text-sm">
         <p>
-          hello, i&apos;m nathan. based in san diego &amp; los angeles.
+          hello, i&apos;m nathan. based in san diego &amp; los angeles — california.
         </p>
         <p>
           former sneaker bot dev. reverse-engineered anti-bot measures on nike,

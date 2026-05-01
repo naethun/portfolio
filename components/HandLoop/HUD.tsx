@@ -1,6 +1,15 @@
 'use client';
 
-import { useEffect, useRef, type RefObject } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  type RefObject,
+} from 'react';
 import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
 import { MacWindow } from './MacWindow';
 
@@ -24,6 +33,84 @@ interface Props {
 
 export function HUD({ videoRef, landmarksRef, cameraEnabled }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    originX: number;
+    originY: number;
+  } | null>(null);
+
+  // Seed position from the initial top/left layout so the first drag doesn't jump.
+  useLayoutEffect(() => {
+    if (!cameraEnabled || pos !== null) return;
+    const el = wrapperRef.current;
+    const parent = el?.offsetParent as HTMLElement | null;
+    if (!el || !parent) return;
+    const elRect = el.getBoundingClientRect();
+    const parentRect = parent.getBoundingClientRect();
+    setPos({ x: elRect.left - parentRect.left, y: elRect.top - parentRect.top });
+  }, [cameraEnabled, pos]);
+
+  const clamp = useCallback((x: number, y: number) => {
+    const el = wrapperRef.current;
+    const parent = el?.offsetParent as HTMLElement | null;
+    if (!el || !parent) return { x, y };
+    const maxX = Math.max(0, parent.clientWidth - el.offsetWidth);
+    const maxY = Math.max(0, parent.clientHeight - el.offsetHeight);
+    return {
+      x: Math.min(Math.max(0, x), maxX),
+      y: Math.min(Math.max(0, y), maxY),
+    };
+  }, []);
+
+  const onPointerDown = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+      const el = wrapperRef.current;
+      const parent = el?.offsetParent as HTMLElement | null;
+      if (!el || !parent) return;
+      const elRect = el.getBoundingClientRect();
+      const parentRect = parent.getBoundingClientRect();
+      const originX = elRect.left - parentRect.left;
+      const originY = elRect.top - parentRect.top;
+      dragRef.current = {
+        pointerId: e.pointerId,
+        startX: e.clientX,
+        startY: e.clientY,
+        originX,
+        originY,
+      };
+      el.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    },
+    [],
+  );
+
+  const onPointerMove = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      const drag = dragRef.current;
+      if (!drag || drag.pointerId !== e.pointerId) return;
+      const next = clamp(
+        drag.originX + (e.clientX - drag.startX),
+        drag.originY + (e.clientY - drag.startY),
+      );
+      setPos(next);
+    },
+    [clamp],
+  );
+
+  const endDrag = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    const el = wrapperRef.current;
+    if (el && el.hasPointerCapture(e.pointerId)) {
+      el.releasePointerCapture(e.pointerId);
+    }
+    dragRef.current = null;
+  }, []);
 
   useEffect(() => {
     if (!cameraEnabled) return;
@@ -84,8 +171,23 @@ export function HUD({ videoRef, landmarksRef, cameraEnabled }: Props) {
 
   if (!cameraEnabled) return null;
 
+  const positioned = pos !== null;
+  const style: CSSProperties = positioned
+    ? { left: pos.x, top: pos.y, touchAction: 'none' }
+    : { touchAction: 'none' };
+
   return (
-    <div className="pointer-events-auto absolute left-4 top-4 z-20 md:left-8 md:top-8">
+    <div
+      ref={wrapperRef}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      className={`pointer-events-auto absolute z-20 cursor-grab select-none active:cursor-grabbing ${
+        positioned ? '' : 'left-4 top-4 md:left-8 md:top-8'
+      }`}
+      style={style}
+    >
       <MacWindow size="sm" title="Camera">
         <canvas
           ref={canvasRef}
