@@ -13,19 +13,15 @@ export default function ReadmePreview() {
           hello, i&apos;m nathan. based in san diego &amp; los angeles.
         </p>
         <p>
-          software engineer · product engineer · digital &amp; web design ·
-          technologist + creative.
-        </p>
-        <p>
           former sneaker bot dev. reverse-engineered anti-bot measures on nike,
-          shopify, supreme &amp; many more — generated 7-figures in profit for
+          shopify, supreme &amp; many more. generated 7-figures in profit for
           users.
         </p>
         <p>
           currently changing how influencers monetize content @ aesthetic.
           backed by tier 1 vcs alongside the greatest tastemakers.
         </p>
-        <p>studying cognitive science (design &amp; interaction) @ ucsd.</p>
+        <p>im also studying cognitive science (design &amp; interaction) + computer science @ ucsd on a full ride.</p>
       </div>
 
       <div className="mt-5 flex gap-5">

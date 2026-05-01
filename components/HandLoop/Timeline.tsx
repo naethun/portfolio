@@ -13,13 +13,14 @@ import {
 import { MacWindow } from './MacWindow';
 import type { GestureState } from './useSwipeGesture';
 import type { HandShape } from './useHandShape';
+import type { HandFacing } from './useHandFacing';
 
 interface LoopImage {
   src: string;
   filename: string;
 }
 
-export type TimelineMode = 'cluster' | 'helix' | 'ring' | 'ring-zoom';
+export type TimelineMode = 'cluster' | 'helix' | 'ring' | 'ring-zoom' | 'deck';
 
 export interface TimelineHandle {
   scrub: (dir: 'right' | 'left') => void;
@@ -29,6 +30,7 @@ interface InfoData {
   frontIndex: number;
   total: number;
   handShape: HandShape;
+  handFacing: HandFacing;
   pinch: { primary: boolean; secondary: boolean };
   gesture: GestureState;
   fps: number;
@@ -164,6 +166,36 @@ function ringZoomTransform(
   };
 }
 
+// Deck mode: cards laid out in a centered, auto-fit grid. Sequential reveal
+// is handled at the framer-motion transition layer (per-card delay), not
+// here — this just produces the final grid coordinates.
+function deckTransform(
+  i: number,
+  total: number,
+  stage: { w: number; h: number }
+): Tx {
+  const cols = Math.max(1, Math.ceil(Math.sqrt(total)));
+  const rows = Math.max(1, Math.ceil(total / cols));
+  const padX = stage.w * 0.08;
+  const padY = stage.h * 0.12;
+  const cellW = (stage.w - padX * 2) / cols;
+  const cellH = (stage.h - padY * 2) / rows;
+  const col = i % cols;
+  const row = Math.floor(i / cols);
+  const x = (col - (cols - 1) / 2) * cellW;
+  const y = (row - (rows - 1) / 2) * cellH;
+  return {
+    x,
+    y,
+    z: 0,
+    rotate: 0,
+    rotateY: 0,
+    scale: 0.5,
+    opacity: 1,
+    zIndex: i,
+  };
+}
+
 export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
   { images, index, mode, clusterAngle, onFrontChange, title, info, frameless = false },
   ref
@@ -280,9 +312,10 @@ export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
       if (mode === 'cluster') return clusterTransform(i, total, clusterAngle, index);
       if (mode === 'ring') return ringTransform(i, total, phase, geo);
       if (mode === 'ring-zoom') return ringZoomTransform(i, total, phase, geo);
+      if (mode === 'deck') return deckTransform(i, total, stageSize);
       return helixTransform(i, total, phase, geo);
     });
-  }, [images, mode, total, clusterAngle, index, phase, geo]);
+  }, [images, mode, total, clusterAngle, index, phase, geo, stageSize]);
 
   const modeLabel =
     mode === 'helix'
@@ -291,7 +324,9 @@ export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
         ? 'RING     '
         : mode === 'ring-zoom'
           ? 'RING-ZOOM'
-          : 'CLUSTER  ';
+          : mode === 'deck'
+            ? 'DECK     '
+            : 'CLUSTER  ';
 
   const stage = (
     <div
@@ -309,7 +344,9 @@ export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
           const t = transforms[i];
           const transition = mode === 'cluster'
             ? { type: 'spring' as const, stiffness: 180, damping: 22 }
-            : { type: 'spring' as const, stiffness: 320, damping: 40, mass: 0.4 };
+            : mode === 'deck'
+              ? { type: 'spring' as const, stiffness: 280, damping: 30, delay: i * 0.07 }
+              : { type: 'spring' as const, stiffness: 320, damping: 40, mass: 0.4 };
           return (
             <motion.div
               key={img.src}
@@ -355,6 +392,7 @@ export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
             </div>
             <div>{`MODE   ${modeLabel}`}</div>
             <div>{`HAND   ${info.handShape.toUpperCase()}`}</div>
+            <div>{`FACING ${info.handFacing.toUpperCase()}`}</div>
             <div>{`PINCH  P:${info.pinch.primary ? 'YES' : 'NO '}  S:${info.pinch.secondary ? 'YES' : 'NO '}`}</div>
             <div>
               {`STATE  ${

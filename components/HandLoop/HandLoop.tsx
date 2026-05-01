@@ -5,6 +5,7 @@ import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
 import { useHandTracking } from './useHandTracking';
 import { useSwipeGesture, type SwipeDirection } from './useSwipeGesture';
 import { useHandShape } from './useHandShape';
+import { useHandFacing } from './useHandFacing';
 import { usePinch, type HandLandmarks } from './usePinch';
 import { HUD } from './HUD';
 import { Timeline, type TimelineHandle, type TimelineMode } from './Timeline';
@@ -108,20 +109,24 @@ export default function HandLoop({ images, frameless = false }: Props) {
   });
 
   const handShape = useHandShape(primaryHandRef, cameraEnabled);
+  const handFacing = useHandFacing(primaryHandRef, cameraEnabled);
   const primaryPinch = usePinch(primaryHandRef, cameraEnabled);
   const secondaryPinch = usePinch(secondaryHandRef, cameraEnabled);
 
   // Mode is derived deterministically from per-hand state. 'unknown' shape is
   // sticky so the mode doesn't flicker when the hand momentarily blurs out.
+  // Pinches still take priority — they're a deliberate two-finger gesture and
+  // shouldn't be swallowed by the palm-facing deck mode.
   useEffect(() => {
     if (handShape === 'closed') {
       setTimelineMode('cluster');
     } else if (handShape === 'open') {
       if (primaryPinch && secondaryPinch) setTimelineMode('ring-zoom');
       else if (primaryPinch) setTimelineMode('ring');
+      else if (handFacing === 'palmar') setTimelineMode('deck');
       else setTimelineMode('helix');
     }
-  }, [handShape, primaryPinch, secondaryPinch]);
+  }, [handShape, handFacing, primaryPinch, secondaryPinch]);
 
   // Mobile / coarse pointer: no palm-shape input, default to helix.
   useEffect(() => {
@@ -268,6 +273,7 @@ export default function HandLoop({ images, frameless = false }: Props) {
           frontIndex,
           total,
           handShape,
+          handFacing,
           pinch: { primary: primaryPinch, secondary: secondaryPinch },
           gesture,
           fps,
