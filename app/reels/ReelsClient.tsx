@@ -40,7 +40,7 @@ export default function ReelsClient({ images }: { images: LoopImage[] }) {
       >
         <div
           className="absolute inset-x-3 top-3"
-          style={{ height: 'calc(70% - 18px)' }}
+          style={{ height: 'calc(60% - 18px)' }}
         >
           <MacWindow
             title="moodboard.app"
@@ -60,7 +60,7 @@ export default function ReelsClient({ images }: { images: LoopImage[] }) {
 
         <div
           className="absolute inset-x-3 bottom-3"
-          style={{ height: 'calc(30% - 18px)' }}
+          style={{ height: 'calc(40% - 18px)' }}
         >
           <MacWindow
             title="camera.live"
