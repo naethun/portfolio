@@ -1,12 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
 import { useHandTracking } from './useHandTracking';
 import { useSwipeGesture, type SwipeDirection } from './useSwipeGesture';
 import { useHandShape } from './useHandShape';
 import { useHandFacing } from './useHandFacing';
 import { usePinch, type HandLandmarks } from './usePinch';
+import { usePictureFrame } from './usePictureFrame';
+import { useCubeRotation } from './useCubeRotation';
 import { HUD } from './HUD';
 import { Timeline, type TimelineHandle, type TimelineMode } from './Timeline';
 
@@ -18,6 +20,10 @@ interface LoopImage {
 interface Props {
   images: LoopImage[];
   frameless?: boolean;
+  cameraConstraints?: MediaTrackConstraints;
+  displayVideoRef?: RefObject<HTMLVideoElement | null>;
+  hideHUD?: boolean;
+  externalLandmarksRef?: RefObject<HandLandmarkerResult | null>;
 }
 
 type CameraState =
@@ -30,7 +36,14 @@ type CameraState =
 
 const TOUCH_SWIPE_PX = 50;
 
-export default function HandLoop({ images, frameless = false }: Props) {
+export default function HandLoop({
+  images,
+  frameless = false,
+  cameraConstraints,
+  displayVideoRef,
+  hideHUD = false,
+  externalLandmarksRef,
+}: Props) {
   const [index, setIndex] = useState(0);
   const [frontIndex, setFrontIndex] = useState(0);
   const [cameraState, setCameraState] = useState<CameraState>('idle');
@@ -78,6 +91,7 @@ export default function HandLoop({ images, frameless = false }: Props) {
   const handleResult = useCallback(
     (result: HandLandmarkerResult, t: number) => {
       landmarksRef.current = result;
+      if (externalLandmarksRef) externalLandmarksRef.current = result;
 
       // Split detected hands by handedness label. With selfie-mirrored input,
       // MediaPipe's "Right" is the user's right hand — we make that primary.
@@ -98,7 +112,7 @@ export default function HandLoop({ images, frameless = false }: Props) {
       // user's perceived "swipe right" produces dx > 0.
       if (primary) pushSample(1 - primary[0].x, t);
     },
-    [pushSample]
+    [pushSample, externalLandmarksRef]
   );
 
   const cameraEnabled = cameraState === 'granted';
@@ -112,21 +126,45 @@ export default function HandLoop({ images, frameless = false }: Props) {
   const handFacing = useHandFacing(primaryHandRef, cameraEnabled);
   const primaryPinch = usePinch(primaryHandRef, cameraEnabled);
   const secondaryPinch = usePinch(secondaryHandRef, cameraEnabled);
+  const frameActive = usePictureFrame(
+    primaryHandRef,
+    secondaryHandRef,
+    cameraEnabled
+  );
+  const cubeRot = useCubeRotation(
+    primaryHandRef,
+    secondaryHandRef,
+    frameActive,
+    timelineMode === 'cube',
+    primaryPinch
+  );
 
-  // Mode is derived deterministically from per-hand state. 'unknown' shape is
-  // sticky so the mode doesn't flicker when the hand momentarily blurs out.
-  // Pinches still take priority — they're a deliberate two-finger gesture and
-  // shouldn't be swallowed by the palm-facing deck mode.
+  // Mode is derived from per-hand state. Cube mode is LATCHED — once entered
+  // (via the picture-frame gesture), it persists through pinches and brief
+  // tracking blips, and only releases when the user closes a fist.
   useEffect(() => {
+    if (timelineMode === 'cube') {
+      if (handShape === 'closed') setTimelineMode('cluster');
+      return;
+    }
     if (handShape === 'closed') {
       setTimelineMode('cluster');
+    } else if (frameActive) {
+      setTimelineMode('cube');
     } else if (handShape === 'open') {
       if (primaryPinch && secondaryPinch) setTimelineMode('ring-zoom');
       else if (primaryPinch) setTimelineMode('ring');
       else if (handFacing === 'palmar') setTimelineMode('deck');
       else setTimelineMode('helix');
     }
-  }, [handShape, handFacing, primaryPinch, secondaryPinch]);
+  }, [
+    handShape,
+    handFacing,
+    primaryPinch,
+    secondaryPinch,
+    frameActive,
+    timelineMode,
+  ]);
 
   // Mobile / coarse pointer: no palm-shape input, default to helix.
   useEffect(() => {
@@ -209,21 +247,37 @@ export default function HandLoop({ images, frameless = false }: Props) {
     setCameraState('requesting');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480 },
+        video: cameraConstraints ?? {
+          width: 640,
+          height: 480,
+          frameRate: { ideal: 60, max: 60 },
+        },
         audio: false,
       });
       streamRef.current = stream;
+      const track = stream.getVideoTracks()[0];
+      if (track) {
+        const s = track.getSettings();
+        console.info(
+          `[HandLoop] camera: ${s.width}×${s.height} @ ${s.frameRate}fps (${track.label})`
+        );
+      }
       const video = videoRef.current;
       if (video) {
         video.srcObject = stream;
         await video.play();
+      }
+      const display = displayVideoRef?.current;
+      if (display) {
+        display.srcObject = stream;
+        display.play().catch(() => {});
       }
       setCameraState('granted');
     } catch (err) {
       console.warn('[HandLoop] camera denied', err);
       setCameraState('denied');
     }
-  }, []);
+  }, [cameraConstraints, displayVideoRef]);
 
   const status =
     total === 0
@@ -266,6 +320,7 @@ export default function HandLoop({ images, frameless = false }: Props) {
         index={index}
         mode={timelineMode}
         clusterAngle={clusterAngle}
+        cubeRot={cubeRot}
         onFrontChange={setFrontIndex}
         title={mainTitle}
         frameless={frameless}
@@ -275,6 +330,7 @@ export default function HandLoop({ images, frameless = false }: Props) {
           handShape,
           handFacing,
           pinch: { primary: primaryPinch, secondary: secondaryPinch },
+          frameActive,
           gesture,
           fps,
           status,
@@ -302,11 +358,13 @@ export default function HandLoop({ images, frameless = false }: Props) {
         </div>
       )}
 
-      <HUD
-        videoRef={videoRef}
-        landmarksRef={landmarksRef}
-        cameraEnabled={cameraEnabled}
-      />
+      {!hideHUD && (
+        <HUD
+          videoRef={videoRef}
+          landmarksRef={landmarksRef}
+          cameraEnabled={cameraEnabled}
+        />
+      )}
     </div>
   );
 }

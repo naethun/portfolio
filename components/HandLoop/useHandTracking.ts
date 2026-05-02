@@ -31,10 +31,19 @@ export function useHandTracking({ videoRef, enabled, onResult }: Options) {
 
     let cancelled = false;
     let rafId = 0;
+    let rvfcId = 0;
     let landmarker: HandLandmarker | null = null;
-    let lastVideoTime = -1;
     const fpsWindow: number[] = [];
     let lastFpsUpdate = 0;
+
+    const recordFps = (now: number) => {
+      fpsWindow.push(now);
+      while (fpsWindow.length && fpsWindow[0] < now - 1000) fpsWindow.shift();
+      if (now - lastFpsUpdate > 500) {
+        setFps(fpsWindow.length);
+        lastFpsUpdate = now;
+      }
+    };
 
     (async () => {
       try {
@@ -52,26 +61,43 @@ export function useHandTracking({ videoRef, enabled, onResult }: Options) {
         }
         setReady(true);
 
-        const tick = (now: number) => {
-          const video = videoRef.current;
-          if (!video || !landmarker) {
-            rafId = requestAnimationFrame(tick);
-            return;
-          }
-          if (video.readyState >= 2 && video.currentTime !== lastVideoTime) {
-            lastVideoTime = video.currentTime;
-            const result = landmarker.detectForVideo(video, now);
-            onResultRef.current(result, now);
-            fpsWindow.push(now);
-            while (fpsWindow.length && fpsWindow[0] < now - 1000) fpsWindow.shift();
-            if (now - lastFpsUpdate > 500) {
-              setFps(fpsWindow.length);
-              lastFpsUpdate = now;
+        const video = videoRef.current;
+        // Prefer requestVideoFrameCallback: fires exactly once per camera frame
+        // (no wasted detections when the video hasn't advanced, no upper bound
+        // tied to the display's RAF rate). Falls back to RAF + currentTime poll.
+        const useRvfc =
+          !!video && typeof video.requestVideoFrameCallback === 'function';
+
+        if (useRvfc && video) {
+          const onFrame: VideoFrameRequestCallback = (now) => {
+            if (cancelled || !landmarker) return;
+            const v = videoRef.current;
+            if (v && v.readyState >= 2) {
+              const result = landmarker.detectForVideo(v, now);
+              onResultRef.current(result, now);
+              recordFps(now);
             }
-          }
+            rvfcId = video.requestVideoFrameCallback(onFrame);
+          };
+          rvfcId = video.requestVideoFrameCallback(onFrame);
+        } else {
+          let lastVideoTime = -1;
+          const tick = (now: number) => {
+            const v = videoRef.current;
+            if (!v || !landmarker) {
+              rafId = requestAnimationFrame(tick);
+              return;
+            }
+            if (v.readyState >= 2 && v.currentTime !== lastVideoTime) {
+              lastVideoTime = v.currentTime;
+              const result = landmarker.detectForVideo(v, now);
+              onResultRef.current(result, now);
+              recordFps(now);
+            }
+            rafId = requestAnimationFrame(tick);
+          };
           rafId = requestAnimationFrame(tick);
-        };
-        rafId = requestAnimationFrame(tick);
+        }
       } catch (err) {
         console.error('[useHandTracking] init failed', err);
       }
@@ -80,6 +106,10 @@ export function useHandTracking({ videoRef, enabled, onResult }: Options) {
     return () => {
       cancelled = true;
       if (rafId) cancelAnimationFrame(rafId);
+      const v = videoRef.current;
+      if (rvfcId && v && typeof v.cancelVideoFrameCallback === 'function') {
+        v.cancelVideoFrameCallback(rvfcId);
+      }
       landmarker?.close();
       landmarker = null;
       setReady(false);

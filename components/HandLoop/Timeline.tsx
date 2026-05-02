@@ -20,7 +20,13 @@ interface LoopImage {
   filename: string;
 }
 
-export type TimelineMode = 'cluster' | 'helix' | 'ring' | 'ring-zoom' | 'deck';
+export type TimelineMode =
+  | 'cluster'
+  | 'helix'
+  | 'ring'
+  | 'ring-zoom'
+  | 'deck'
+  | 'cube';
 
 export interface TimelineHandle {
   scrub: (dir: 'right' | 'left') => void;
@@ -32,6 +38,7 @@ interface InfoData {
   handShape: HandShape;
   handFacing: HandFacing;
   pinch: { primary: boolean; secondary: boolean };
+  frameActive: boolean;
   gesture: GestureState;
   fps: number;
   status: string;
@@ -42,6 +49,7 @@ interface Props {
   index: number;
   mode: TimelineMode;
   clusterAngle: number;
+  cubeRot?: { rx: number; ry: number; rz: number; zoom: number };
   onFrontChange?: (i: number) => void;
   title?: string;
   info?: InfoData;
@@ -53,10 +61,141 @@ interface Tx {
   y: number;
   z: number;
   rotate: number;
+  rotateX: number;
   rotateY: number;
   scale: number;
   opacity: number;
   zIndex: number;
+}
+
+// 6 faces × 5 tiles per face = 30 tiles total. The first images repeat to fill
+// the remaining slots when there are fewer than 30 source images.
+const TILES_PER_FACE = 5;
+const FACE_COUNT = 6;
+const TOTAL_TILES = TILES_PER_FACE * FACE_COUNT;
+
+// Quincunx slot offsets in face-local space, fractions of faceSize.
+// 0: top-left, 1: top-right, 2: center, 3: bottom-left, 4: bottom-right.
+const SLOT_OFFSETS: ReadonlyArray<readonly [number, number]> = [
+  [-0.25, -0.25],
+  [+0.25, -0.25],
+  [0.0, 0.0],
+  [-0.25, +0.25],
+  [+0.25, +0.25],
+];
+
+// Outward normals for each face in CSS coordinates (y points down).
+const FACE_NORMALS: ReadonlyArray<readonly [number, number, number]> = [
+  [0, 0, 1], // 0 front
+  [0, 0, -1], // 1 back
+  [1, 0, 0], // 2 right
+  [-1, 0, 0], // 3 left
+  [0, -1, 0], // 4 top
+  [0, 1, 0], // 5 bottom
+];
+
+// Compute world {x, y, z, rotateX, rotateY} for a tile by applying the face
+// rotation to (slotX*faceSize, slotY*faceSize, faceSize/2). Hand-rolled per
+// face so the math is obvious — no matrix lib needed.
+function cubeTileTransform(faceIdx: number, slotIdx: number, fs: number): Tx {
+  const [sx, sy] = SLOT_OFFSETS[slotIdx];
+  const lx = sx * fs;
+  const ly = sy * fs;
+  const lz = fs / 2;
+  let x = 0;
+  let y = 0;
+  let z = 0;
+  let rotateX = 0;
+  let rotateY = 0;
+  switch (faceIdx) {
+    case 0:
+      x = lx;
+      y = ly;
+      z = lz;
+      rotateY = 0;
+      break;
+    case 1:
+      x = -lx;
+      y = ly;
+      z = -lz;
+      rotateY = 180;
+      break;
+    case 2:
+      x = lz;
+      y = ly;
+      z = -lx;
+      rotateY = 90;
+      break;
+    case 3:
+      x = -lz;
+      y = ly;
+      z = lx;
+      rotateY = -90;
+      break;
+    case 4:
+      x = lx;
+      y = -lz;
+      z = -ly;
+      rotateX = 90;
+      break;
+    case 5:
+      x = lx;
+      y = lz;
+      z = ly;
+      rotateX = -90;
+      break;
+  }
+  return {
+    x,
+    y,
+    z,
+    rotate: 0,
+    rotateX,
+    rotateY,
+    scale: 0.55,
+    opacity: 1,
+    zIndex: 0,
+  };
+}
+
+// Apply intrinsic CSS rotation (X then Y then Z) to a 3D vector. Used for the
+// HUD's "front face" calculation.
+function rotateVec(
+  rxDeg: number,
+  ryDeg: number,
+  rzDeg: number,
+  vx: number,
+  vy: number,
+  vz: number
+): [number, number, number] {
+  const rx = (rxDeg * Math.PI) / 180;
+  const ry = (ryDeg * Math.PI) / 180;
+  const rz = (rzDeg * Math.PI) / 180;
+  const cx = Math.cos(rx);
+  const sx = Math.sin(rx);
+  const cy = Math.cos(ry);
+  const sy = Math.sin(ry);
+  const cz = Math.cos(rz);
+  const sz = Math.sin(rz);
+  let x = vx;
+  let y = vy;
+  let z = vz;
+  // rotateX
+  const y1 = y * cx - z * sx;
+  const z1 = y * sx + z * cx;
+  y = y1;
+  z = z1;
+  // rotateY
+  const x2 = x * cy + z * sy;
+  const z2 = -x * sy + z * cy;
+  x = x2;
+  z = z2;
+  // rotateZ
+  const x3 = x * cz - y * sz;
+  const y3 = x * sz + y * cz;
+  x = x3;
+  y = y3;
+  return [x, y, z];
 }
 
 // Deterministic 0..1 noise from an integer seed.
@@ -87,6 +226,7 @@ function clusterTransform(
     y: dy,
     z: 0,
     rotate: rot,
+    rotateX: 0,
     rotateY: 0,
     scale: 0.42,
     opacity: 1,
@@ -117,7 +257,7 @@ function helixTransform(
   const opacity = 0.3 + front * 0.7;
   const scale = 0.7 + front * 0.3;
   const zIndex = Math.round(front * 1000);
-  return { x, y, z, rotate: 0, rotateY, scale, opacity, zIndex };
+  return { x, y, z, rotate: 0, rotateX: 0, rotateY, scale, opacity, zIndex };
 }
 
 function ringTransform(
@@ -133,6 +273,7 @@ function ringTransform(
     y: -r * Math.cos(theta),
     z: 0,
     rotate: 0,
+    rotateX: 0,
     rotateY: 0,
     scale: 0.55,
     opacity: 1,
@@ -159,6 +300,7 @@ function ringZoomTransform(
     y: yOffset - r * c,
     z: 0,
     rotate: 0,
+    rotateX: 0,
     rotateY: 0,
     scale: 1.0,
     opacity: c > 0 ? 1 : 0,
@@ -189,6 +331,7 @@ function deckTransform(
     y,
     z: 0,
     rotate: 0,
+    rotateX: 0,
     rotateY: 0,
     scale: 0.5,
     opacity: 1,
@@ -197,7 +340,17 @@ function deckTransform(
 }
 
 export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
-  { images, index, mode, clusterAngle, onFrontChange, title, info, frameless = false },
+  {
+    images,
+    index,
+    mode,
+    clusterAngle,
+    cubeRot,
+    onFrontChange,
+    title,
+    info,
+    frameless = false,
+  },
   ref
 ) {
   const total = images.length;
@@ -326,7 +479,57 @@ export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
           ? 'RING-ZOOM'
           : mode === 'deck'
             ? 'DECK     '
-            : 'CLUSTER  ';
+            : mode === 'cube'
+              ? 'CUBE     '
+              : 'CLUSTER  ';
+
+  // Build the 30-tile list once per images change. Source images repeat to
+  // pad up to TOTAL_TILES so every face has 5 slots filled.
+  const cubeTiles = useMemo(() => {
+    if (total === 0) return [];
+    const out: {
+      img: LoopImage;
+      tileIdx: number;
+      faceIdx: number;
+      slotIdx: number;
+      key: string;
+      sourceIdx: number;
+      isDuplicate: boolean;
+    }[] = [];
+    for (let tileIdx = 0; tileIdx < TOTAL_TILES; tileIdx++) {
+      const sourceIdx = tileIdx % total;
+      const img = images[sourceIdx];
+      out.push({
+        img,
+        tileIdx,
+        faceIdx: Math.floor(tileIdx / TILES_PER_FACE),
+        slotIdx: tileIdx % TILES_PER_FACE,
+        key: `${img.src}#${tileIdx}`,
+        sourceIdx,
+        isDuplicate: tileIdx >= total,
+      });
+    }
+    return out;
+  }, [images, total]);
+
+  const faceSize = Math.min(stageSize.w, stageSize.h) * 0.32;
+
+  // Front-of-cube face index — the face whose rotated outward normal has the
+  // largest +z component (pointing toward the camera).
+  const frontFaceIdx = useMemo(() => {
+    if (!cubeRot) return 0;
+    let best = 0;
+    let bestDot = -Infinity;
+    for (let i = 0; i < FACE_COUNT; i++) {
+      const [nx, ny, nz] = FACE_NORMALS[i];
+      const r = rotateVec(cubeRot.rx, cubeRot.ry, cubeRot.rz, nx, ny, nz);
+      if (r[2] > bestDot) {
+        bestDot = r[2];
+        best = i;
+      }
+    }
+    return best;
+  }, [cubeRot]);
 
   const stage = (
     <div
@@ -340,59 +543,110 @@ export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
         position: 'relative',
       }}
     >
-        {images.map((img, i) => {
-          const t = transforms[i];
-          const transition = mode === 'cluster'
-            ? { type: 'spring' as const, stiffness: 180, damping: 22 }
-            : mode === 'deck'
-              ? { type: 'spring' as const, stiffness: 280, damping: 30, delay: i * 0.07 }
-              : { type: 'spring' as const, stiffness: 320, damping: 40, mass: 0.4 };
-          return (
-            <motion.div
-              key={img.src}
-              className="absolute left-1/2 top-1/2"
-              style={{
-                width: 'clamp(72px, 11%, 150px)',
-                height: 'clamp(96px, 18%, 200px)',
-                translate: '-50% -50%',
-                transformStyle: 'preserve-3d',
-                zIndex: t.zIndex,
-              }}
-              animate={{
-                x: t.x,
-                y: t.y,
-                z: t.z,
-                rotate: t.rotate,
-                rotateY: t.rotateY,
-                scale: t.scale,
-                opacity: t.opacity,
-              }}
-              transition={transition}
-            >
-              <div className="relative h-full w-full bg-black/5 ring-1 ring-black/10 shadow-lg">
-                <Image
-                  src={img.src}
-                  alt={img.filename}
-                  fill
-                  sizes="(max-width: 1280px) 50vw, 600px"
-                  className="object-cover"
-                  priority={i === index}
-                />
-              </div>
-            </motion.div>
-          );
-        })}
+        <motion.div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            transformStyle: 'preserve-3d',
+            pointerEvents: 'none',
+          }}
+          animate={{
+            rotateX: mode === 'cube' ? (cubeRot?.rx ?? 0) : 0,
+            rotateY: mode === 'cube' ? (cubeRot?.ry ?? 0) : 0,
+            rotateZ: mode === 'cube' ? (cubeRot?.rz ?? 0) : 0,
+            scale: mode === 'cube' ? (cubeRot?.zoom ?? 1) : 1,
+          }}
+          transition={{
+            type: 'spring',
+            stiffness: 120,
+            damping: 30,
+            mass: 0.6,
+          }}
+        >
+          {cubeTiles.map(
+            ({ img, tileIdx, faceIdx, slotIdx, key, sourceIdx, isDuplicate }) => {
+              const inCube = mode === 'cube';
+              const flat = transforms[sourceIdx];
+              const cube = cubeTileTransform(faceIdx, slotIdx, faceSize);
+              const t: Tx = inCube
+                ? cube
+                : { ...flat, opacity: isDuplicate ? 0 : flat.opacity };
+              const transition =
+                mode === 'cluster'
+                  ? { type: 'spring' as const, stiffness: 180, damping: 22 }
+                  : mode === 'cube'
+                    ? {
+                        type: 'spring' as const,
+                        stiffness: 220,
+                        damping: 28,
+                        mass: 0.5,
+                      }
+                    : mode === 'deck'
+                      ? {
+                          type: 'spring' as const,
+                          stiffness: 280,
+                          damping: 30,
+                          delay: sourceIdx * 0.07,
+                        }
+                      : {
+                          type: 'spring' as const,
+                          stiffness: 320,
+                          damping: 40,
+                          mass: 0.4,
+                        };
+              return (
+                <motion.div
+                  key={key}
+                  className="absolute left-1/2 top-1/2"
+                  style={{
+                    width: 'clamp(72px, 11%, 150px)',
+                    height: 'clamp(96px, 18%, 200px)',
+                    translate: '-50% -50%',
+                    transformStyle: 'preserve-3d',
+                    zIndex: t.zIndex,
+                    pointerEvents: 'auto',
+                  }}
+                  animate={{
+                    x: t.x,
+                    y: t.y,
+                    z: t.z,
+                    rotate: t.rotate,
+                    rotateX: t.rotateX,
+                    rotateY: t.rotateY,
+                    scale: t.scale,
+                    opacity: t.opacity,
+                  }}
+                  transition={transition}
+                >
+                  <div className="relative h-full w-full bg-black/5 ring-1 ring-black/10 shadow-lg">
+                    <Image
+                      src={img.src}
+                      alt={img.filename}
+                      fill
+                      sizes="(max-width: 1280px) 50vw, 600px"
+                      className="object-cover"
+                      priority={!isDuplicate && sourceIdx === index}
+                    />
+                  </div>
+                </motion.div>
+              );
+            }
+          )}
+        </motion.div>
 
         {info && (
           <div className="pointer-events-none absolute bottom-3 left-3 font-mono text-[11px] leading-relaxed tracking-wider text-neutral-500 md:bottom-4 md:left-4">
             <div>
-              {mode === 'cluster'
-                ? `IDX    [${String(index + 1).padStart(2, '0')} / ${String(info.total).padStart(2, '0')}]`
-                : `FRONT  [${String(info.frontIndex + 1).padStart(2, '0')} / ${String(info.total).padStart(2, '0')}]`}
+              {mode === 'cube'
+                ? `FACE   [${frontFaceIdx + 1} / 6]`
+                : mode === 'cluster'
+                  ? `IDX    [${String(index + 1).padStart(2, '0')} / ${String(info.total).padStart(2, '0')}]`
+                  : `FRONT  [${String(info.frontIndex + 1).padStart(2, '0')} / ${String(info.total).padStart(2, '0')}]`}
             </div>
             <div>{`MODE   ${modeLabel}`}</div>
             <div>{`HAND   ${info.handShape.toUpperCase()}`}</div>
             <div>{`FACING ${info.handFacing.toUpperCase()}`}</div>
+            <div>{`FRAME  ${info.frameActive ? 'YES' : 'NO '}`}</div>
             <div>{`PINCH  P:${info.pinch.primary ? 'YES' : 'NO '}  S:${info.pinch.secondary ? 'YES' : 'NO '}`}</div>
             <div>
               {`STATE  ${
