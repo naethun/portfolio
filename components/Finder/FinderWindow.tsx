@@ -30,11 +30,11 @@ export default function FinderWindow({
       </div>
 
       {/* Body: sidebar + content */}
-      <div className="flex flex-1 flex-col md:flex-row">
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
         <aside className="border-b border-black/10 bg-neutral-50 px-4 py-4 md:w-48 md:border-b-0 md:border-r md:py-6 lg:w-56">
           {sidebar}
         </aside>
-        <div className="relative flex-1 overflow-hidden bg-white">
+        <div className="relative min-h-0 flex-1 overflow-hidden bg-white">
           {children}
         </div>
       </div>

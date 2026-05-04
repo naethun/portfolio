@@ -2,24 +2,17 @@ import type { Experience, Project } from '@/types/portfolio';
 
 export const Bio = {
   name: "Nathan",
-  roles: [
-    "Full-Stack Software Engineer",
-    "Product Engineer",
-    "Startup Focused",
-    "Web3 Believer",
-    "Automation Enthusiast",
-  ],
   github: "https://github.com/naethun",
   resume:
-    "https://drive.google.com/file/d/1dXH2o6HOp3X6Pr5aMPaT3GttSuygP4Bn/view?usp=sharing",
+    "https://drive.google.com/file/d/1N3kuuJif2t6-Ne9_n8QFMu-uywxGdaNn/view?usp=sharing",
   linkedin: "https://www.linkedin.com/in/naethun/",
 };
 
 export const experiences: Experience[] = [
   {
     id: 0,
-    img: "https://media.licdn.com/dms/image/v2/D560BAQGFoZOgu9BJkw/company-logo_100_100/company-logo_100_100/0/1730333417498/aestheticai_logo?e=1773273600&v=beta&t=P1d-xNZ-mJ07P2Yc0n3ODUwm2XlCmy_-fSiYE4f5uVs",
-    role: "Founding Software Engineer",
+    img: "/aedemo1.gif",
+    role: "Founding Software Engineer - $1.5M Raised",
     company: "Aesthetic",
     date: "December 2025 - Present",
     desc: `Aesthetic is a all-in-one shopping platform that allows users to buy products through our fully autounomus shopping assistant. 100k+ users, 250k+ GMV, 160k+ on Instagram
@@ -45,10 +38,10 @@ export const experiences: Experience[] = [
   },
   {
     id: 1,
-    img: "https://media.licdn.com/dms/image/v2/D4E0BAQGpif9l90Gmww/company-logo_100_100/B4EZcfGRU8HsAU-/0/1748573427276/energex_ai_logo?e=1773273600&v=beta&t=WYlSn4AxhAXpI6lg_bpu1Sq6qiyqkOJ7kUZVN9iEll8",
-    role: "Software Engineer",
+    img: "/energex.gif",
+    role: "Software Engineer - 6-figure ARR",
     company: "EnergeX AI",
-    date: "September 2025 - Present",
+    date: "September 2025 - April 2026",
     desc: `EnergeX AI is an AI-driven CRM platform that automates outbound sales calls & real-time analytics for high-volume teams.
 
     - Architected & shipped a multi-campaign calling system, enabling concurrent campaign execution with isolated queue runners, safe concurrency controls, & automated pause/resume logic based on real-time agent availability. Increased effective call throughput by 2-3x without additional infrastructure.
@@ -93,37 +86,11 @@ export const experiences: Experience[] = [
       "Playwright",
       "Git",
     ],
-  },  
-  {
-    id: 3,
-    img: "https://media.licdn.com/dms/image/v2/D4E0BAQFFnQDKU-9RVw/company-logo_100_100/B4EZarxyFiHoAU-/0/1746638677031/familia_io_logo?e=1773273600&v=beta&t=45xKagSmcntaMwtggdntFvK8hvTuEKMYaU0k0GDJTGo",
-    role: "Software Engineer",
-    company: "Familia",
-    date: "May 2025 - Oct 2025",
-    desc: `Familia is a start-up focused on mental wellness, building an app that enables users to meditate together.
-
-    - Designed & implemented a tiered, matching algorithm that combines dynamic user preferences with manual partner selection. Significantly improving accuracy & personalization in user-to-user pairing for 150+ active users.
-
-    - Developed a real-time chat & internal notification system with WebSockets, boosting user retention.
-
-    - Architected, deployed, & maintained a scalable PostgreSQL database with fully normalized schema design, advanced index optimization, & detailed technical documentation. Supported high-volume concurrent users & long-term maintainability.
-
-    - Led end-to-end full-stack development of both web & mobile platforms (Next.js & React Native). Driving feature development, UI/UX consistency, & backend integration within an Agile workflow. Enabling a rapid iteration with scalable feature rollout.
-    `,
-    skills: [
-      "Node.js",
-      "AWS",
-      "React Native",
-      "PostgreSQL",
-      "Railway",
-      "Git",
-      "Figma",
-    ],
   },
   {
     id: 4,
     img: "https://img1.wsimg.com/isteam/ip/7230bf8c-78a3-4764-bbc6-b984344c2a04/Viet_Voices_Logo_Phrase.png/:/cr=t:0%25,l:0%25,w:100%25,h:100%25/rs=w:400,cg:true",
-    role: "Data Analyst",
+    role: "Data Engineer",
     company: "Viet Voices",
     date: "Jan 2024 - Jul 2025",
     desc: `A non-profit organization that focuses on representing marginalized Vietnamese & other AAPI communities within San Diego.
@@ -154,7 +121,7 @@ export const experiences: Experience[] = [
   {
     id: 5,
     img: "https://yt3.googleusercontent.com/ytc/AIdro_nqJRBE-PvehwgWqiwAhPzjuDAi6kca33Z5mvp4UADlcyI=s900-c-k-c0x00ffffff-no-rj",
-    role: "Lead Coding Instructor",
+    role: "Lead Developer & Instructor",
     company: "Code Ninjas",
     date: "Dec 2022 - Sept 2025",
     desc: `A place for students from ages 7-14 to learn basic Computer Science concepts & fundementals of software development.

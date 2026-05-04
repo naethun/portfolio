@@ -15,9 +15,9 @@ const rows: Row[] = [
   { label: 'based in', value: 'san diego & los angeles, ca' },
   {
     label: 'email',
-    value: 'nathan@myaesthetic.ai',
-    href: 'mailto:nathan@myaesthetic.ai',
-    copy: 'nathan@myaesthetic.ai',
+    value: 'hello@naethun.dev',
+    href: 'mailto:hello@naethun.dev',
+    copy: 'hello@naethun.dev',
   },
   {
     label: 'github',
@@ -55,7 +55,7 @@ export default function ContactCard() {
     <div className="flex h-full items-center justify-center px-5 py-8 md:px-10">
       <div className="w-full max-w-md rounded-xl bg-white px-6 py-7 ring-1 ring-black/10 shadow-sm md:px-8 md:py-8">
         <p className="mb-4 font-mono text-[11px] tracking-wider text-neutral-500">
-          contact.vcf — preview
+          always open to new opportunities!
         </p>
         <ul className="divide-y divide-black/5">
           {rows.map((row) => (

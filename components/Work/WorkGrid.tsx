@@ -14,8 +14,8 @@ export function workItemId(item: WorkItem): string {
 
 export default function WorkGrid({ items, onSelect }: WorkGridProps) {
   return (
-    <div className="h-full overflow-y-auto px-5 py-6 md:px-7 md:py-7">
-      <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4">
+    <div className="h-full overflow-y-auto px-6 py-7 md:px-9 md:py-9">
+      <div className="grid grid-cols-2 gap-5 md:gap-6">
         {items.map((item, idx) => (
           <WorkCard
             key={workItemId(item)}

@@ -37,18 +37,26 @@ export default function CaseStudyDetail({ item, onClose }: CaseStudyDetailProps)
   const meta = getMeta(item);
   const containerRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
+  const [viewportRatio, setViewportRatio] = useState(1);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const onScroll = () => {
+    const update = () => {
       const max = el.scrollHeight - el.clientHeight;
       const next = max > 0 ? Math.min(1, Math.max(0, el.scrollTop / max)) : 0;
       setProgress(next);
+      const ratio = el.scrollHeight > 0 ? el.clientHeight / el.scrollHeight : 1;
+      setViewportRatio(Math.min(1, Math.max(0.08, ratio)));
     };
-    onScroll();
-    el.addEventListener('scroll', onScroll, { passive: true });
-    return () => el.removeEventListener('scroll', onScroll);
+    update();
+    el.addEventListener('scroll', update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener('scroll', update);
+      ro.disconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -77,38 +85,35 @@ export default function CaseStudyDetail({ item, onClose }: CaseStudyDetailProps)
           <span aria-hidden className="text-lg leading-none">×</span>
         </button>
 
-        {/* Scroll progress indicator */}
-        <div className="pointer-events-none absolute right-2 top-1/2 z-10 hidden h-40 w-[2px] -translate-y-1/2 overflow-hidden bg-black/10 md:block">
+        {/* Scroll indicator — track + thumb, mimics native scrollbar so it reads instantly */}
+        <div className="pointer-events-none absolute right-[30px] top-16 bottom-12 z-10 hidden w-[3px] rounded-full bg-black/[0.07] md:block">
           <div
-            className="w-full bg-neutral-700 transition-[height]"
-            style={{ height: `${Math.round(progress * 100)}%` }}
+            className="absolute left-0 right-0 rounded-full bg-neutral-800/85"
+            style={{
+              height: `${viewportRatio * 100}%`,
+              top: `${progress * (1 - viewportRatio) * 100}%`,
+            }}
           />
         </div>
-        <div className="pointer-events-none absolute right-5 top-[calc(50%-90px)] z-10 hidden font-mono text-[10px] tracking-wider text-neutral-500 md:block">
-          {Math.round(progress * 100)}%
-        </div>
 
-        <div ref={containerRef} className="h-full overflow-y-auto px-6 pt-16 pb-20 md:px-12 md:pt-20 md:pb-24">
+        <div
+          ref={containerRef}
+          className="h-full overflow-y-auto px-6 pt-16 pb-20 md:pl-12 md:pr-24 md:pt-20 md:pb-24 [&::-webkit-scrollbar]:hidden"
+          style={{ scrollbarWidth: 'none' }}
+        >
           <div className="mx-auto max-w-3xl">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-[160px_1fr] md:gap-10">
-              <div>
-                <p className="font-mono text-[11px] uppercase tracking-wider text-neutral-500">
-                  {meta.eyebrow}
+            <div className="flex flex-col items-center text-center">
+              <h2 className="text-3xl font-medium tracking-tight text-neutral-900 md:text-5xl">
+                {meta.title}
+              </h2>
+              <p className="mt-3 text-[13px] tracking-wide text-neutral-500 md:text-sm">
+                {meta.date}
+              </p>
+              {meta.caseStudy?.subtitle && (
+                <p className="mt-4 max-w-xl text-sm leading-relaxed text-neutral-600 md:text-base">
+                  {meta.caseStudy.subtitle}
                 </p>
-                <p className="mt-1 font-mono text-[11px] text-neutral-500">
-                  {meta.date}
-                </p>
-              </div>
-              <div>
-                <h2 className="font-display text-3xl font-medium text-neutral-900 md:text-4xl">
-                  {meta.title}
-                </h2>
-                {meta.caseStudy?.subtitle && (
-                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-neutral-600 md:text-base">
-                    {meta.caseStudy.subtitle}
-                  </p>
-                )}
-              </div>
+              )}
             </div>
 
             {meta.hero && (
