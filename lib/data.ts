@@ -1,4 +1,4 @@
-import type { Experience, Project } from '@/types/portfolio';
+import type { Experience, Project } from "@/types/portfolio";
 
 export const Bio = {
   name: "Nathan",
@@ -12,7 +12,7 @@ export const experiences: Experience[] = [
   {
     id: 0,
     img: "/aedemo1.gif",
-    role: "Founding Software Engineer - $1.5M Raised",
+    role: "Founding Software Engineer",
     company: "Aesthetic",
     date: "December 2025 - Present",
     desc: `Aesthetic is a all-in-one shopping platform that allows users to buy products through our fully autounomus shopping assistant. 100k+ users, 250k+ GMV, 160k+ on Instagram
@@ -23,18 +23,11 @@ export const experiences: Experience[] = [
 
     - Built the core visual search experience across web and mobile — interactive gesture-driven bounding box selection (60fps via Reanimated shared values), coordinate system transformation between platforms, race condition elimination via AbortController lifecycle management, and a product condition classifier with 40+ domain priors — plus an app-wide offline resilience layer with graceful degradation
 
-    - Architected a full-stack AI product intelligence pipeline across 3 codebases — Firecrawl web scraping → LLM-powered structured extraction (Schematron 8B) → two-tier async caching (sync top-5 + backgroundLambda for 6-15) → mobile delivery with graceful fallback, reducing product detail load times from seconds toinstant for returning users 
+    - Architected a full-stack AI product intelligence pipeline across 3 codebases — Firecrawl web scraping → LLM-powered structured extraction (Schematron 8B) → two-tier async caching (sync top-5 + backgroundLambda for 6-15) → mobile delivery with graceful fallback, reducing product detail load times from seconds toinstant for returning users
 
     - Led zero-downtime migration from DynamoDB to PostgreSQL for the entire backend, built migration that processed 4.6M + records, feature flags for safe rollout, & comprehensive tests.
     `,
-    skills: [
-      "Node.js",
-      "Expo",
-      "Next.js",
-      "AWS",
-      "PostgreSQL",
-      "DynamoDB",
-    ],
+    skills: ["Node.js", "Expo", "Next.js", "AWS", "PostgreSQL", "DynamoDB"],
   },
   {
     id: 1,
@@ -52,14 +45,7 @@ export const experiences: Experience[] = [
 
     - Led a comprehensive full-stack UI redesign across 60+ production files, extracting reusable React design primitives (tables, stat cards, page shells) & introducing a unified animation system. Modernizing the dashboard UX & significantly improving usability for high-volume call center workflows.
     `,
-    skills: [
-      "Node.js",
-      "PostgreSQL",
-      "Docker",
-      "Git",
-      "OpenAI",
-      "Next.js",
-    ],
+    skills: ["Node.js", "PostgreSQL", "Docker", "Git", "OpenAI", "Next.js"],
   },
   {
     id: 2,
@@ -68,24 +54,18 @@ export const experiences: Experience[] = [
     company: "Daedastream",
     date: "June 2025 - December 2025",
     desc: `Daedastream is a software agency that automates processes for clients, provides full-stack development, & AI-driven operations.
-  
+
     - Contributed to a multi-agent orchestration framework using tmux + Redis Streams, enabling dynamic spawning, coordination, & messaging between frontend, backend, & DevOps agents.
-  
+
     - Engineered console-capture automation using Playwright + NDJSON streaming to classify browser errors in real time & route them into the Redis-tmux loop for automated debugging workflows.
-  
+
     - Developed custom automation solutions for multiple clients, improving their analytics pipelines, system reliability, & operational efficiency through tailored data-processing & monitoring tools.
-  
+
     - Designed modular service components & internal APIs to support scalable automation, easier agent lifecycle management, & extensible event-driven architecture.
-  
+
     - Enhanced developer tooling by integrating test harnesses, logging utilities, & environment setups that accelerated iteration velocity across the engineering team.
     `,
-    skills: [
-      "Python",
-      "Redis",
-      "Tmux",
-      "Playwright",
-      "Git",
-    ],
+    skills: ["Python", "Redis", "Tmux", "Playwright", "Git"],
   },
   {
     id: 4,
@@ -131,12 +111,7 @@ export const experiences: Experience[] = [
       - Developed programs with Node JS & Python which automates certain tasks for our center director. A few programs I have made were, tracking quarterly attendance which resulted in a 20% increase in efficiency compared to manual methods, & a email filter which parsed through a list of over 1000 emails & got rid of duplicates & customers who don't want to be apart of the email list anymore.
 
       - Delegated tasks & managed other instructors to ensure each student is being educated efficiently & effectively.`,
-    skills: [
-      "JavaScript",
-      "NodeJS",
-      "C#",
-      "Python",
-    ],
+    skills: ["JavaScript", "NodeJS", "C#", "Python"],
   },
   {
     id: 6,
@@ -168,8 +143,7 @@ export const projects: Project[] = [
     id: 9,
     title: "Redacted CLI",
     date: "July 2022 - Jan 2023",
-    description:
-      `A software that automated tasks for our users on Discord & across the NFT space. I focused on the backend modules, specifically the NFT ones. We built a community of 2,600+ members throughout the whole process.
+    description: `A software that automated tasks for our users on Discord & across the NFT space. I focused on the backend modules, specifically the NFT ones. We built a community of 2,600+ members throughout the whole process.
 
       Some features that we had:
       MagicEden NFT Sniper, user set a price for a specific NFT, we h&led searching the backend for it, & proccessed the transaction on the blockchain it as soon as it finds the matching parameters.
@@ -190,14 +164,12 @@ export const projects: Project[] = [
     id: 1,
     title: "Telios AIO",
     date: "Dec 2022 - April 2023",
-    description:
-      `Full-stack development by me & my colleague. I focused on the backend. The purpose of this chrome extension was to help their users checkout a desired product in order to make a profit. By the use of automation, requests, & web scraping— this chrome extension was able to do what a human could do within in seconds.
+    description: `Full-stack development by me & my colleague. I focused on the backend. The purpose of this chrome extension was to help their users checkout a desired product in order to make a profit. By the use of automation, requests, & web scraping— this chrome extension was able to do what a human could do within in seconds.
 
       During the peak of it's era, it was highly functional & successful.
 
       Currently, I am not sure what modules work but I'm sure the shopify autofill may not be depreciated.`,
-    image:
-      "https://i.postimg.cc/9FPPH35P/t1.png",
+    image: "https://i.postimg.cc/9FPPH35P/t1.png",
     tags: ["Google Chrome Extension", "JavaScript", "HTML", "CSS", "jQuery"],
     category: "Chrome Extension",
     github: "https://github.com/naethun/Telios-AIO/",
@@ -206,8 +178,7 @@ export const projects: Project[] = [
     id: 2,
     title: "CareFi (LIVE AI BEST COAST 2025 HACKATHON WINNER)",
     date: "3 day hackathon",
-    description:
-      `We were inspired by a friend’s dermatology club that asked us to create a website for skincare analysis. This sparked our idea to build an AI-powered platform that makes personalized skincare accessible and affordable for everyone.
+    description: `We were inspired by a friend’s dermatology club that asked us to create a website for skincare analysis. This sparked our idea to build an AI-powered platform that makes personalized skincare accessible and affordable for everyone.
 
       CareFi uses advanced AI to analyze a user’s skin from photos and detect common conditions such as acne, dryness, oiliness, and sensitivity. It then recommends a customized skincare routine tailored to each user’s unique needs and budget, providing insights often associated with dermatologist-quality results.
 
@@ -238,5 +209,5 @@ export const projects: Project[] = [
     tags: ["Next.js", "Node.js", "PostgreSQL", "OpenAI", "Docker", "Git"],
     category: "Web Application",
     github: "https://devpost.com/software/carefi",
-  }
+  },
 ];
