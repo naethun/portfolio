@@ -165,6 +165,11 @@ export const projects: Project[] = [
           type: "text",
           content: `Robinhood made investing feel as easy as tapping a button — but for millions of young, first-time investors, "easy to access" never meant "easy to understand." Over a quarter, my team studied people who genuinely wanted to invest responsibly yet felt overwhelmed, anxious, or unsure the moment they opened the app, then defaulted to guessing. Our answer is a practice-first learning layer built into Robinhood: a zero-risk sandbox and bite-sized, plain-language lessons that let beginners build real confidence before a single dollar is on the line.`,
         },
+        {
+          type: "image",
+          content: "/portfolio/cogs127/sandbox.png",
+          alt: "Zero-risk Practice Sandbox with mock funds",
+        },
         { type: "heading", content: "The problem" },
         {
           type: "text",
@@ -219,6 +224,16 @@ Across everyone, jargon and on-screen overload were the friction points: moving 
 From there we built high-fidelity directions: a simplified portfolio hub that collapses the firehose of charts and numbers into a few expandable cards; a Standard / Focus View toggle that lets users dial down intensity depending on how they feel; and a Practice Sandbox using clearly-labeled mock funds. On the lesson side we prototyped a personalized learning-style setup feeding a short, one-concept-at-a-time flow (e.g. P/E ratio) with mock-money practice and hold-to-confirm friction, plus an annotated version layered over a realistic Robinhood screen.`,
         },
         {
+          type: "image",
+          content: "/portfolio/cogs127/lesson.png",
+          alt: "Lesson flow — one concept at a time with mock-money practice",
+        },
+        {
+          type: "image",
+          content: "/portfolio/cogs127/concepts.png",
+          alt: "Standard and Focus View concept for reducing visual intensity",
+        },
+        {
           type: "embed",
           content:
             "https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FMr9830xmwwIq5Q7SmdtJIw%2FCOGS-127---Robinhood-Extension-Hi-Fi-Prototype%3Fnode-id%3D0-1",
@@ -234,6 +249,11 @@ From there we built high-fidelity directions: a simplified portfolio hub that co
         {
           type: "text",
           content: `The final direction makes the zero-risk sandbox the default entry point — keeping A's step-by-step navigation as the backbone while adopting B's visual language. Two changes mattered most. First, we replaced the real, volatile stock shown in an alarming red chart (which unsettled testers even with a "this is practice" banner) with a fictional stock on a gentle upward curve, removing real-market anxiety entirely. Second, instead of dropping users into an undifferentiated list, the learning tab now opens to pre-selected beginner lessons with time estimates and difficulty tags, tracked progress, and a clear "continue" — so users always know where to start, with plain-language definitions surfacing for any jargon they hit.`,
+        },
+        {
+          type: "image",
+          content: "/portfolio/cogs127/before-after.png",
+          alt: "Before and after — volatile real stock replaced with a calm fictional one, plus guided lessons",
         },
         { type: "heading", content: "What I'd do next" },
         {
