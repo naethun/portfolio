@@ -140,6 +140,95 @@ export const experiences: Experience[] = [
 
 export const projects: Project[] = [
   {
+    id: 3,
+    title: "Learn First, Invest Second",
+    date: "COGS 127 · Spring 2026",
+    description: `A live case study from UCSD's COGS 127 (Applied Product & Software design). My team studied how young, first-time investors with mental health conditions actually behave inside Robinhood, then designed a practice-first learning layer that lets them build confidence before risking real money.`,
+    image: "/portfolio/cogs127/cover.svg",
+    tags: [
+      "UX Research",
+      "Interaction Design",
+      "Figma",
+      "Usability Testing",
+      "Fintech",
+      "Accessibility",
+    ],
+    category: "UX Research & Design — COGS 127",
+    github: "https://www.figma.com/design/Mr9830xmwwIq5Q7SmdtJIw/COGS-127---Robinhood-Extension-Hi-Fi-Prototype",
+    caseStudy: {
+      hero: "/portfolio/cogs127/cover.svg",
+      subtitle:
+        "A practice-first learning layer that helps overwhelmed first-time investors build confidence before risking real money.",
+      sections: [
+        { type: "heading", content: "The problem" },
+        {
+          type: "text",
+          content: `Young, first-time investors who also live with mental health conditions — anxiety, depression, BPD — want to grow their money, but mobile trading apps amplify impulsive, emotionally-reactive decisions and offer no real path to understanding. Left without guidance, they fall back on surface cues like trending lists, green percentages, and whatever sits at the top of the screen, rather than informed reasoning. The need isn't a flashier app; it's a way to feel safe enough to learn before money is on the line.`,
+        },
+        { type: "heading", content: "Why it matters" },
+        {
+          type: "text",
+          content: `Robinhood sits at the intersection of two trends in our generation. It reports 26.5M funded accounts — roughly 75% under 43 and nearly half first-time investors (Fortune, 2026) — and that same group is the most psychologically vulnerable: 46% of Gen Z hold a formal mental health diagnosis (Harmony Healthcare IT, 2025). Participation is climbing while comprehension lags: Gen Z has the lowest financial literacy of any generation at ~38% (2025 TIAA Institute-GFLEC Index), yet 56% of 18–25-year-olds already invest.
+
+In January 2024, Robinhood was charged with trivializing investing and nudging inexperienced users toward riskier, more frequent trades through confetti, streaks, and frictionless purchasing — design patterns that map directly onto the negative urgency seen in conditions like BPD. With an estimated $80T in wealth transferring to younger generations in the coming decades, designing for understanding rather than impulse isn't just ethical; it's how a platform earns long-term trust.`,
+        },
+        { type: "heading", content: "My role" },
+        {
+          type: "text",
+          content: `A four-person team project (James, Alex, Natalin, and me) spanning a full quarter. This case study reflects my work across user research, synthesis of findings into a point of view, and high-fidelity prototyping and testing in Figma.`,
+        },
+        { type: "heading", content: "Research: how do beginners actually behave?" },
+        {
+          type: "text",
+          content: `We ran moderated, think-aloud interviews with four participants spanning low to intermediate financial literacy — Isabella (19), Clara (20), Dylan (19), and Aaron (17). Each started with background questions, told a real "last time you had extra money" story, then attempted a live task: "You just got paid and have $300 left after expenses. Using the Robinhood app, walk me through what you'd do." We watched where attention went, where people hesitated, and where confidence and understanding came apart.`,
+        },
+        { type: "heading", content: "What we saw" },
+        {
+          type: "text",
+          content: `Confidence rarely meant understanding. Isabella chose a stock simply because it was "at the top" of the app, feeling sure despite having done no research. Beginners leaned on visual hierarchy — trending lists, big percentages, familiar brand names — to stand in for reasoning the app never taught.
+
+Risk and uncertainty were a universal barrier. Aaron, the least experienced, said the app "didn't feel welcoming to someone who's new to this" and wanted to call his parents before doing anything. Even Dylan, the most confident, held back because he couldn't see projected outcomes before committing. Clara showed that access to financial tools doesn't equal literacy — she used banking apps daily but still felt lost on investing, taxes, and retirement.
+
+Across everyone, jargon and on-screen overload were the friction points: moving numbers with no meaning, "top movers" that were moving down, and dense help text that explained nothing.`,
+        },
+        { type: "heading", content: "The insight" },
+        {
+          type: "text",
+          content: `The real barrier wasn't a lack of information — it was a lack of permission to explore without consequences. When we looked at where engagement actually clustered, it was around the feeling of safety, not the depth of any lesson. One participant wanted a parent present before touching anything; another specifically gravitated to "practice mode"; a third responded more to reduced visual overwhelm than to anything we taught. That reframed the project: don't add more content — give people a zero-risk place to learn by doing.`,
+        },
+        { type: "heading", content: "Designing the solution" },
+        {
+          type: "text",
+          content: `We explored two entry points: a dedicated, self-paced Tutorials tab that never disrupts the existing UI, and a re-accessible onboarding tutorial that can be reopened anytime from settings. Early sketches drew on Duolingo-style modular lessons — small, ordered, progress-saving — and taught us that button placement and visual hierarchy are far from obvious and worth iterating on directly.
+
+From there we built high-fidelity directions: a simplified portfolio hub that collapses the firehose of charts and numbers into a few expandable cards; a Standard / Focus View toggle that lets users dial down intensity depending on how they feel; and a Practice Sandbox using clearly-labeled mock funds. On the lesson side we prototyped a personalized learning-style setup feeding a short, one-concept-at-a-time flow (e.g. P/E ratio) with mock-money practice and hold-to-confirm friction, plus an annotated version layered over a realistic Robinhood screen.`,
+        },
+        {
+          type: "embed",
+          content:
+            "https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FMr9830xmwwIq5Q7SmdtJIw%2FCOGS-127---Robinhood-Extension-Hi-Fi-Prototype%3Fnode-id%3D0-1",
+          title: "Interactive Figma prototype — Robinhood learning layer",
+          ratio: "16 / 10",
+        },
+        { type: "heading", content: "Testing two directions" },
+        {
+          type: "text",
+          content: `We compared two prototypes in a within-subjects A/B study, counterbalancing order to reduce bias, with sessions framed as a test of the design — never of the participant. Two takeaways were consistent: Prototype A's linear navigation and a clear "next" gave low-confidence users the structure they needed, while Prototype B's cleaner visual hierarchy and color lowered the barrier to engage at all. Both participants gravitated to the practice section precisely because no real money was involved. Testing also surfaced concrete fixes: font sizes were too small, and an all-green interface made it ambiguous which elements were actually interactive.`,
+        },
+        { type: "heading", content: "Where it landed" },
+        {
+          type: "text",
+          content: `The final direction makes the zero-risk sandbox the default entry point — keeping A's step-by-step navigation as the backbone while adopting B's visual language. Two changes mattered most. First, we replaced the real, volatile stock shown in an alarming red chart (which unsettled testers even with a "this is practice" banner) with a fictional stock on a gentle upward curve, removing real-market anxiety entirely. Second, instead of dropping users into an undifferentiated list, the learning tab now opens to pre-selected beginner lessons with time estimates and difficulty tags, tracked progress, and a clear "continue" — so users always know where to start, with plain-language definitions surfacing for any jargon they hit.`,
+        },
+        { type: "heading", content: "What I'd do next" },
+        {
+          type: "text",
+          content: `Push the lessons fully inside the sandbox so users learn by doing rather than reading; validate specifically with the target population managing anxiety and BPD rather than general beginners; and run a dedicated accessibility pass on the font-size and button-affordance issues testing exposed. The throughline: the most ethical version of this product is also the most retentive one — trust and understanding become the reason people stay.`,
+        },
+      ],
+    },
+  },
+  {
     id: 9,
     title: "Redacted CLI",
     date: "July 2022 - Jan 2023",

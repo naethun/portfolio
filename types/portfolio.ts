@@ -21,7 +21,8 @@ export interface SkillCategory {
 export type CaseStudySection =
   | { type: 'heading'; content: string }
   | { type: 'text'; content: string }
-  | { type: 'image'; content: string; alt?: string };
+  | { type: 'image'; content: string; alt?: string }
+  | { type: 'embed'; content: string; title?: string; ratio?: string };
 
 export interface CaseStudy {
   hero?: string;

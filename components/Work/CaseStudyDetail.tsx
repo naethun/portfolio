@@ -178,6 +178,29 @@ function CaseStudyBlock({ section }: { section: CaseStudySection }) {
       </div>
     );
   }
+  if (section.type === 'embed') {
+    return (
+      <figure className="space-y-2">
+        <div
+          className="w-full overflow-hidden rounded-lg bg-neutral-100 ring-1 ring-black/10"
+          style={{ aspectRatio: section.ratio ?? '4 / 3' }}
+        >
+          <iframe
+            src={section.content}
+            title={section.title ?? 'Embedded prototype'}
+            loading="lazy"
+            allowFullScreen
+            className="h-full w-full"
+          />
+        </div>
+        {section.title && (
+          <figcaption className="text-center font-mono text-[11px] uppercase tracking-wider text-neutral-500">
+            {section.title}
+          </figcaption>
+        )}
+      </figure>
+    );
+  }
   return (
     <p className="whitespace-pre-line text-sm leading-relaxed text-neutral-700 md:text-[15px]">
       {section.content}
