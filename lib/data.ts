@@ -190,7 +190,7 @@ In January 2024, Robinhood was charged with trivializing investing and nudging i
 
 - Design & prototyping: contributed to the high-fidelity design directions and iterations in Figma (the sandbox, lesson flows, and landing-page concepts), and to the design edits made in response to user-testing feedback.
 
-- Testing & iteration: helped run the A/B usability sessions and translate what we learned into the final direction.`,
+- Closing the loop with users: brought the designs back to people from our original interview group, walked them through the prototype, and captured what resonated and what fell flat — feeding their reactions directly into the next round of design decisions.`,
         },
         { type: "heading", content: "Research: how do beginners actually behave?" },
         {
