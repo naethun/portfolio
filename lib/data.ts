@@ -180,7 +180,17 @@ In January 2024, Robinhood was charged with trivializing investing and nudging i
         { type: "heading", content: "My role" },
         {
           type: "text",
-          content: `A four-person team project (James, Alex, Natalin, and me) spanning a full quarter. This case study reflects my work across user research, synthesis of findings into a point of view, and high-fidelity prototyping and testing in Figma.`,
+          content: `A four-person team project (James, Alex, Natalin, and me) spanning a full quarter. I contributed across the full process rather than owning a single lane:
+
+- User research & interviews: helped design the interview protocol and the live "$300 to invest" task, then ran moderated, think-aloud sessions with participants and captured their behavior, hesitations, and quotes.
+
+- Synthesis & findings: turned raw interview notes into per-participant findings and the cross-participant insights that exposed the real pattern — confidence without comprehension, and safety mattering more than lesson depth.
+
+- Problem framing & thesis: helped sharpen the problem statement to focus on people rather than the app, and drove the point-of-view that reframed the project from "add more education" to "give beginners a zero-risk place to learn by doing."
+
+- Design & prototyping: contributed to the high-fidelity design directions and iterations in Figma (the sandbox, lesson flows, and landing-page concepts), and to the design edits made in response to user-testing feedback.
+
+- Testing & iteration: helped run the A/B usability sessions and translate what we learned into the final direction.`,
         },
         { type: "heading", content: "Research: how do beginners actually behave?" },
         {
