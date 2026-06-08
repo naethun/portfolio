@@ -141,9 +141,9 @@ export const experiences: Experience[] = [
 export const projects: Project[] = [
   {
     id: 3,
-    title: "Learn First, Invest Second",
+    title: "Helping Anxious Beginners Learn Before They Invest",
     date: "COGS 127 · Spring 2026",
-    description: `A live case study from UCSD's COGS 127 (Applied Product & Software design). My team studied how young, first-time investors with mental health conditions actually behave inside Robinhood, then designed a practice-first learning layer that lets them build confidence before risking real money.`,
+    description: `A live case study from UCSD's COGS 127 (Data-Driven UX/Product Design). My team studied how young, first-time investors with mental health conditions actually behave inside Robinhood, then designed a practice-first learning layer that lets them build confidence before risking real money.`,
     image: "/portfolio/cogs127/cover.svg",
     tags: [
       "UX Research",
@@ -160,6 +160,11 @@ export const projects: Project[] = [
       subtitle:
         "A practice-first learning layer that helps overwhelmed first-time investors build confidence before risking real money.",
       sections: [
+        { type: "heading", content: "Overview" },
+        {
+          type: "text",
+          content: `Robinhood made investing feel as easy as tapping a button — but for millions of young, first-time investors, "easy to access" never meant "easy to understand." Over a quarter, my team studied people who genuinely wanted to invest responsibly yet felt overwhelmed, anxious, or unsure the moment they opened the app, then defaulted to guessing. Our answer is a practice-first learning layer built into Robinhood: a zero-risk sandbox and bite-sized, plain-language lessons that let beginners build real confidence before a single dollar is on the line.`,
+        },
         { type: "heading", content: "The problem" },
         {
           type: "text",
