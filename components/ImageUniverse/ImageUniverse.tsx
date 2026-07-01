@@ -55,6 +55,11 @@ const FOV = 55;
 const INTRO_DURATION = 2.2; // seconds
 const START_DISTANCE = POSITION_SPREAD * 1.5; // resting distance after intro
 
+/** Globe formation (gesture-driven scatter → sphere morph). */
+const GLOBE_RADIUS = 16; // sphere radius in world units when fully formed
+const FORMATION_EASE = 3.0; // higher = snappier scatter↔globe transition
+const GLOBE_SPIN_SPEED = 0.25; // radians/sec at full formation
+
 /* ==========================================================================*/
 
 interface Props {
@@ -64,6 +69,12 @@ interface Props {
   background?: string;
   /** fired when a sprite is clicked (camera also flies to frame it). */
   onSelect?: (media: UniverseMedia, index: number) => void;
+  /**
+   * Optional 0..1 target the render loop eases toward: 0 = scattered cloud,
+   * 1 = globe. Driven externally (e.g. by hand gestures). Instanced-planes
+   * mode only; ignored in Points mode.
+   */
+  formationTargetRef?: React.RefObject<number>;
 }
 
 interface Pickable {
@@ -80,8 +91,11 @@ export default function ImageUniverse({
   className,
   background = BACKGROUND_COLOR,
   onSelect,
+  formationTargetRef,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const formationTargetInternal = useRef(0);
+  const formationRef = formationTargetRef ?? formationTargetInternal;
   // keep the latest onSelect without re-running the heavy scene effect
   const onSelectRef = useRef(onSelect);
   useEffect(() => {
@@ -145,6 +159,15 @@ export default function ImageUniverse({
 
     // ---- shared reveal uniform (0 -> 1 intro fade/scale) -------------------
     const uReveal = { value: 0 };
+
+    // ---- globe-formation uniforms (scatter <-> sphere morph) ---------------
+    const uFormation = { value: 0 };
+    const uSpin = { value: 0 };
+    const uGlobeRadius = { value: GLOBE_RADIUS };
+    const uCamRight = { value: new THREE.Vector3(1, 0, 0) };
+    const uCamUp = { value: new THREE.Vector3(0, 1, 0) };
+    // true once the instanced image mesh exists (globe is instanced-only)
+    let globeActive = false;
 
     // ---- deterministic-ish position + size generation ----------------------
     const count = media.length;
@@ -321,15 +344,28 @@ export default function ImageUniverse({
         geo.setIndex([0, 1, 2, 0, 2, 3]);
 
         const iPos = new Float32Array(n * 3);
+        const iSphereDir = new Float32Array(n * 3);
         const iScale = new Float32Array(n * 2);
         const iUvOffset = new Float32Array(n * 2);
         const iUvScale = new Float32Array(n * 2);
+
+        // Fibonacci sphere: even direction per image for globe coverage.
+        const golden = Math.PI * (3 - Math.sqrt(5));
 
         items.forEach((item, k) => {
           const g = imageIndices[k];
           iPos[k * 3] = positions[g * 3];
           iPos[k * 3 + 1] = positions[g * 3 + 1];
           iPos[k * 3 + 2] = positions[g * 3 + 2];
+
+          // even point on the unit sphere for this image
+          const y = n > 1 ? 1 - (k / (n - 1)) * 2 : 0;
+          const rad = Math.sqrt(Math.max(0, 1 - y * y));
+          const th = k * golden;
+          iSphereDir[k * 3] = Math.cos(th) * rad;
+          iSphereDir[k * 3 + 1] = y;
+          iSphereDir[k * 3 + 2] = Math.sin(th) * rad;
+
           const base = sizeBase[g] * PLANE_WORLD_SCALE;
           const a = item.aspect;
           const w = base * Math.sqrt(a);
@@ -344,13 +380,22 @@ export default function ImageUniverse({
         });
 
         geo.setAttribute('iPosition', new THREE.InstancedBufferAttribute(iPos, 3));
+        geo.setAttribute('iSphereDir', new THREE.InstancedBufferAttribute(iSphereDir, 3));
         geo.setAttribute('iScale', new THREE.InstancedBufferAttribute(iScale, 2));
         geo.setAttribute('iUvOffset', new THREE.InstancedBufferAttribute(iUvOffset, 2));
         geo.setAttribute('iUvScale', new THREE.InstancedBufferAttribute(iUvScale, 2));
         geo.instanceCount = n;
 
         const mat = new THREE.ShaderMaterial({
-          uniforms: { uAtlas, uReveal },
+          uniforms: {
+            uAtlas,
+            uReveal,
+            uFormation,
+            uSpin,
+            uGlobeRadius,
+            uCamRight,
+            uCamUp,
+          },
           vertexShader: PLANE_VERTEX,
           fragmentShader: PLANE_FRAGMENT,
           transparent: true,
@@ -358,6 +403,7 @@ export default function ImageUniverse({
           depthWrite: true,
           side: THREE.DoubleSide,
         });
+        globeActive = true;
 
         const mesh = new THREE.Mesh(geo, mat);
         mesh.frustumCulled = false;
@@ -571,15 +617,35 @@ export default function ImageUniverse({
     }
 
     // ---- render loop -------------------------------------------------------
+    let lastFrame = performance.now();
     const animate = () => {
       raf = requestAnimationFrame(animate);
+      const now = performance.now();
+      const dt = Math.min(0.05, (now - lastFrame) / 1000); // clamp long stalls
+      lastFrame = now;
+
       // enable idle drift only when truly idle and intro finished
       if (!introRunning && !controls.autoRotate) {
-        if (performance.now() - lastInteraction > IDLE_DELAY_MS) {
+        if (now - lastInteraction > IDLE_DELAY_MS) {
           controls.autoRotate = true;
         }
       }
+
       controls.update();
+
+      // ease the scatter <-> globe morph toward its external target, spin the
+      // globe (proportional to formation), and refresh the billboard camera basis
+      // (after controls.update so it reflects this frame's camera orientation).
+      if (globeActive) {
+        const target = Math.max(0, Math.min(1, formationRef.current ?? 0));
+        uFormation.value += (target - uFormation.value) * Math.min(1, dt * FORMATION_EASE);
+        uSpin.value += GLOBE_SPIN_SPEED * dt * uFormation.value;
+        camera.updateMatrixWorld();
+        const e = camera.matrixWorld.elements;
+        uCamRight.value.set(e[0], e[1], e[2]);
+        uCamUp.value.set(e[4], e[5], e[6]);
+      }
+
       renderer.render(scene, camera);
     };
 
@@ -619,8 +685,8 @@ export default function ImageUniverse({
         container.removeChild(renderer.domElement);
       }
     };
-    // rebuild if the media set changes
-  }, [media, background, isEmpty]);
+    // rebuild if the media set changes (formationRef is a stable ref object)
+  }, [media, background, isEmpty, formationRef]);
 
   return (
     <div

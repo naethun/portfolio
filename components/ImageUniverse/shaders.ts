@@ -82,16 +82,28 @@ export const POINTS_FRAGMENT = /* glsl */ `
 
 export const PLANE_VERTEX = /* glsl */ `
   // Provided by three for the unit-quad BufferGeometry: position (vec3), uv.
-  attribute vec3 iPosition;   // per-instance world center
+  attribute vec3 iPosition;   // per-instance scattered world center
+  attribute vec3 iSphereDir;  // per-instance unit direction on the globe
   attribute vec2 iScale;      // per-instance world (width, height) — encodes aspect
   attribute vec2 iUvOffset;
   attribute vec2 iUvScale;
 
   uniform float uReveal;
+  uniform float uFormation;    // 0 = scattered cloud, 1 = globe
+  uniform float uSpin;         // globe rotation about Y (radians)
+  uniform float uGlobeRadius;
+  uniform vec3 uCamRight;      // world-space camera basis (for the billboard term)
+  uniform vec3 uCamUp;
 
   varying vec2 vUv;
   varying vec2 vUvOffset;
   varying vec2 vUvScale;
+
+  vec3 rotateY(vec3 p, float a) {
+    float c = cos(a);
+    float s = sin(a);
+    return vec3(c * p.x + s * p.z, p.y, -s * p.x + c * p.z);
+  }
 
   void main() {
     // Flip V: plane uv has (0,0) at bottom-left, atlas is authored top-left.
@@ -99,11 +111,28 @@ export const PLANE_VERTEX = /* glsl */ `
     vUvOffset = iUvOffset;
     vUvScale = iUvScale;
 
-    // Screen-aligned billboard: place the instance center in view space, then
-    // offset by the quad corner scaled in view space so it always faces camera.
-    vec4 mv = modelViewMatrix * vec4(iPosition, 1.0);
-    mv.xy += position.xy * iScale * uReveal;
-    gl_Position = projectionMatrix * mv;
+    // Globe target: spin the sphere direction about Y, place on the sphere.
+    vec3 dir = rotateY(iSphereDir, uSpin);
+    vec3 spherePos = dir * uGlobeRadius;
+
+    // Surface-tangent basis so the quad faces outward (reads as a solid globe).
+    vec3 up = abs(dir.y) > 0.99 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 0.0);
+    vec3 tangent = normalize(cross(up, dir));
+    vec3 bitangent = cross(dir, tangent);
+
+    // Instance center: scattered position -> sphere surface.
+    vec3 center = mix(iPosition, spherePos, uFormation);
+
+    float sx = position.x * iScale.x * uReveal;
+    float sy = position.y * iScale.y * uReveal;
+
+    // Billboard (camera-facing) vs globe surface offset, blended by formation.
+    // At uFormation = 0 this reduces to the original screen-aligned billboard.
+    vec3 billboardOffset = uCamRight * sx + uCamUp * sy;
+    vec3 globeOffset = tangent * sx + bitangent * sy;
+    vec3 worldPos = center + mix(billboardOffset, globeOffset, uFormation);
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(worldPos, 1.0);
   }
 `;
 
