@@ -14,22 +14,26 @@ import ContactCard from '@/components/ContactCard';
 
 import { Bio, experiences, projects } from '@/lib/data';
 import type { Folder, WorkItem } from '@/types/portfolio';
-import type { LoopImage } from '@/lib/getLoopImages';
+import type { UniverseMedia } from '@/lib/getUniverseMedia';
 
-const HandLoop = dynamic(() => import('@/components/HandLoop/HandLoop'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full items-center justify-center font-mono text-xs tracking-[0.2em] text-neutral-400">
-      LOADING…
-    </div>
-  ),
-});
+// three.js + WebGL is client-only, so load the universe with SSR disabled.
+const ImageUniverse = dynamic(
+  () => import('@/components/ImageUniverse/ImageUniverse'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center font-mono text-xs tracking-[0.2em] text-neutral-400">
+        LOADING…
+      </div>
+    ),
+  },
+);
 
 interface Props {
-  loopImages: LoopImage[];
+  media: UniverseMedia[];
 }
 
-export default function HomeClient({ loopImages }: Props) {
+export default function HomeClient({ media }: Props) {
   const [folder, setFolder] = useState<Folder>('work');
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -100,7 +104,7 @@ export default function HomeClient({ loopImages }: Props) {
 
               {folder === 'moodboard' && (
                 <div className="relative h-full w-full">
-                  <HandLoop images={loopImages} frameless />
+                  <ImageUniverse media={media} />
                 </div>
               )}
 

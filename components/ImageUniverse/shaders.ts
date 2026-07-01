@@ -1,0 +1,163 @@
+/**
+ * SHADERS
+ * =======
+ * Two render paths share the same atlas + per-particle data:
+ *
+ *  1. POINTS  — one THREE.Points, size-by-distance via gl_PointSize (this is the
+ *     technique from the brief). Sprites are square and GPU-capped (~1024px), so
+ *     we discard the out-of-aspect margins to avoid distortion.
+ *
+ *  2. INSTANCED PLANES — one instanced draw of camera-facing quads scaled to each
+ *     image's aspect ratio. Crisp (mipmapped, not point-size-capped) and correct
+ *     aspect. This is the default because the gallery is mostly portrait photos.
+ *
+ * Both discard fully transparent fragments so sprites composite cleanly, and both
+ * multiply alpha by `uReveal` for the GSAP fade-in.
+ */
+
+// ----------------------------------------------------------------------------
+// POINTS
+// ----------------------------------------------------------------------------
+
+export const POINTS_VERTEX = /* glsl */ `
+  attribute float aSize;
+  attribute vec2 aUvOffset;
+  attribute vec2 aUvScale;
+  attribute float aAspect;
+
+  uniform float uSizeFactor;   // the tunable "300.0" point-size factor
+  uniform float uReveal;       // 0..1 intro scale-in
+  uniform float uPixelRatio;
+
+  varying vec2 vUvOffset;
+  varying vec2 vUvScale;
+  varying float vAspect;
+
+  void main() {
+    vUvOffset = aUvOffset;
+    vUvScale = aUvScale;
+    vAspect = aAspect;
+
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+    // near = big, far = small. mix(...) keeps a little size while revealing.
+    gl_PointSize = aSize * mix(0.2, 1.0, uReveal) * uPixelRatio * (uSizeFactor / -mvPosition.z);
+    gl_Position = projectionMatrix * mvPosition;
+  }
+`;
+
+export const POINTS_FRAGMENT = /* glsl */ `
+  precision highp float;
+
+  uniform sampler2D uAtlas;
+  uniform float uReveal;
+
+  varying vec2 vUvOffset;
+  varying vec2 vUvScale;
+  varying float vAspect;
+
+  void main() {
+    // gl_PointCoord: (0,0) top-left, (1,1) bottom-right — matches our atlas.
+    vec2 pc = gl_PointCoord;
+
+    // The sprite is square; remap so the image keeps its aspect and the
+    // leftover margin is discarded (no stretch, no crop).
+    vec2 uv = pc;
+    if (vAspect >= 1.0) {
+      uv.y = (pc.y - 0.5) * vAspect + 0.5;   // landscape: shrink vertically
+    } else {
+      uv.x = (pc.x - 0.5) / vAspect + 0.5;   // portrait: shrink horizontally
+    }
+    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) discard;
+
+    vec4 color = texture2D(uAtlas, vUvOffset + uv * vUvScale);
+    if (color.a < 0.01) discard;
+    color.a *= uReveal;
+    gl_FragColor = color;
+  }
+`;
+
+// ----------------------------------------------------------------------------
+// INSTANCED PLANES (billboarded quads)
+// ----------------------------------------------------------------------------
+
+export const PLANE_VERTEX = /* glsl */ `
+  // Provided by three for the unit-quad BufferGeometry: position (vec3), uv.
+  attribute vec3 iPosition;   // per-instance world center
+  attribute vec2 iScale;      // per-instance world (width, height) — encodes aspect
+  attribute vec2 iUvOffset;
+  attribute vec2 iUvScale;
+
+  uniform float uReveal;
+
+  varying vec2 vUv;
+  varying vec2 vUvOffset;
+  varying vec2 vUvScale;
+
+  void main() {
+    // Flip V: plane uv has (0,0) at bottom-left, atlas is authored top-left.
+    vUv = vec2(uv.x, 1.0 - uv.y);
+    vUvOffset = iUvOffset;
+    vUvScale = iUvScale;
+
+    // Screen-aligned billboard: place the instance center in view space, then
+    // offset by the quad corner scaled in view space so it always faces camera.
+    vec4 mv = modelViewMatrix * vec4(iPosition, 1.0);
+    mv.xy += position.xy * iScale * uReveal;
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+
+export const PLANE_FRAGMENT = /* glsl */ `
+  precision highp float;
+
+  uniform sampler2D uAtlas;
+  uniform float uReveal;
+
+  varying vec2 vUv;
+  varying vec2 vUvOffset;
+  varying vec2 vUvScale;
+
+  void main() {
+    vec4 color = texture2D(uAtlas, vUvOffset + vUv * vUvScale);
+    if (color.a < 0.01) discard;
+    color.a *= uReveal;
+    gl_FragColor = color;
+  }
+`;
+
+// ----------------------------------------------------------------------------
+// VIDEO (single billboarded plane, one per video texture)
+// ----------------------------------------------------------------------------
+
+export const VIDEO_VERTEX = /* glsl */ `
+  uniform vec3 uCenter;
+  uniform vec2 uScale;
+  uniform float uReveal;
+
+  varying vec2 vUv;
+
+  void main() {
+    vUv = vec2(uv.x, 1.0 - uv.y);
+    vec4 mv = modelViewMatrix * vec4(uCenter, 1.0);
+    mv.xy += position.xy * uScale * uReveal;
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+
+export const VIDEO_FRAGMENT = /* glsl */ `
+  precision highp float;
+
+  uniform sampler2D uVideo;
+  uniform float uReveal;
+
+  varying vec2 vUv;
+
+  void main() {
+    vec4 color = texture2D(uVideo, vUv);
+    // Match the image shaders: with depthWrite on, transparent regions of an
+    // alpha-channel video must not write depth and occlude sprites behind them.
+    if (color.a < 0.01) discard;
+    color.a *= uReveal;
+    gl_FragColor = color;
+  }
+`;

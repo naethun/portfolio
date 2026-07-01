@@ -1,5 +1,5 @@
 import { JetBrains_Mono } from 'next/font/google';
-import { getLoopImages } from '@/lib/getLoopImages';
+import { getUniverseMedia } from '@/lib/getUniverseMedia';
 import LoopClient from './LoopClient';
 
 const jetbrainsMono = JetBrains_Mono({
@@ -9,14 +9,17 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: 'LOOP · interactive image gallery',
+  title: 'LOOP · 3D image universe',
 };
 
 export default function LoopPage() {
-  const images = getLoopImages();
+  const media = getUniverseMedia();
   return (
-    <main className={`${jetbrainsMono.className} ${jetbrainsMono.variable} bg-black text-white`}>
-      <LoopClient images={images} />
+    <main
+      className={`${jetbrainsMono.className} ${jetbrainsMono.variable}`}
+      style={{ background: '#f4f2ee' }}
+    >
+      <LoopClient media={media} />
     </main>
   );
 }

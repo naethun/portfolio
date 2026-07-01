@@ -1,7 +1,7 @@
-import { getLoopImages } from '@/lib/getLoopImages';
+import { getUniverseMedia } from '@/lib/getUniverseMedia';
 import HomeClient from './HomeClient';
 
 export default function Home() {
-  const loopImages = getLoopImages();
-  return <HomeClient loopImages={loopImages} />;
+  const media = getUniverseMedia();
+  return <HomeClient media={media} />;
 }
