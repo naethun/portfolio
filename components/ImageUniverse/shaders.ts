@@ -84,14 +84,17 @@ export const PLANE_VERTEX = /* glsl */ `
   // Provided by three for the unit-quad BufferGeometry: position (vec3), uv.
   attribute vec3 iPosition;   // per-instance scattered world center
   attribute vec3 iSphereDir;  // per-instance unit direction on the globe
+  attribute vec2 iHelix;      // per-instance helix params: (base angle, height)
   attribute vec2 iScale;      // per-instance world (width, height) — encodes aspect
   attribute vec2 iUvOffset;
   attribute vec2 iUvScale;
 
   uniform float uReveal;
-  uniform float uFormation;    // 0 = scattered cloud, 1 = globe
-  uniform float uSpin;         // globe rotation about Y (radians)
+  uniform float uFormation;    // 0 = scattered cloud, 1 = formed shape
+  uniform float uShape;        // 0 = globe, 1 = helix (DNA)
+  uniform float uSpin;         // rotation about Y (radians)
   uniform float uGlobeRadius;
+  uniform float uHelixRadius;
   uniform vec3 uCamRight;      // world-space camera basis (for the billboard term)
   uniform vec3 uCamUp;
 
@@ -111,26 +114,35 @@ export const PLANE_VERTEX = /* glsl */ `
     vUvOffset = iUvOffset;
     vUvScale = iUvScale;
 
-    // Globe target: spin the sphere direction about Y, place on the sphere.
-    vec3 dir = rotateY(iSphereDir, uSpin);
-    vec3 spherePos = dir * uGlobeRadius;
-
+    // --- Globe target: spin the sphere direction about Y, place on the sphere.
+    vec3 dirG = rotateY(iSphereDir, uSpin);
+    vec3 globePos = dirG * uGlobeRadius;
     // Surface-tangent basis so the quad faces outward (reads as a solid globe).
-    vec3 up = abs(dir.y) > 0.99 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 0.0);
-    vec3 tangent = normalize(cross(up, dir));
-    vec3 bitangent = cross(dir, tangent);
+    vec3 upG = abs(dirG.y) > 0.99 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 0.0);
+    vec3 tanG = normalize(cross(upG, dirG));
+    vec3 bitG = cross(dirG, tanG);
 
-    // Instance center: scattered position -> sphere surface.
-    vec3 center = mix(iPosition, spherePos, uFormation);
+    // --- Helix (DNA) target: point on a spinning vertical spiral, facing out.
+    float ang = iHelix.x + uSpin;
+    vec3 helixPos = vec3(cos(ang) * uHelixRadius, iHelix.y, sin(ang) * uHelixRadius);
+    vec3 nH = vec3(cos(ang), 0.0, sin(ang)); // radial outward (horizontal)
+    vec3 tanH = normalize(cross(vec3(0.0, 1.0, 0.0), nH));
+    vec3 bitH = cross(nH, tanH);
+
+    // Blend the formed shape (globe <-> helix), then scatter <-> formed.
+    vec3 formedPos = mix(globePos, helixPos, uShape);
+    vec3 tangent = mix(tanG, tanH, uShape);
+    vec3 bitangent = mix(bitG, bitH, uShape);
+    vec3 center = mix(iPosition, formedPos, uFormation);
 
     float sx = position.x * iScale.x * uReveal;
     float sy = position.y * iScale.y * uReveal;
 
-    // Billboard (camera-facing) vs globe surface offset, blended by formation.
+    // Billboard (camera-facing) vs formed-surface offset, blended by formation.
     // At uFormation = 0 this reduces to the original screen-aligned billboard.
     vec3 billboardOffset = uCamRight * sx + uCamUp * sy;
-    vec3 globeOffset = tangent * sx + bitangent * sy;
-    vec3 worldPos = center + mix(billboardOffset, globeOffset, uFormation);
+    vec3 shapeOffset = tangent * sx + bitangent * sy;
+    vec3 worldPos = center + mix(billboardOffset, shapeOffset, uFormation);
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(worldPos, 1.0);
   }

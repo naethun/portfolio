@@ -60,6 +60,12 @@ const GLOBE_RADIUS = 16; // sphere radius in world units when fully formed
 const FORMATION_EASE = 3.0; // higher = snappier scatter↔globe transition
 const GLOBE_SPIN_SPEED = 0.25; // radians/sec at full formation
 
+/** Helix (DNA) shape — the alternate formed shape (palms→globe, backs→helix). */
+const HELIX_RADIUS = 11; // spiral radius in world units
+const HELIX_HEIGHT = 46; // total vertical span of the double helix
+const HELIX_TURNS = 3; // how many full turns top-to-bottom
+const SHAPE_EASE = 2.5; // higher = snappier globe↔helix transition
+
 /* ==========================================================================*/
 
 interface Props {
@@ -71,10 +77,15 @@ interface Props {
   onSelect?: (media: UniverseMedia, index: number) => void;
   /**
    * Optional 0..1 target the render loop eases toward: 0 = scattered cloud,
-   * 1 = globe. Driven externally (e.g. by hand gestures). Instanced-planes
+   * 1 = formed shape. Driven externally (e.g. by hand gestures). Instanced-planes
    * mode only; ignored in Points mode.
    */
   formationTargetRef?: React.RefObject<number>;
+  /**
+   * Optional 0..1 target selecting the formed shape: 0 = globe, 1 = helix (DNA).
+   * Only visible while formationTargetRef > 0.
+   */
+  shapeTargetRef?: React.RefObject<number>;
 }
 
 interface Pickable {
@@ -92,10 +103,13 @@ export default function ImageUniverse({
   background = BACKGROUND_COLOR,
   onSelect,
   formationTargetRef,
+  shapeTargetRef,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const formationTargetInternal = useRef(0);
   const formationRef = formationTargetRef ?? formationTargetInternal;
+  const shapeTargetInternal = useRef(0);
+  const shapeRef = shapeTargetRef ?? shapeTargetInternal;
   // keep the latest onSelect without re-running the heavy scene effect
   const onSelectRef = useRef(onSelect);
   useEffect(() => {
@@ -162,8 +176,10 @@ export default function ImageUniverse({
 
     // ---- globe-formation uniforms (scatter <-> sphere morph) ---------------
     const uFormation = { value: 0 };
+    const uShape = { value: 0 };
     const uSpin = { value: 0 };
     const uGlobeRadius = { value: GLOBE_RADIUS };
+    const uHelixRadius = { value: HELIX_RADIUS };
     const uCamRight = { value: new THREE.Vector3(1, 0, 0) };
     const uCamUp = { value: new THREE.Vector3(0, 1, 0) };
     // true once the instanced image mesh exists (globe is instanced-only)
@@ -345,12 +361,15 @@ export default function ImageUniverse({
 
         const iPos = new Float32Array(n * 3);
         const iSphereDir = new Float32Array(n * 3);
+        const iHelix = new Float32Array(n * 2);
         const iScale = new Float32Array(n * 2);
         const iUvOffset = new Float32Array(n * 2);
         const iUvScale = new Float32Array(n * 2);
 
         // Fibonacci sphere: even direction per image for globe coverage.
         const golden = Math.PI * (3 - Math.sqrt(5));
+        // Double helix: two strands offset by π, images stepped up the height.
+        const pairs = Math.max(1, Math.ceil(n / 2));
 
         items.forEach((item, k) => {
           const g = imageIndices[k];
@@ -365,6 +384,12 @@ export default function ImageUniverse({
           iSphereDir[k * 3] = Math.cos(th) * rad;
           iSphereDir[k * 3 + 1] = y;
           iSphereDir[k * 3 + 2] = Math.sin(th) * rad;
+
+          // double-helix params for this image
+          const strand = k % 2;
+          const t = pairs > 1 ? Math.floor(k / 2) / (pairs - 1) : 0.5; // 0..1 up
+          iHelix[k * 2] = t * HELIX_TURNS * Math.PI * 2 + strand * Math.PI;
+          iHelix[k * 2 + 1] = (t - 0.5) * HELIX_HEIGHT;
 
           const base = sizeBase[g] * PLANE_WORLD_SCALE;
           const a = item.aspect;
@@ -381,6 +406,7 @@ export default function ImageUniverse({
 
         geo.setAttribute('iPosition', new THREE.InstancedBufferAttribute(iPos, 3));
         geo.setAttribute('iSphereDir', new THREE.InstancedBufferAttribute(iSphereDir, 3));
+        geo.setAttribute('iHelix', new THREE.InstancedBufferAttribute(iHelix, 2));
         geo.setAttribute('iScale', new THREE.InstancedBufferAttribute(iScale, 2));
         geo.setAttribute('iUvOffset', new THREE.InstancedBufferAttribute(iUvOffset, 2));
         geo.setAttribute('iUvScale', new THREE.InstancedBufferAttribute(iUvScale, 2));
@@ -391,8 +417,10 @@ export default function ImageUniverse({
             uAtlas,
             uReveal,
             uFormation,
+            uShape,
             uSpin,
             uGlobeRadius,
+            uHelixRadius,
             uCamRight,
             uCamUp,
           },
@@ -639,6 +667,8 @@ export default function ImageUniverse({
       if (globeActive) {
         const target = Math.max(0, Math.min(1, formationRef.current ?? 0));
         uFormation.value += (target - uFormation.value) * Math.min(1, dt * FORMATION_EASE);
+        const shapeTarget = Math.max(0, Math.min(1, shapeRef.current ?? 0));
+        uShape.value += (shapeTarget - uShape.value) * Math.min(1, dt * SHAPE_EASE);
         uSpin.value += GLOBE_SPIN_SPEED * dt * uFormation.value;
         camera.updateMatrixWorld();
         const e = camera.matrixWorld.elements;
@@ -685,8 +715,8 @@ export default function ImageUniverse({
         container.removeChild(renderer.domElement);
       }
     };
-    // rebuild if the media set changes (formationRef is a stable ref object)
-  }, [media, background, isEmpty, formationRef]);
+    // rebuild if the media set changes (formationRef/shapeRef are stable refs)
+  }, [media, background, isEmpty, formationRef, shapeRef]);
 
   return (
     <div

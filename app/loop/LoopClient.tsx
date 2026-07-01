@@ -11,6 +11,7 @@ import { useCameraStream, type CameraState } from '@/components/ImageUniverse/us
 import {
   useUniverseGestures,
   type GestureState,
+  type GestureDebug,
 } from '@/components/ImageUniverse/useUniverseGestures';
 
 // three.js + WebGL is client-only, so load with SSR disabled.
@@ -47,8 +48,10 @@ function gestureHint(state: GestureState): string {
       return 'NOW OPEN BOTH HANDS INTO AN L →';
     case 'globe':
       return 'GLOBE · RELAX HANDS TO RELEASE';
+    case 'helix':
+      return 'HELIX · RELAX HANDS TO RELEASE';
     default:
-      return 'PINCH BOTH HANDS (THUMB + INDEX) TO BEGIN';
+      return 'PINCH → OPEN L = GLOBE   ·   SHOW BACKS OF BOTH HANDS = HELIX';
   }
 }
 
@@ -56,7 +59,10 @@ export default function LoopClient({ media }: { media: UniverseMedia[] }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const landmarksRef = useRef<HandLandmarkerResult | null>(null);
   const formationTargetRef = useRef(0);
+  const shapeTargetRef = useRef(0);
+  const debugRef = useRef<GestureDebug | null>(null);
   const [gesture, setGesture] = useState<GestureState>('natural');
+  const [showDebug, setShowDebug] = useState(true);
 
   const { state: cameraState, enable, disable } = useCameraStream({ videoRef });
   const cameraEnabled = cameraState === 'granted';
@@ -75,25 +81,51 @@ export default function LoopClient({ media }: { media: UniverseMedia[] }) {
     landmarksRef,
     enabled: cameraEnabled,
     formationTargetRef,
+    shapeTargetRef,
     onState,
+    debugRef,
   });
 
-  // Keyboard fallback for the globe (no webcam needed): press "G" to toggle.
-  // The gesture layer owns the formation while the camera is on.
+  // Keyboard fallback (no webcam needed): "G" toggles the globe on/off,
+  // "H" toggles the formed shape between globe and helix. The gesture layer
+  // owns both while the camera is on.
   useEffect(() => {
     if (cameraEnabled) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'g' || e.key === 'G') {
         formationTargetRef.current = formationTargetRef.current > 0.5 ? 0 : 1;
+      } else if (e.key === 'h' || e.key === 'H') {
+        shapeTargetRef.current = shapeTargetRef.current > 0.5 ? 0 : 1;
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [cameraEnabled]);
 
+  // "D" toggles the debug readout (always available).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'd' || e.key === 'D') setShowDebug((v) => !v);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   return (
     <div className="relative h-[100svh] w-full">
-      <ImageUniverse media={media} formationTargetRef={formationTargetRef} />
+      <ImageUniverse
+        media={media}
+        formationTargetRef={formationTargetRef}
+        shapeTargetRef={shapeTargetRef}
+      />
+
+      {showDebug && (
+        <GestureDebugPanel
+          cameraState={cameraState}
+          ready={ready}
+          debugRef={debugRef}
+        />
+      )}
 
       {/* Hidden video feeding the hand landmarker (kept decoding: 1px, opacity-0). */}
       <video
@@ -131,6 +163,79 @@ export default function LoopClient({ media }: { media: UniverseMedia[] }) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+/** Live detector readout — reveals exactly where the camera→gesture chain breaks. */
+function GestureDebugPanel({
+  cameraState,
+  ready,
+  debugRef,
+}: {
+  cameraState: CameraState;
+  ready: boolean;
+  debugRef: React.RefObject<GestureDebug | null>;
+}) {
+  const [snap, setSnap] = useState<GestureDebug | null>(null);
+  useEffect(() => {
+    const id = window.setInterval(() => setSnap(debugRef.current), 120);
+    return () => window.clearInterval(id);
+  }, [debugRef]);
+
+  const flag = (v: boolean | undefined) => (v ? '✓' : '·');
+  const num = (n: number | undefined) =>
+    n === undefined || n < 0 ? '—' : n.toFixed(2);
+  const row = (label: string, value: string) => (
+    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+      <span style={{ opacity: 0.55 }}>{label}</span>
+      <span>{value}</span>
+    </div>
+  );
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: 12,
+        right: 12,
+        zIndex: 40,
+        minWidth: 190,
+        padding: '10px 12px',
+        borderRadius: 10,
+        background: 'rgba(255,255,255,0.82)',
+        border: '1px solid rgba(0,0,0,0.1)',
+        backdropFilter: 'blur(6px)',
+        color: '#1a1a1a',
+        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+        fontSize: 11,
+        lineHeight: 1.7,
+        pointerEvents: 'none',
+        userSelect: 'none',
+      }}
+    >
+      <div style={{ fontWeight: 600, marginBottom: 4, letterSpacing: '0.1em' }}>
+        GESTURE DEBUG
+      </div>
+      {row('camera', cameraState)}
+      {row(
+        'model',
+        cameraState !== 'granted' ? 'idle' : ready ? 'ready' : 'loading…',
+      )}
+      {row('hands', String(snap?.hands ?? 0))}
+      {row(
+        'handedness',
+        snap ? `${snap.handedness[0]} ${snap.handedness[1]}` : '— —',
+      )}
+      {row('pinch', `${flag(snap?.pinch[0])} ${flag(snap?.pinch[1])}`)}
+      {row('L-shape', `${flag(snap?.l[0])} ${flag(snap?.l[1])}`)}
+      {row('backs', `${flag(snap?.dorsal[0])} ${flag(snap?.dorsal[1])}`)}
+      {row('open-hand', `${flag(snap?.open[0])} ${flag(snap?.open[1])}`)}
+      {row('L-progress', `${num(snap?.progress[0])} ${num(snap?.progress[1])}`)}
+      {row('formation', snap ? snap.formation.toFixed(2) : '0.00')}
+      {row('shape', snap ? `${snap.shape.toFixed(2)} ${snap.shape > 0.5 ? '(helix)' : '(globe)'}` : '0.00')}
+      {row('state', snap?.state ?? 'natural')}
+      <div style={{ opacity: 0.4, marginTop: 5, fontSize: 10 }}>press D to hide</div>
     </div>
   );
 }
