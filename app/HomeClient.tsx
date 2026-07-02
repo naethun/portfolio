@@ -15,10 +15,12 @@ import ContactCard from '@/components/ContactCard';
 import { Bio, experiences, projects } from '@/lib/data';
 import type { Folder, WorkItem } from '@/types/portfolio';
 import type { UniverseMedia } from '@/lib/getUniverseMedia';
+import type { ShoppableManifest } from '@/lib/shoppable/types';
 
-// three.js + WebGL is client-only, so load the universe with SSR disabled.
-const ImageUniverse = dynamic(
-  () => import('@/components/ImageUniverse/ImageUniverse'),
+// three.js + WebGL is client-only, so load the full universe experience
+// (image universe + gestures + shoppable breakdown) with SSR disabled.
+const UniverseExperience = dynamic(
+  () => import('@/components/ImageUniverse/UniverseExperience'),
   {
     ssr: false,
     loading: () => (
@@ -31,9 +33,10 @@ const ImageUniverse = dynamic(
 
 interface Props {
   media: UniverseMedia[];
+  shoppable: ShoppableManifest;
 }
 
-export default function HomeClient({ media }: Props) {
+export default function HomeClient({ media, shoppable }: Props) {
   const [folder, setFolder] = useState<Folder>('work');
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -104,7 +107,11 @@ export default function HomeClient({ media }: Props) {
 
               {folder === 'moodboard' && (
                 <div className="relative h-full w-full">
-                  <ImageUniverse media={media} />
+                  <UniverseExperience
+                    media={media}
+                    shoppable={shoppable}
+                    className="relative h-full w-full"
+                  />
                 </div>
               )}
 

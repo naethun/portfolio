@@ -1,5 +1,6 @@
 import { JetBrains_Mono } from 'next/font/google';
-import { getLoopImages } from '@/lib/getLoopImages';
+import { getUniverseMedia } from '@/lib/getUniverseMedia';
+import { getShoppable } from '@/lib/shoppable/getShoppable';
 import ReelsClient from './ReelsClient';
 
 const jetbrainsMono = JetBrains_Mono({
@@ -13,12 +14,13 @@ export const metadata = {
 };
 
 export default function ReelsPage() {
-  const images = getLoopImages();
+  const media = getUniverseMedia();
+  const shoppable = getShoppable();
   return (
     <main
       className={`${jetbrainsMono.className} ${jetbrainsMono.variable} min-h-screen bg-white text-black`}
     >
-      <ReelsClient images={images} />
+      <ReelsClient media={media} shoppable={shoppable} />
     </main>
   );
 }

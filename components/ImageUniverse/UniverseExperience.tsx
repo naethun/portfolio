@@ -59,13 +59,40 @@ function gestureHint(state: GestureState): string {
   }
 }
 
-export default function LoopClient({
+/**
+ * The full `/loop` experience — 3D image universe + hand-gesture morphs (globe /
+ * helix / flat) + shoppable breakdown overlay + debug HUD — packaged as one
+ * reusable component so it can be dropped into any route or panel. `/loop` and
+ * `/reels` render it full-viewport (default `className`); the home "moodboard"
+ * Finder tab passes a fill-the-container `className`.
+ */
+export default function UniverseExperience({
   media,
   shoppable,
+  className,
+  externalLandmarksRef,
+  externalCameraActive = false,
+  hideChrome = false,
 }: {
   media: UniverseMedia[];
   shoppable: ShoppableManifest;
+  /** Root container classes. Defaults to a full-viewport stage. */
+  className?: string;
+  /**
+   * When provided, gestures read hand landmarks from this ref instead of the
+   * component's own webcam — for embeddings (e.g. the `/reels` recording stage)
+   * that own the camera + hand-tracking elsewhere and display it separately.
+   */
+  externalLandmarksRef?: React.RefObject<HandLandmarkerResult | null>;
+  /** In external-camera mode, whether that camera/tracking is live (gates gestures). */
+  externalCameraActive?: boolean;
+  /**
+   * Hide the internal camera HUD, the bottom guidance strip + camera button,
+   * and default the gesture-debug panel off — a clean embed for a recording frame.
+   */
+  hideChrome?: boolean;
 }) {
+  const external = externalLandmarksRef != null;
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const landmarksRef = useRef<HandLandmarkerResult | null>(null);
   const formationTargetRef = useRef(0);
@@ -73,25 +100,28 @@ export default function LoopClient({
   const flatTargetRef = useRef(0);
   const debugRef = useRef<GestureDebug | null>(null);
   const [gesture, setGesture] = useState<GestureState>('natural');
-  const [showDebug, setShowDebug] = useState(true);
+  const [showDebug, setShowDebug] = useState(!hideChrome);
   const [selected, setSelected] = useState<UniverseMedia | null>(null);
 
   const { state: cameraState, enable, disable } = useCameraStream({ videoRef });
-  const cameraEnabled = cameraState === 'granted';
+  const internalCameraEnabled = cameraState === 'granted';
+  // A live camera can be the internal webcam or one owned by an embedder.
+  const liveCamera = external ? externalCameraActive : internalCameraEnabled;
+  const activeLandmarksRef = externalLandmarksRef ?? landmarksRef;
 
   const onResult = useCallback((result: HandLandmarkerResult) => {
     landmarksRef.current = result;
   }, []);
   const { ready } = useHandTracking({
     videoRef,
-    enabled: cameraEnabled,
+    enabled: !external && internalCameraEnabled,
     onResult,
   });
 
   const onState = useCallback((s: GestureState) => setGesture(s), []);
   useUniverseGestures({
-    landmarksRef,
-    enabled: cameraEnabled && !selected,
+    landmarksRef: activeLandmarksRef,
+    enabled: liveCamera && !selected,
     formationTargetRef,
     shapeTargetRef,
     flatTargetRef,
@@ -99,11 +129,11 @@ export default function LoopClient({
     debugRef,
   });
 
-  // Keyboard fallback (no webcam needed): "G" toggles the globe on/off,
+  // Keyboard fallback (no live camera): "G" toggles the globe on/off,
   // "H" toggles the formed shape between globe and helix. The gesture layer
-  // owns both while the camera is on.
+  // owns both while a camera is driving the scene.
   useEffect(() => {
-    if (cameraEnabled || selected) return;
+    if (liveCamera || selected) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'g' || e.key === 'G') {
         formationTargetRef.current = formationTargetRef.current > 0.5 ? 0 : 1;
@@ -120,7 +150,7 @@ export default function LoopClient({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [cameraEnabled, selected]);
+  }, [liveCamera, selected]);
 
   // "D" toggles the debug readout (always available).
   useEffect(() => {
@@ -133,7 +163,7 @@ export default function LoopClient({
   }, [selected]);
 
   return (
-    <div className="relative h-[100svh] w-full">
+    <div className={className ?? 'relative h-[100svh] w-full'}>
       <ImageUniverse
         media={media}
         formationTargetRef={formationTargetRef}
@@ -165,42 +195,50 @@ export default function LoopClient({
         />
       )}
 
-      {/* Hidden video feeding the hand landmarker (kept decoding: 1px, opacity-0). */}
-      <video
-        ref={videoRef}
-        playsInline
-        muted
-        className="pointer-events-none absolute -z-10 h-px w-px opacity-0"
-      />
+      {/* Hidden video feeding the hand landmarker (kept decoding: 1px, opacity-0).
+          Only the internal camera path needs it; in external mode the embedder
+          owns (and displays) the camera. */}
+      {!external && (
+        <video
+          ref={videoRef}
+          playsInline
+          muted
+          className="pointer-events-none absolute -z-10 h-px w-px opacity-0"
+        />
+      )}
 
       {/* Camera + hand-skeleton window (draggable), shown once the camera is on. */}
-      <HUD videoRef={videoRef} landmarksRef={landmarksRef} cameraEnabled={cameraEnabled} />
+      {!hideChrome && (
+        <HUD videoRef={videoRef} landmarksRef={landmarksRef} cameraEnabled={internalCameraEnabled} />
+      )}
 
       {/* Bottom-center control / guidance strip. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-5">
-        {!cameraEnabled ? (
-          <button
-            type="button"
-            onClick={enable}
-            disabled={cameraState === 'requesting'}
-            className="pointer-events-auto rounded-full border border-neutral-300 bg-white/80 px-5 py-2.5 font-mono text-[11px] tracking-[0.2em] text-neutral-700 shadow-sm backdrop-blur transition-colors hover:border-neutral-900 hover:text-neutral-900 disabled:opacity-60"
-          >
-            {cameraLabel(cameraState)}
-          </button>
-        ) : (
-          <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-neutral-200 bg-white/70 px-4 py-2 font-mono text-[11px] tracking-[0.2em] text-neutral-600 backdrop-blur">
-            <span>{ready ? gestureHint(gesture) : 'LOADING HAND MODEL…'}</span>
+      {!hideChrome && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-5">
+          {!internalCameraEnabled ? (
             <button
               type="button"
-              onClick={disable}
-              aria-label="Turn off camera"
-              className="text-neutral-400 transition-colors hover:text-neutral-900"
+              onClick={enable}
+              disabled={cameraState === 'requesting'}
+              className="pointer-events-auto rounded-full border border-neutral-300 bg-white/80 px-5 py-2.5 font-mono text-[11px] tracking-[0.2em] text-neutral-700 shadow-sm backdrop-blur transition-colors hover:border-neutral-900 hover:text-neutral-900 disabled:opacity-60"
             >
-              ✕ CAMERA
+              {cameraLabel(cameraState)}
             </button>
-          </div>
-        )}
-      </div>
+          ) : (
+            <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-neutral-200 bg-white/70 px-4 py-2 font-mono text-[11px] tracking-[0.2em] text-neutral-600 backdrop-blur">
+              <span>{ready ? gestureHint(gesture) : 'LOADING HAND MODEL…'}</span>
+              <button
+                type="button"
+                onClick={disable}
+                aria-label="Turn off camera"
+                className="text-neutral-400 transition-colors hover:text-neutral-900"
+              >
+                ✕ CAMERA
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

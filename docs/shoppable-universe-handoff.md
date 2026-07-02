@@ -63,7 +63,7 @@ RUNTIME (/loop)
 | `public/portfolio/shoppable/thumbs/` | Locally cached product images (merchant CDNs rot). |
 | `public/portfolio/shoppable/masks/` | Locally cached SAM mask cutout PNGs for the glow. |
 | `app/loop/page.tsx` | Loads the manifest, passes it to `LoopClient`. |
-| `app/loop/LoopClient.tsx` | Owns `selected` state, renders the overlay, suppresses G/H/D shortcuts + gestures while open, and disables click-to-fly (see §5). |
+| `app/loop/LoopClient.tsx` | Owns `selected` state, renders the overlay, suppresses G/H/F/D shortcuts + gestures while open, and disables click-to-fly (see §5). |
 | `components/ImageUniverse/ImageUniverse.tsx` | **One additive change:** optional `shouldFlyTo?(media,index):boolean` prop (defaults to fly). Everything else untouched. |
 
 `package.json`: added `shoppable:test`, `shoppable:generate`, and `image-size` (devDependency, used only by the generator — never in the client bundle).

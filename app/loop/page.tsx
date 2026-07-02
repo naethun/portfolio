@@ -1,7 +1,7 @@
 import { JetBrains_Mono } from 'next/font/google';
 import { getUniverseMedia } from '@/lib/getUniverseMedia';
 import { getShoppable } from '@/lib/shoppable/getShoppable';
-import LoopClient from './LoopClient';
+import UniverseExperience from '@/components/ImageUniverse/UniverseExperience';
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
@@ -21,7 +21,7 @@ export default function LoopPage() {
       className={`${jetbrainsMono.className} ${jetbrainsMono.variable}`}
       style={{ background: '#f4f2ee' }}
     >
-      <LoopClient media={media} shoppable={shoppable} />
+      <UniverseExperience media={media} shoppable={shoppable} />
     </main>
   );
 }
