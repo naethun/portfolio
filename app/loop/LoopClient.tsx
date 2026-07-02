@@ -52,8 +52,10 @@ function gestureHint(state: GestureState): string {
       return 'GLOBE · RELAX HANDS TO RELEASE';
     case 'helix':
       return 'HELIX · RELAX HANDS TO RELEASE';
+    case 'flat':
+      return 'FLAT · RELAX HANDS TO RELEASE';
     default:
-      return 'PINCH → OPEN L = GLOBE   ·   SHOW BACKS OF BOTH HANDS = HELIX';
+      return 'PINCH→L = GLOBE · BOTH BACKS = HELIX · PALM+BACK = FLAT';
   }
 }
 
@@ -68,6 +70,7 @@ export default function LoopClient({
   const landmarksRef = useRef<HandLandmarkerResult | null>(null);
   const formationTargetRef = useRef(0);
   const shapeTargetRef = useRef(0);
+  const flatTargetRef = useRef(0);
   const debugRef = useRef<GestureDebug | null>(null);
   const [gesture, setGesture] = useState<GestureState>('natural');
   const [showDebug, setShowDebug] = useState(true);
@@ -91,6 +94,7 @@ export default function LoopClient({
     enabled: cameraEnabled && !selected,
     formationTargetRef,
     shapeTargetRef,
+    flatTargetRef,
     onState,
     debugRef,
   });
@@ -105,6 +109,13 @@ export default function LoopClient({
         formationTargetRef.current = formationTargetRef.current > 0.5 ? 0 : 1;
       } else if (e.key === 'h' || e.key === 'H') {
         shapeTargetRef.current = shapeTargetRef.current > 0.5 ? 0 : 1;
+      } else if (e.key === 'f' || e.key === 'F') {
+        // Toggle the flat grid. It needs both formation (scatter→formed) and the
+        // flat override; turning it off returns to the scattered cloud.
+        const on = flatTargetRef.current > 0.5;
+        flatTargetRef.current = on ? 0 : 1;
+        formationTargetRef.current = on ? 0 : 1;
+        shapeTargetRef.current = 0;
       }
     };
     window.addEventListener('keydown', onKey);
@@ -127,6 +138,7 @@ export default function LoopClient({
         media={media}
         formationTargetRef={formationTargetRef}
         shapeTargetRef={shapeTargetRef}
+        flatTargetRef={flatTargetRef}
         onSelect={(m) => {
           if (shoppable[m.filename]) setSelected(m);
         }}
@@ -257,6 +269,7 @@ function GestureDebugPanel({
       {row('L-shape', `${flag(snap?.l[0])} ${flag(snap?.l[1])}`)}
       {row('backs', `${flag(snap?.dorsal[0])} ${flag(snap?.dorsal[1])}`)}
       {row('open-hand', `${flag(snap?.open[0])} ${flag(snap?.open[1])}`)}
+      {row('flat', snap ? snap.flat.toFixed(2) : '0.00')}
       {row('L-progress', `${num(snap?.progress[0])} ${num(snap?.progress[1])}`)}
       {row('formation', snap ? snap.formation.toFixed(2) : '0.00')}
       {row('shape', snap ? `${snap.shape.toFixed(2)} ${snap.shape > 0.5 ? '(helix)' : '(globe)'}` : '0.00')}

@@ -15,6 +15,7 @@ import {
   VIDEO_VERTEX,
   VIDEO_FRAGMENT,
 } from './shaders';
+import { computeFlatGrid } from './flatGrid.mjs';
 
 /* ============================================================================
  * TUNABLES — everything you'd want to tweak lives here.
@@ -66,6 +67,12 @@ const HELIX_HEIGHT = 46; // total vertical span of the double helix
 const HELIX_TURNS = 3; // how many full turns top-to-bottom
 const SHAPE_EASE = 2.5; // higher = snappier globe↔helix transition
 
+/** Flat gallery-wall grid — the third formed shape (one palm + one back). */
+const FLAT_SPACING_X = 8; // world-unit gap between grid columns
+const FLAT_SPACING_Y = 8; // world-unit gap between grid rows
+const FLAT_COLUMNS = 0; // 0 = auto (ceil(sqrt(n))); else force this many columns
+const FLAT_EASE = 2.5; // scatter↔flat morph speed (matches SHAPE_EASE)
+
 /* ==========================================================================*/
 
 interface Props {
@@ -92,6 +99,11 @@ interface Props {
    * Only visible while formationTargetRef > 0.
    */
   shapeTargetRef?: React.RefObject<number>;
+  /**
+   * Optional 0..1 target for the flat gallery-wall grid: 0 = globe/helix shape,
+   * 1 = flat grid. Overrides the globe/helix shape while > 0.
+   */
+  flatTargetRef?: React.RefObject<number>;
 }
 
 interface Pickable {
@@ -111,12 +123,15 @@ export default function ImageUniverse({
   shouldFlyTo,
   formationTargetRef,
   shapeTargetRef,
+  flatTargetRef,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const formationTargetInternal = useRef(0);
   const formationRef = formationTargetRef ?? formationTargetInternal;
   const shapeTargetInternal = useRef(0);
   const shapeRef = shapeTargetRef ?? shapeTargetInternal;
+  const flatTargetInternal = useRef(0);
+  const flatRef = flatTargetRef ?? flatTargetInternal;
   // keep the latest onSelect without re-running the heavy scene effect
   const onSelectRef = useRef(onSelect);
   useEffect(() => {
@@ -188,6 +203,7 @@ export default function ImageUniverse({
     // ---- globe-formation uniforms (scatter <-> sphere morph) ---------------
     const uFormation = { value: 0 };
     const uShape = { value: 0 };
+    const uFlat = { value: 0 };
     const uSpin = { value: 0 };
     const uGlobeRadius = { value: GLOBE_RADIUS };
     const uHelixRadius = { value: HELIX_RADIUS };
@@ -373,6 +389,11 @@ export default function ImageUniverse({
         const iPos = new Float32Array(n * 3);
         const iSphereDir = new Float32Array(n * 3);
         const iHelix = new Float32Array(n * 2);
+        const iGrid = computeFlatGrid(n, {
+          columns: FLAT_COLUMNS,
+          spacingX: FLAT_SPACING_X,
+          spacingY: FLAT_SPACING_Y,
+        });
         const iScale = new Float32Array(n * 2);
         const iUvOffset = new Float32Array(n * 2);
         const iUvScale = new Float32Array(n * 2);
@@ -418,6 +439,7 @@ export default function ImageUniverse({
         geo.setAttribute('iPosition', new THREE.InstancedBufferAttribute(iPos, 3));
         geo.setAttribute('iSphereDir', new THREE.InstancedBufferAttribute(iSphereDir, 3));
         geo.setAttribute('iHelix', new THREE.InstancedBufferAttribute(iHelix, 2));
+        geo.setAttribute('iGrid', new THREE.InstancedBufferAttribute(iGrid, 3));
         geo.setAttribute('iScale', new THREE.InstancedBufferAttribute(iScale, 2));
         geo.setAttribute('iUvOffset', new THREE.InstancedBufferAttribute(iUvOffset, 2));
         geo.setAttribute('iUvScale', new THREE.InstancedBufferAttribute(iUvScale, 2));
@@ -429,6 +451,7 @@ export default function ImageUniverse({
             uReveal,
             uFormation,
             uShape,
+            uFlat,
             uSpin,
             uGlobeRadius,
             uHelixRadius,
@@ -683,6 +706,8 @@ export default function ImageUniverse({
         uFormation.value += (target - uFormation.value) * Math.min(1, dt * FORMATION_EASE);
         const shapeTarget = Math.max(0, Math.min(1, shapeRef.current ?? 0));
         uShape.value += (shapeTarget - uShape.value) * Math.min(1, dt * SHAPE_EASE);
+        const flatTarget = Math.max(0, Math.min(1, flatRef.current ?? 0));
+        uFlat.value += (flatTarget - uFlat.value) * Math.min(1, dt * FLAT_EASE);
         uSpin.value += GLOBE_SPIN_SPEED * dt * uFormation.value;
         camera.updateMatrixWorld();
         const e = camera.matrixWorld.elements;
@@ -730,7 +755,7 @@ export default function ImageUniverse({
       }
     };
     // rebuild if the media set changes (formationRef/shapeRef are stable refs)
-  }, [media, background, isEmpty, formationRef, shapeRef]);
+  }, [media, background, isEmpty, formationRef, shapeRef, flatRef]);
 
   return (
     <div

@@ -85,6 +85,7 @@ export const PLANE_VERTEX = /* glsl */ `
   attribute vec3 iPosition;   // per-instance scattered world center
   attribute vec3 iSphereDir;  // per-instance unit direction on the globe
   attribute vec2 iHelix;      // per-instance helix params: (base angle, height)
+  attribute vec3 iGrid;       // per-instance flat gallery-grid center (z = 0)
   attribute vec2 iScale;      // per-instance world (width, height) — encodes aspect
   attribute vec2 iUvOffset;
   attribute vec2 iUvScale;
@@ -92,6 +93,7 @@ export const PLANE_VERTEX = /* glsl */ `
   uniform float uReveal;
   uniform float uFormation;    // 0 = scattered cloud, 1 = formed shape
   uniform float uShape;        // 0 = globe, 1 = helix (DNA)
+  uniform float uFlat;         // 0 = globe/helix shape, 1 = flat gallery grid
   uniform float uSpin;         // rotation about Y (radians)
   uniform float uGlobeRadius;
   uniform float uHelixRadius;
@@ -129,10 +131,13 @@ export const PLANE_VERTEX = /* glsl */ `
     vec3 tanH = normalize(cross(vec3(0.0, 1.0, 0.0), nH));
     vec3 bitH = cross(nH, tanH);
 
-    // Blend the formed shape (globe <-> helix), then scatter <-> formed.
-    vec3 formedPos = mix(globePos, helixPos, uShape);
-    vec3 tangent = mix(tanG, tanH, uShape);
-    vec3 bitangent = mix(bitG, bitH, uShape);
+    // Blend globe <-> helix, then let flat override that (grid slot, camera-facing).
+    // At uFlat = 1 the tangent basis equals the camera basis, so shapeOffset ==
+    // billboardOffset below and every flat tile faces the camera at any formation.
+    vec3 shapePos = mix(globePos, helixPos, uShape);
+    vec3 formedPos = mix(shapePos, iGrid, uFlat);
+    vec3 tangent = mix(mix(tanG, tanH, uShape), uCamRight, uFlat);
+    vec3 bitangent = mix(mix(bitG, bitH, uShape), uCamUp, uFlat);
     vec3 center = mix(iPosition, formedPos, uFormation);
 
     float sx = position.x * iScale.x * uReveal;

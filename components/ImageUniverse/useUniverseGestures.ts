@@ -3,7 +3,7 @@
 import { useEffect, useRef, type RefObject } from 'react';
 import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
 
-export type GestureState = 'natural' | 'armed' | 'globe' | 'helix';
+export type GestureState = 'natural' | 'armed' | 'globe' | 'helix' | 'flat';
 
 /** Live per-frame detector telemetry for the on-screen debug overlay. */
 export interface GestureDebug {
@@ -13,6 +13,8 @@ export interface GestureDebug {
   l: [boolean, boolean];
   dorsal: [boolean, boolean];
   open: [boolean, boolean];
+  /** current flat-grid target (0 = off, 1 = flat gallery grid). */
+  flat: number;
   progress: [number, number];
   state: GestureState;
   /** current target values the gesture layer is driving the renderer with. */
@@ -37,6 +39,11 @@ const ARMED_FLOOR = 0.1; // formation at a bare pinch (progress 0) — a slight 
 const ENTER_MS = 120; // sustain a pose this long before it counts (anti-flicker)
 const RELEASE_MS = 600; // gesture family abandoned this long → back to natural
 const EXIT_GRACE_MS = 350; // L lost this long while in globe → ease back to scatter
+
+// Flat gallery-wall grid: one palm + one back (mixed facing) of two open hands.
+// A slightly longer enter hold than ENTER_MS so a smooth two-hand palms→backs
+// flip (on the way to helix) doesn't transiently trigger flat.
+const FLAT_ENTER_MS = 200;
 
 // Palm facing (globe ⇄ helix while formed). Reuses HandLoop's palm-normal math.
 const PALMAR_SIGN = -1; // sign of the palm normal's z that means "facing camera"
@@ -133,6 +140,8 @@ interface Options {
   formationTargetRef: RefObject<number>;
   /** 0 = globe, 1 = helix; set from palm facing while formed (backs → helix). */
   shapeTargetRef: RefObject<number>;
+  /** 0 = globe/helix shape, 1 = flat gallery grid; set from the mixed-facing pose. */
+  flatTargetRef: RefObject<number>;
   onState?: (s: GestureState) => void;
   /** optional per-frame telemetry sink for the debug overlay. */
   debugRef?: RefObject<GestureDebug | null>;
@@ -151,6 +160,7 @@ export function useUniverseGestures({
   enabled,
   formationTargetRef,
   shapeTargetRef,
+  flatTargetRef,
   onState,
   debugRef,
 }: Options) {
@@ -163,6 +173,7 @@ export function useUniverseGestures({
     if (!enabled) {
       formationTargetRef.current = 0;
       shapeTargetRef.current = 0;
+      flatTargetRef.current = 0;
       if (debugRef) debugRef.current = null;
       onStateRef.current?.('natural');
       return;
@@ -171,11 +182,12 @@ export function useUniverseGestures({
     // start from the scattered natural state whenever tracking (re)enables
     formationTargetRef.current = 0;
     shapeTargetRef.current = 0;
+    flatTargetRef.current = 0;
     let raf = 0;
     // Two independent formations, each held while its gesture holds:
     //   globe = pinch → open into an L (palms)
     //   helix = show the BACKS of both open hands
-    let state: 'natural' | 'armed' | 'globe' | 'helix' = 'natural';
+    let state: 'natural' | 'armed' | 'globe' | 'helix' | 'flat' = 'natural';
     // timestamps a condition has held continuously true (-1 = currently false)
     let tPinch = -1;
     let tL = -1;
@@ -183,6 +195,8 @@ export function useUniverseGestures({
     let tNoEngaged = -1;
     let tHelix = -1;
     let tNoHelix = -1;
+    let tFlat = -1;
+    let tNoFlat = -1;
 
     let reported: GestureState = 'natural';
     const report = (label: GestureState) => {
@@ -197,19 +211,30 @@ export function useUniverseGestures({
       if (s === 'globe') {
         formationTargetRef.current = 1;
         shapeTargetRef.current = 0;
+        flatTargetRef.current = 0;
         report('globe');
       } else if (s === 'helix') {
         formationTargetRef.current = 1;
         shapeTargetRef.current = 1;
+        flatTargetRef.current = 0;
         report('helix');
+      } else if (s === 'flat') {
+        // grid forms; the globe/helix mix rests at globe underneath but is fully
+        // masked by uFlat = 1, so its value is cosmetic.
+        formationTargetRef.current = 1;
+        shapeTargetRef.current = 0;
+        flatTargetRef.current = 1;
+        report('flat');
       } else if (s === 'armed') {
         // globe pull-in; formation is written continuously below from progress
         formationTargetRef.current = ARMED_FLOOR;
         shapeTargetRef.current = 0;
+        flatTargetRef.current = 0;
         report('armed');
       } else {
         formationTargetRef.current = 0;
         shapeTargetRef.current = 0;
+        flatTargetRef.current = 0;
         report('natural');
       }
     };
@@ -239,6 +264,8 @@ export function useUniverseGestures({
       const bothL = twoHands && l0 && l1;
       // helix trigger: backs of both OPEN hands facing the camera
       const bothBacks = twoHands && open0 && dor0 && open1 && dor1;
+      // flat trigger: two OPEN hands with mixed facing (exactly one back-facing).
+      const flatPose = twoHands && open0 && open1 && dor0 !== dor1;
 
       // continuous pinch→L progress across both hands (min = the less-open hand,
       // so the globe only completes when BOTH reach the full L). Both hands must
@@ -252,11 +279,14 @@ export function useUniverseGestures({
       tNoEngaged = !bothEngaged ? (tNoEngaged < 0 ? now : tNoEngaged) : -1;
       tHelix = bothBacks ? (tHelix < 0 ? now : tHelix) : -1;
       tNoHelix = !bothBacks ? (tNoHelix < 0 ? now : tNoHelix) : -1;
+      tFlat = flatPose ? (tFlat < 0 ? now : tFlat) : -1;
+      tNoFlat = !flatPose ? (tNoFlat < 0 ? now : tNoFlat) : -1;
 
       if (state === 'natural') {
         // pinch → globe path; backs of open hands → helix path
         if (tPinch > 0 && now - tPinch >= ENTER_MS) setState('armed');
         else if (tHelix > 0 && now - tHelix >= ENTER_MS) setState('helix');
+        else if (tFlat > 0 && now - tFlat >= FLAT_ENTER_MS) setState('flat');
       } else if (state === 'armed') {
         if (tL > 0 && now - tL >= ENTER_MS) {
           setState('globe');
@@ -272,6 +302,9 @@ export function useUniverseGestures({
       } else if (state === 'helix') {
         // held while the backs of both open hands show; relax / turn palms to scatter
         if (tNoHelix > 0 && now - tNoHelix >= EXIT_GRACE_MS) setState('natural');
+      } else if (state === 'flat') {
+        // held while the mixed-facing pose holds; relax / change pose to scatter
+        if (tNoFlat > 0 && now - tNoFlat >= EXIT_GRACE_MS) setState('natural');
       }
 
       if (debugRef) {
@@ -282,6 +315,7 @@ export function useUniverseGestures({
           l: [l0, l1],
           dorsal: [dor0, dor1],
           open: [open0, open1],
+          flat: flatTargetRef.current,
           progress: [prog0, prog1],
           state: reported,
           formation: formationTargetRef.current,
@@ -297,7 +331,8 @@ export function useUniverseGestures({
       cancelAnimationFrame(raf);
       formationTargetRef.current = 0;
       shapeTargetRef.current = 0;
+      flatTargetRef.current = 0;
       if (debugRef) debugRef.current = null;
     };
-  }, [enabled, landmarksRef, formationTargetRef, shapeTargetRef, debugRef]);
+  }, [enabled, landmarksRef, formationTargetRef, shapeTargetRef, flatTargetRef, debugRef]);
 }

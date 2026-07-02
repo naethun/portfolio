@@ -66,6 +66,7 @@ formations, both entered **from scattered**:
 |-----------|---------|-----------|---------|
 | **Globe** | Pinch both hands (thumb+index, others curled) → **open into an L** (palms toward camera). Formation pulls in continuously as you open (min of both hands' open-progress). | the L is held | relax the L → scatter |
 | **Helix (DNA)** | Show the **backs of both open hands** (flat open hand, palm facing away). | the pose is held | lower / turn palms → scatter |
+| **Flat** | Show **two open hands, one palm + one back** (mixed facing). All images snap into an even, camera-facing gallery-wall grid (no spin). | the pose is held | change pose / lower hands → scatter |
 
 The two triggers are deliberately distinct poses (pinch/L vs. flat open hand) and distinguished by
 **palm facing**. The shape is **not switchable while formed** — relax to scattered and re-form to
@@ -77,10 +78,12 @@ natural ──both pinch (120ms)──▶ armed ──both L (120ms)──▶ gl
    │                              │
    │                        (pinch abandoned 600ms) ─▶ natural
    └──backs of both open hands (120ms)──▶ helix ──pose lost (350ms)──▶ natural
+   └──two open hands, one palm + one back (200ms)──▶ flat ──pose lost (350ms)──▶ natural
 ```
 - Writes two refs the renderer eases toward: **`formationTargetRef`** (0=scatter, 1=formed) and
-  **`shapeTargetRef`** (0=globe, 1=helix). No per-frame React re-renders.
-- Reports `natural | armed | globe | helix` to the orchestrator for the guidance strip.
+  **`shapeTargetRef`** (0=globe, 1=helix). No per-frame React re-renders. The renderer also eases
+  toward **`flatTargetRef`** (0 = globe/helix shape, 1 = flat grid).
+- Reports `natural | armed | globe | helix | flat` to the orchestrator for the guidance strip.
 
 ### Pose detection (landmark math, MediaPipe 21-point hands)
 - **pinch**: `dist(thumbTip, indexTip) / dist(wrist, middleMCP) < PINCH_MAX`, others curled.
@@ -110,6 +113,7 @@ natural ──both pinch (120ms)──▶ armed ──both L (120ms)──▶ gl
 | `FOV`, `INTRO_DURATION`, `START_DISTANCE` | `55`, `2.2`, `90` | camera + intro |
 | `GLOBE_RADIUS` / `GLOBE_SPIN_SPEED` / `FORMATION_EASE` | `16` / `0.25` / `3.0` | globe size / spin / morph speed |
 | `HELIX_RADIUS` / `HELIX_HEIGHT` / `HELIX_TURNS` / `SHAPE_EASE` | `11` / `46` / `3` / `2.5` | helix geometry / morph speed |
+| `FLAT_SPACING_X` / `FLAT_SPACING_Y` / `FLAT_COLUMNS` / `FLAT_EASE` | `8` / `8` / `0` (auto √n) / `2.5` | flat grid cell gaps / forced columns / morph speed |
 
 **Gesture** — top of `components/ImageUniverse/useUniverseGestures.ts`:
 
@@ -121,6 +125,7 @@ natural ──both pinch (120ms)──▶ armed ──both L (120ms)──▶ gl
 | `L_PERP_COS` | `0.6` | how perpendicular thumb/index must be for an L |
 | `ARMED_FLOOR` | `0.1` | how much the cloud gathers at a bare pinch |
 | `ENTER_MS` / `RELEASE_MS` / `EXIT_GRACE_MS` | `120` / `600` / `350` | pose-sustain / abandon / release timings |
+| `FLAT_ENTER_MS` | `200` | sustain the mixed (palm+back) pose this long before flat engages |
 | `PALMAR_SIGN` | `-1` | **global facing direction.** If globe/helix (or palms/backs) come out inverted, flip this. |
 | `FACING_EPS` | `0.005` | edge-on facing dead-zone |
 
@@ -136,7 +141,8 @@ natural ──both pinch (120ms)──▶ armed ──both L (120ms)──▶ gl
   `formation`, `shape`, `state`. **This is the primary debugging tool** — it shows exactly where the
   camera→landmark→pose→state chain breaks. Built via a `debugRef` the gesture hook writes each frame;
   the panel polls it (~8 Hz) so it doesn't force React re-renders.
-- **Keyboard fallbacks** (camera off): **`G`** toggles the globe on/off, **`H`** toggles globe↔helix.
+- **Keyboard fallbacks** (camera off): **`G`** toggles the globe on/off, **`H`** toggles globe↔helix,
+  **`F`** toggles the flat grid on/off, mirroring `G`/`H`.
   These write the same refs the gestures do, so they exercise the full render path without a webcam.
 - **Reviewing a user screen-recording without ffmpeg**: this machine has no ffmpeg/cv2. Use the
   Swift + AVFoundation frame extractor at
