@@ -124,6 +124,29 @@ test('buildManifestEntry keeps only bounds with valid coords and ≥1 product, c
   assert.equal(entry.items[1].products.length, 5);
 });
 
+test('buildManifestEntry carries maskUrl through and leaves localMask null', () => {
+  const outfit = makeOutfit([
+    {
+      boundId: 'b1',
+      productInfo: { label: 'boots', category: 'boots', confidence: 0.9 },
+      coordinates: { x: 100, y: 200, width: 300, height: 400, centerX: 250, centerY: 400 },
+      maskUrl: 'https://s3.example.com/masks/b1.png',
+      recommendations: [REC],
+    },
+    {
+      boundId: 'b2',
+      productInfo: { label: 'top', category: 'tops', confidence: 0.8 },
+      coordinates: { x: 100, y: 200, width: 300, height: 400, centerX: 250, centerY: 400 },
+      recommendations: [REC], // no maskUrl at all
+    },
+  ]);
+  const entry = buildManifestEntry({ outfit, imgWidth: 1000, imgHeight: 2000 });
+  assert.equal(entry.items[0].maskUrl, 'https://s3.example.com/masks/b1.png');
+  assert.equal(entry.items[0].localMask, null);
+  assert.equal(entry.items[1].maskUrl, null);
+  assert.equal(entry.items[1].localMask, null);
+});
+
 test('buildManifestEntry returns null when nothing survives', () => {
   assert.equal(buildManifestEntry({ outfit: makeOutfit([]), imgWidth: 10, imgHeight: 10 }), null);
   assert.equal(buildManifestEntry({ outfit: {}, imgWidth: 10, imgHeight: 10 }), null);

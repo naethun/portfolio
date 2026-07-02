@@ -197,3 +197,24 @@ DOM overlay rendered by `LoopClient` above the WebGL canvas. Files:
 - Gesture-based selection (MediaPipe) through the same `onSelect` path.
 - Multiple products per limb (manifest already carries 5).
 - Home moodboard shoppability.
+
+---
+
+## Addendum — design iteration (2026-07-01, post-launch feedback)
+
+Supersedes §4's left/right split layout:
+
+- **Bound regions carry AESTHETIC's mask-glow "shine"** (ported from the
+  creators `MaskGlowCanvas`, scan variant, metallic gradient): SAM mask
+  cutouts (now in the manifest as `maskUrl`/`localMask`, cached under
+  `public/portfolio/shoppable/masks/`) are painted on a canvas over the image
+  with `mix-blend-mode: plus-lighter`; idle sweep 3s of a 7s phase-staggered
+  cycle; hovering a card isolates that item with a uniform glow. The
+  hover box-outline trace is replaced by the glow.
+- **Centered composition:** the image sits centered in the viewport.
+- **Radial limbs:** each card is pushed outward along the ray from the image
+  center through its item's anchor (glasses top-left → card branches out
+  top-left; boots low-right → card exits right/bottom), connecting to the card
+  edge that faces the image. Cards clamp to the viewport, de-overlap
+  vertically, and slide horizontally off the image if clamping would park
+  them on it. Mobile keeps the stacked layout without limbs.

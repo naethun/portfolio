@@ -73,8 +73,14 @@ interface Props {
   className?: string;
   /** override the near-white background if you want. */
   background?: string;
-  /** fired when a sprite is clicked (camera also flies to frame it). */
+  /** fired when a sprite is clicked (camera also flies to frame it, unless shouldFlyTo returns false). */
   onSelect?: (media: UniverseMedia, index: number) => void;
+  /**
+   * Return false to suppress the camera fly-to for a given click — e.g. when
+   * the click opens an overlay that should leave the camera where it was.
+   * Defaults to always flying.
+   */
+  shouldFlyTo?: (media: UniverseMedia, index: number) => boolean;
   /**
    * Optional 0..1 target the render loop eases toward: 0 = scattered cloud,
    * 1 = formed shape. Driven externally (e.g. by hand gestures). Instanced-planes
@@ -102,6 +108,7 @@ export default function ImageUniverse({
   className,
   background = BACKGROUND_COLOR,
   onSelect,
+  shouldFlyTo,
   formationTargetRef,
   shapeTargetRef,
 }: Props) {
@@ -115,6 +122,10 @@ export default function ImageUniverse({
   useEffect(() => {
     onSelectRef.current = onSelect;
   }, [onSelect]);
+  const shouldFlyToRef = useRef(shouldFlyTo);
+  useEffect(() => {
+    shouldFlyToRef.current = shouldFlyTo;
+  }, [shouldFlyTo]);
 
   const hasImages = media.some((m) => m.type === 'image');
   const hasVideos = media.some((m) => m.type === 'video');
@@ -596,8 +607,11 @@ export default function ImageUniverse({
       if (moved < 6 && dt < 400) {
         const hit = pick(e.clientX, e.clientY);
         if (hit) {
-          onSelectRef.current?.(media[hit.globalIndex], hit.globalIndex);
-          flyTo(hit);
+          const clicked = media[hit.globalIndex];
+          onSelectRef.current?.(clicked, hit.globalIndex);
+          if (shouldFlyToRef.current?.(clicked, hit.globalIndex) ?? true) {
+            flyTo(hit);
+          }
         }
       }
     };

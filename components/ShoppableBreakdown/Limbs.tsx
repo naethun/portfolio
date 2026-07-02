@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { limbPath } from './geometry';
+import { limbPath, type LimbEdge } from './geometry';
 
 export interface LimbLine {
   x1: number;
   y1: number;
   x2: number;
   y2: number;
+  /** Card edge the limb arrives at (the edge facing the image). */
+  edge: LimbEdge;
 }
 
 /**
@@ -31,7 +33,7 @@ export function Limbs({ lines, active }: { lines: LimbLine[]; active: number | n
       {lines.map((line, i) => (
         <g key={i}>
           <path
-            d={limbPath(line.x1, line.y1, line.x2, line.y2)}
+            d={limbPath(line.x1, line.y1, line.x2, line.y2, line.edge)}
             fill="none"
             stroke={active === null || active === i ? 'rgba(23,23,23,0.5)' : 'rgba(23,23,23,0.14)'}
             strokeWidth={1}

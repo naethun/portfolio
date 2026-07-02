@@ -28,6 +28,8 @@ const ROOT = join(__dirname, '..');
 const IMAGES_DIR = join(ROOT, 'public/portfolio/loop-imgs');
 const THUMBS_DIR = join(ROOT, 'public/portfolio/shoppable/thumbs');
 const THUMBS_PUBLIC_PREFIX = '/portfolio/shoppable/thumbs';
+const MASKS_DIR = join(ROOT, 'public/portfolio/shoppable/masks');
+const MASKS_PUBLIC_PREFIX = '/portfolio/shoppable/masks';
 const MANIFEST_PATH = join(ROOT, 'lib/shoppable/manifest.json');
 const LIST_PATH = join(__dirname, 'shoppable-images.json');
 
@@ -124,6 +126,22 @@ async function downloadThumb(item) {
   }
 }
 
+/** Cache the item's SAM mask cutout locally; sets item.localMask on success. */
+async function downloadMask(item) {
+  if (!item.maskUrl) return;
+  try {
+    const res = await fetch(item.maskUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const buffer = Buffer.from(await res.arrayBuffer());
+    mkdirSync(MASKS_DIR, { recursive: true });
+    const filename = `${item.boundId}.png`;
+    writeFileSync(join(MASKS_DIR, filename), buffer);
+    item.localMask = `${MASKS_PUBLIC_PREFIX}/${filename}`;
+  } catch (error) {
+    console.warn(`  mask download failed for "${item.label}": ${error.message}`);
+  }
+}
+
 async function processImage(filename) {
   console.log(`\n▶ ${filename}`);
   const localPath = join(IMAGES_DIR, filename);
@@ -146,6 +164,7 @@ async function processImage(filename) {
 
   for (const item of entry.items) {
     await downloadThumb(item);
+    await downloadMask(item);
   }
   console.log(
     `  ✓ ${entry.items.length} shoppable item(s): ${entry.items.map((i) => i.label).join(', ')}`,

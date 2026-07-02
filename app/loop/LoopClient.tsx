@@ -130,6 +130,11 @@ export default function LoopClient({
         onSelect={(m) => {
           if (shoppable[m.filename]) setSelected(m);
         }}
+        // Never fly/re-center the camera on click: clicking an image used to
+        // lock the OrbitControls target onto it, pinning it centered while
+        // everything orbited around it. Shoppable clicks still open the
+        // overlay via onSelect; all other clicks are camera no-ops.
+        shouldFlyTo={() => false}
       />
 
       {selected && shoppable[selected.filename] && (

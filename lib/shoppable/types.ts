@@ -26,6 +26,10 @@ export interface ShoppableItem {
   anchor: { x: number; y: number };
   /** Normalized bounding box — traced on the image when the item's card is hovered. */
   box: { x: number; y: number; w: number; h: number };
+  /** SAM mask cutout PNG (full-image size, garment on transparent bg) on S3. */
+  maskUrl: string | null;
+  /** Locally cached copy under /portfolio/shoppable/masks/, preferred over `maskUrl`. */
+  localMask: string | null;
   /** Ranked recommendations; the UI shows products[0]. Never empty in a valid manifest. */
   products: ShoppableProduct[];
 }

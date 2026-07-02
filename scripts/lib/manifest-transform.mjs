@@ -82,6 +82,8 @@ export function buildManifestEntry({ outfit, imgWidth, imgHeight }) {
       category: bound.productInfo?.category ?? null,
       anchor: normalized.anchor,
       box: normalized.box,
+      maskUrl: bound.maskUrl ?? null,
+      localMask: null, // filled in by the generator after mask download
       products,
     });
   }

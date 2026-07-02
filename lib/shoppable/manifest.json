@@ -1,7 +1,7 @@
 {
   "c9c4f69557d717f8a59825628307b4a2.jpg": {
     "shortCode": "tzUIKArGJt",
-    "generatedAt": "2026-07-02T02:38:19.832Z",
+    "generatedAt": "2026-07-02T03:11:46.769Z",
     "items": [
       {
         "boundId": "dbb294f5-6edd-4e5a-8178-a3d445839363",
@@ -17,6 +17,8 @@
           "w": 0.331915,
           "h": 0.56355
         },
+        "maskUrl": "https://aesthetic-search-images-dev.s3.us-east-1.amazonaws.com/bounds/tzUIKArGJt/mask-shoes-0-643417b6.png",
+        "localMask": "/portfolio/shoppable/masks/dbb294f5-6edd-4e5a-8178-a3d445839363.png",
         "products": [
           {
             "name": "The Highest Heel SASHA-101 Women's Sexy 5\" Heel Platform Knee Boot Chrome Ornaments Black Shoes",
@@ -84,6 +86,8 @@
           "w": 0.116458,
           "h": 0.05766700000000001
         },
+        "maskUrl": "https://aesthetic-search-images-dev.s3.us-east-1.amazonaws.com/bounds/tzUIKArGJt/mask-eyewear-0-11903c15.png",
+        "localMask": "/portfolio/shoppable/masks/bf22a5a3-d63f-4ac1-998e-7b4db2c4e051.png",
         "products": [
           {
             "name": "Chic and stylish sunnies from Galliano's tenure as creative director of Dior",
