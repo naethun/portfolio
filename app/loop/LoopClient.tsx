@@ -13,6 +13,8 @@ import {
   type GestureState,
   type GestureDebug,
 } from '@/components/ImageUniverse/useUniverseGestures';
+import type { ShoppableManifest } from '@/lib/shoppable/types';
+import { ShoppableBreakdown } from '@/components/ShoppableBreakdown/ShoppableBreakdown';
 
 // three.js + WebGL is client-only, so load with SSR disabled.
 const ImageUniverse = dynamic(
@@ -55,7 +57,13 @@ function gestureHint(state: GestureState): string {
   }
 }
 
-export default function LoopClient({ media }: { media: UniverseMedia[] }) {
+export default function LoopClient({
+  media,
+  shoppable,
+}: {
+  media: UniverseMedia[];
+  shoppable: ShoppableManifest;
+}) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const landmarksRef = useRef<HandLandmarkerResult | null>(null);
   const formationTargetRef = useRef(0);
@@ -63,6 +71,7 @@ export default function LoopClient({ media }: { media: UniverseMedia[] }) {
   const debugRef = useRef<GestureDebug | null>(null);
   const [gesture, setGesture] = useState<GestureState>('natural');
   const [showDebug, setShowDebug] = useState(true);
+  const [selected, setSelected] = useState<UniverseMedia | null>(null);
 
   const { state: cameraState, enable, disable } = useCameraStream({ videoRef });
   const cameraEnabled = cameraState === 'granted';
@@ -79,7 +88,7 @@ export default function LoopClient({ media }: { media: UniverseMedia[] }) {
   const onState = useCallback((s: GestureState) => setGesture(s), []);
   useUniverseGestures({
     landmarksRef,
-    enabled: cameraEnabled,
+    enabled: cameraEnabled && !selected,
     formationTargetRef,
     shapeTargetRef,
     onState,
@@ -90,7 +99,7 @@ export default function LoopClient({ media }: { media: UniverseMedia[] }) {
   // "H" toggles the formed shape between globe and helix. The gesture layer
   // owns both while the camera is on.
   useEffect(() => {
-    if (cameraEnabled) return;
+    if (cameraEnabled || selected) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'g' || e.key === 'G') {
         formationTargetRef.current = formationTargetRef.current > 0.5 ? 0 : 1;
@@ -100,16 +109,17 @@ export default function LoopClient({ media }: { media: UniverseMedia[] }) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [cameraEnabled]);
+  }, [cameraEnabled, selected]);
 
   // "D" toggles the debug readout (always available).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (selected) return;
       if (e.key === 'd' || e.key === 'D') setShowDebug((v) => !v);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [selected]);
 
   return (
     <div className="relative h-[100svh] w-full">
@@ -117,7 +127,18 @@ export default function LoopClient({ media }: { media: UniverseMedia[] }) {
         media={media}
         formationTargetRef={formationTargetRef}
         shapeTargetRef={shapeTargetRef}
+        onSelect={(m) => {
+          if (shoppable[m.filename]) setSelected(m);
+        }}
       />
+
+      {selected && shoppable[selected.filename] && (
+        <ShoppableBreakdown
+          media={selected}
+          entry={shoppable[selected.filename]}
+          onClose={() => setSelected(null)}
+        />
+      )}
 
       {showDebug && (
         <GestureDebugPanel

@@ -1,5 +1,6 @@
 import { JetBrains_Mono } from 'next/font/google';
 import { getUniverseMedia } from '@/lib/getUniverseMedia';
+import { getShoppable } from '@/lib/shoppable/getShoppable';
 import LoopClient from './LoopClient';
 
 const jetbrainsMono = JetBrains_Mono({
@@ -14,12 +15,13 @@ export const metadata = {
 
 export default function LoopPage() {
   const media = getUniverseMedia();
+  const shoppable = getShoppable();
   return (
     <main
       className={`${jetbrainsMono.className} ${jetbrainsMono.variable}`}
       style={{ background: '#f4f2ee' }}
     >
-      <LoopClient media={media} />
+      <LoopClient media={media} shoppable={shoppable} />
     </main>
   );
 }
