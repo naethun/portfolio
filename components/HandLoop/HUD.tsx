@@ -22,9 +22,6 @@ const HAND_CONNECTIONS: ReadonlyArray<readonly [number, number]> = [
   [0, 17],                                  // palm
 ];
 
-const PREVIEW_W = 240;
-const PREVIEW_H = 180;
-
 interface Props {
   videoRef: RefObject<HTMLVideoElement | null>;
   landmarksRef: RefObject<HandLandmarkerResult | null>;
@@ -120,12 +117,44 @@ export function HUD({ videoRef, landmarksRef, cameraEnabled }: Props) {
     if (!ctx) return;
 
     let rafId = 0;
+    let ro: ResizeObserver | null = null;
+
+    // Size the backing store to the displayed size × DPR so the preview stays
+    // crisp on Retina — a fixed low-res canvas upscaled looked pixelated.
+    const sizeCanvas = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.max(1, Math.round(rect.width * dpr));
+      const h = Math.max(1, Math.round(rect.height * dpr));
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+      }
+    };
+    sizeCanvas();
+    ro = new ResizeObserver(sizeCanvas);
+    ro.observe(canvas);
+
     const draw = () => {
+      const cw = canvas.width;
+      const ch = canvas.height;
       const video = videoRef.current;
-      if (video && video.readyState >= 2) {
+      const vw = video?.videoWidth ?? 0;
+      const vh = video?.videoHeight ?? 0;
+
+      if (video && video.readyState >= 2 && vw > 0 && vh > 0) {
+        // object-cover: fill the window preserving the stream's aspect ratio
+        // (no squeeze), cropping any overflow.
+        const scale = Math.max(cw / vw, ch / vh);
+        const dispW = vw * scale;
+        const dispH = vh * scale;
+        const offX = (cw - dispW) / 2;
+        const offY = (ch - dispH) / 2;
+
+        ctx.clearRect(0, 0, cw, ch);
         ctx.save();
-        ctx.setTransform(-1, 0, 0, 1, PREVIEW_W, 0); // mirror horizontally
-        ctx.drawImage(video, 0, 0, PREVIEW_W, PREVIEW_H);
+        ctx.setTransform(-1, 0, 0, 1, cw, 0); // mirror horizontally (selfie)
+        ctx.drawImage(video, offX, offY, dispW, dispH);
         ctx.restore();
 
         const result = landmarksRef.current;
@@ -139,11 +168,12 @@ export function HUD({ videoRef, landmarksRef, cameraEnabled }: Props) {
               ? 'rgba(255,255,255,0.95)'
               : 'rgba(255,180,80,0.95)';
             const fill = isPrimary ? 'rgba(255,255,255,1)' : 'rgba(255,180,80,1)';
-            const px = (i: number) => (1 - lm[i].x) * PREVIEW_W;
-            const py = (i: number) => lm[i].y * PREVIEW_H;
+            // Mirror x manually to match the flipped video; apply cover offsets.
+            const px = (i: number) => offX + (1 - lm[i].x) * dispW;
+            const py = (i: number) => offY + lm[i].y * dispH;
 
             ctx.strokeStyle = stroke;
-            ctx.lineWidth = 1;
+            ctx.lineWidth = Math.max(1.5, cw * 0.006);
             ctx.beginPath();
             for (const [a, b] of HAND_CONNECTIONS) {
               ctx.moveTo(px(a), py(a));
@@ -152,21 +182,26 @@ export function HUD({ videoRef, landmarksRef, cameraEnabled }: Props) {
             ctx.stroke();
 
             ctx.fillStyle = fill;
+            const r = Math.max(2, cw * 0.009);
             for (let i = 0; i < lm.length; i++) {
               ctx.beginPath();
-              ctx.arc(px(i), py(i), 2, 0, Math.PI * 2);
+              ctx.arc(px(i), py(i), r, 0, Math.PI * 2);
               ctx.fill();
             }
           }
         }
       } else {
+        ctx.clearRect(0, 0, cw, ch);
         ctx.fillStyle = 'rgba(0,0,0,0.6)';
-        ctx.fillRect(0, 0, PREVIEW_W, PREVIEW_H);
+        ctx.fillRect(0, 0, cw, ch);
       }
       rafId = requestAnimationFrame(draw);
     };
     rafId = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(rafId);
+    return () => {
+      cancelAnimationFrame(rafId);
+      ro?.disconnect();
+    };
   }, [cameraEnabled, videoRef, landmarksRef]);
 
   if (!cameraEnabled) return null;
@@ -191,13 +226,11 @@ export function HUD({ videoRef, landmarksRef, cameraEnabled }: Props) {
       <MacWindow size="sm" title="Camera">
         <canvas
           ref={canvasRef}
-          width={PREVIEW_W}
-          height={PREVIEW_H}
           className="block bg-black"
           style={{
-            width: 'clamp(140px, 18vw, 220px)',
+            width: 'clamp(160px, 20vw, 260px)',
             height: 'auto',
-            aspectRatio: '4 / 3',
+            aspectRatio: '16 / 9',
           }}
         />
       </MacWindow>
