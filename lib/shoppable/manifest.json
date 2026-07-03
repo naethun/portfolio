@@ -1,7 +1,7 @@
 {
   "c9c4f69557d717f8a59825628307b4a2.jpg": {
     "shortCode": "tzUIKArGJt",
-    "generatedAt": "2026-07-02T03:11:46.769Z",
+    "generatedAt": "2026-07-03T01:59:22.098Z",
     "items": [
       {
         "boundId": "dbb294f5-6edd-4e5a-8178-a3d445839363",
@@ -138,6 +138,81 @@
             "image": "https://u-mercari-images.mercdn.net/thumb/photos/m57883447670_1.jpg?width=2560&quality=75&_=1776691692",
             "localImage": null,
             "merchant": "mercari.com"
+          }
+        ]
+      }
+    ]
+  },
+  "slp_jacket.jpg": {
+    "shortCode": "djcjn00f10",
+    "generatedAt": "2026-07-03T02:00:57.182Z",
+    "items": [
+      {
+        "boundId": "d9092538-45f1-4482-b191-db610b692fff",
+        "label": "Outerwear",
+        "category": "Outerwear",
+        "anchor": {
+          "x": 0.496513,
+          "y": 0.487949
+        },
+        "box": {
+          "x": 0.0646428,
+          "y": 0.005058499999999966,
+          "w": 0.8637402,
+          "h": 0.9657805
+        },
+        "maskUrl": "https://aesthetic-search-images-dev.s3.us-east-1.amazonaws.com/bounds/djcjn00f10/mask-outerwear-0-5f96bfed.png",
+        "localMask": "/portfolio/shoppable/masks/d9092538-45f1-4482-b191-db610b692fff.png",
+        "products": [
+          {
+            "name": "Burberry Burberry SS11 Spring 2011 Loseley Leather Biker Jacket",
+            "brand": "Grailed",
+            "price": 2250,
+            "currency": "USD",
+            "url": "https://www.grailed.com/listings/77045687-burberry-burberry-ss11-spring-2011-loseley-leather-biker-jacket",
+            "image": "https://media-assets.grailed.com/prd/listing/46621007/6d4b0ee804b24c63a2b1e8a81bd0ca2d",
+            "localImage": "/portfolio/shoppable/thumbs/d9092538-45f1-4482-b191-db610b692fff.jpg",
+            "merchant": "grailed.com"
+          },
+          {
+            "name": "Babaton Black Vegan Leather Shirt",
+            "brand": "Depop",
+            "price": 70,
+            "currency": "CAD",
+            "url": "https://www.depop.com/products/markpatrielle-babaton-black-vegan-leather-shirt/",
+            "image": "https://media-photos.depop.com/b1/2410834/2009858498_c9209619cd27405ead0bac2d8f144c73/P8.jpg",
+            "localImage": null,
+            "merchant": "depop.com"
+          },
+          {
+            "name": "Leather biker jacket Burberry Black size 38 IT in Leather",
+            "brand": "Vestiaire Collective",
+            "price": 2197,
+            "currency": "USD",
+            "url": "https://us.vestiairecollective.com/women-clothing/biker-jackets/burberry/black-leather-burberry-biker-jacket-34089547.shtml",
+            "image": "https://images.vestiairecollective.com/images/resized/w=2920,q=75,f=auto,/produit/black-leather-burberry-biker-jacket-34089547-3_2.jpg",
+            "localImage": null,
+            "merchant": "us.vestiairecollective.com"
+          },
+          {
+            "name": "Leather jacket Burberry Black size 38 IT in Leather",
+            "brand": "Vestiaire Collective",
+            "price": 1984.47,
+            "currency": "USD",
+            "url": "https://us.vestiairecollective.com/women-clothing/jackets/burberry/black-leather-burberry-jacket-35128136.shtml",
+            "image": "https://images.vestiairecollective.com/images/resized/w=500,q=75,f=auto,/produit/black-leather-burberry-jacket-35128136-1_3.jpg",
+            "localImage": null,
+            "merchant": "us.vestiairecollective.com"
+          },
+          {
+            "name": "Burberry Brit Iconic Loseley Quilted Leather Jacket",
+            "brand": "eBay",
+            "price": null,
+            "currency": "USD",
+            "url": "https://www.ebay.com/itm/194616766681",
+            "image": "https://i.ebayimg.com/images/g/wWAAAOSwzZthub74/s-l400.jpg",
+            "localImage": null,
+            "merchant": "ebay.com"
           }
         ]
       }

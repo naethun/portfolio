@@ -45,13 +45,13 @@ export default function ReelsClient({
   const landmarksRef = useRef<HandLandmarkerResult | null>(null);
 
   // This page owns the camera; the universe up top consumes its landmarks.
-  const { state: cameraState, enable, disable } = useCameraStream({ videoRef: camRef });
+  const { state: cameraState, enable } = useCameraStream({ videoRef: camRef });
   const cameraActive = cameraState === 'granted';
 
   const onResult = useCallback((result: HandLandmarkerResult) => {
     landmarksRef.current = result;
   }, []);
-  const { ready } = useHandTracking({
+  useHandTracking({
     videoRef: camRef,
     enabled: cameraActive,
     onResult,
@@ -107,9 +107,10 @@ export default function ReelsClient({
               enabled={cameraActive}
             />
 
-            {/* Camera control / status strip. */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-4">
-              {!cameraActive ? (
+            {/* Camera enable button — only before the camera is on. Once live,
+                nothing overlays the frame (clean for recording). */}
+            {!cameraActive && (
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-4">
                 <button
                   type="button"
                   onClick={enable}
@@ -118,20 +119,8 @@ export default function ReelsClient({
                 >
                   {cameraLabel(cameraState)}
                 </button>
-              ) : (
-                <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-4 py-2 font-mono text-[11px] tracking-[0.2em] text-white/80 backdrop-blur">
-                  {!ready && <span>LOADING HAND MODEL…</span>}
-                  <button
-                    type="button"
-                    onClick={disable}
-                    aria-label="Turn off camera"
-                    className="text-white/60 transition-colors hover:text-white"
-                  >
-                    ✕ CAMERA
-                  </button>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </MacWindow>
         </div>
       </div>

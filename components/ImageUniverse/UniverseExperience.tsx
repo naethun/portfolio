@@ -93,9 +93,9 @@ export default function UniverseExperience({
    */
   hideChrome?: boolean;
   /**
-   * Hide the gesture-instruction text in the bottom strip (keeps the camera
-   * enable/disable control) — for recording surfaces that don't want the
-   * "PINCH→L = GLOBE …" hint in frame.
+   * Clean recording mode: hides the on-camera bottom strip entirely (both the
+   * "PINCH→L = GLOBE …" hint and the "✕ CAMERA" button). Only the initial
+   * enable button shows; once the camera is on, nothing overlays the frame.
    */
   hideGuidance?: boolean;
 }) {
@@ -219,8 +219,10 @@ export default function UniverseExperience({
         <HUD videoRef={videoRef} landmarksRef={landmarksRef} cameraEnabled={internalCameraEnabled} />
       )}
 
-      {/* Bottom-center control / guidance strip. */}
-      {!hideChrome && (
+      {/* Bottom-center control / guidance strip. With hideGuidance, only the
+          initial enable button shows — once the camera is on the strip (hint +
+          ✕ CAMERA) is dropped entirely for a clean recording frame. */}
+      {!hideChrome && (!internalCameraEnabled || !hideGuidance) && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-5">
           {!internalCameraEnabled ? (
             <button
