@@ -33,6 +33,7 @@ export default function PortraitPage() {
           media={media}
           shoppable={shoppable}
           className="relative h-full w-full"
+          hideGuidance
         />
       </div>
     </main>

@@ -73,6 +73,7 @@ export default function UniverseExperience({
   externalLandmarksRef,
   externalCameraActive = false,
   hideChrome = false,
+  hideGuidance = false,
 }: {
   media: UniverseMedia[];
   shoppable: ShoppableManifest;
@@ -91,6 +92,12 @@ export default function UniverseExperience({
    * and default the gesture-debug panel off — a clean embed for a recording frame.
    */
   hideChrome?: boolean;
+  /**
+   * Hide the gesture-instruction text in the bottom strip (keeps the camera
+   * enable/disable control) — for recording surfaces that don't want the
+   * "PINCH→L = GLOBE …" hint in frame.
+   */
+  hideGuidance?: boolean;
 }) {
   const external = externalLandmarksRef != null;
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -226,7 +233,9 @@ export default function UniverseExperience({
             </button>
           ) : (
             <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-neutral-200 bg-white/70 px-4 py-2 font-mono text-[11px] tracking-[0.2em] text-neutral-600 backdrop-blur">
-              <span>{ready ? gestureHint(gesture) : 'LOADING HAND MODEL…'}</span>
+              {!hideGuidance && (
+                <span>{ready ? gestureHint(gesture) : 'LOADING HAND MODEL…'}</span>
+              )}
               <button
                 type="button"
                 onClick={disable}

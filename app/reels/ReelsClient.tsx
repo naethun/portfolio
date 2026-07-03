@@ -120,18 +120,14 @@ export default function ReelsClient({
                 </button>
               ) : (
                 <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-4 py-2 font-mono text-[11px] tracking-[0.2em] text-white/80 backdrop-blur">
-                  <span>
-                    {ready
-                      ? 'PINCH→L = GLOBE · BOTH BACKS = HELIX · PALM+BACK = FLAT'
-                      : 'LOADING HAND MODEL…'}
-                  </span>
+                  {!ready && <span>LOADING HAND MODEL…</span>}
                   <button
                     type="button"
                     onClick={disable}
                     aria-label="Turn off camera"
-                    className="text-white/50 transition-colors hover:text-white"
+                    className="text-white/60 transition-colors hover:text-white"
                   >
-                    ✕
+                    ✕ CAMERA
                   </button>
                 </div>
               )}
