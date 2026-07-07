@@ -64,23 +64,17 @@ export function SkeletonOverlay({ landmarksRef, videoRef, enabled }: Props) {
         const offX = (cw - dispW) / 2;
         const offY = (ch - dispH) / 2;
 
+        // TouchDesigner MediaPipe-style skeleton: thin soft salmon-pink
+        // connections with brighter pale-pink joint dots, same for both hands.
         for (let i = 0; i < result.landmarks.length; i++) {
           const lm = result.landmarks[i];
-          const label = result.handedness?.[i]?.[0]?.categoryName;
-          const isPrimary = label === 'Right';
-          const stroke = isPrimary
-            ? 'rgba(255,255,255,0.95)'
-            : 'rgba(255,180,80,0.95)';
-          const fill = isPrimary
-            ? 'rgba(255,255,255,1)'
-            : 'rgba(255,180,80,1)';
 
           // Mirror x to match the bottom video's scaleX(-1) display.
           const px = (n: number) => offX + (1 - lm[n].x) * dispW;
           const py = (n: number) => offY + lm[n].y * dispH;
 
-          ctx.lineWidth = Math.max(2, dispW * 0.003);
-          ctx.strokeStyle = stroke;
+          ctx.lineWidth = Math.max(1.5, dispW * 0.002);
+          ctx.strokeStyle = 'rgba(248, 188, 178, 0.85)';
           ctx.beginPath();
           for (const [a, b] of HAND_CONNECTIONS) {
             ctx.moveTo(px(a), py(a));
@@ -88,8 +82,8 @@ export function SkeletonOverlay({ landmarksRef, videoRef, enabled }: Props) {
           }
           ctx.stroke();
 
-          ctx.fillStyle = fill;
-          const r = Math.max(3, dispW * 0.005);
+          ctx.fillStyle = 'rgba(255, 223, 215, 0.95)';
+          const r = Math.max(2.5, dispW * 0.004);
           for (let j = 0; j < lm.length; j++) {
             ctx.beginPath();
             ctx.arc(px(j), py(j), r, 0, Math.PI * 2);
