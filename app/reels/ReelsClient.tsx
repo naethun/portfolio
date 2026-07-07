@@ -59,19 +59,22 @@ export default function ReelsClient({
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-white">
+      {/* The reel canvas matches the visible reel area on-phone (~9:17.5), with
+          the light-gray Instagram backdrop and window proportions taken from
+          the reference screenshot. */}
       <div
-        className="relative bg-white"
-        style={{ aspectRatio: '9 / 16', height: '100vh', maxWidth: '100vw' }}
+        className="relative overflow-hidden bg-[#d1d1d6]"
+        style={{ aspectRatio: '9 / 17.5', height: '100vh', maxWidth: '100vw' }}
       >
         {/* Top: the shoppable image universe, gesture-driven by the shared camera. */}
         <div
-          className="absolute inset-x-3 top-3"
-          style={{ height: 'calc(60% - 18px)' }}
+          className="absolute"
+          style={{ left: '4%', right: '4%', top: '7.8%', height: '42%' }}
         >
           <MacWindow
             title="moodboard.app"
             className="flex h-full w-full flex-col"
-            contentClassName="min-h-0 flex-1 bg-[#f4f2ee]"
+            contentClassName="min-h-0 flex-1 bg-white"
           >
             <UniverseExperience
               media={media}
@@ -79,19 +82,21 @@ export default function ReelsClient({
               externalLandmarksRef={landmarksRef}
               externalCameraActive={cameraActive}
               hideChrome
+              background="#ffffff"
               className="relative h-full w-full"
             />
           </MacWindow>
         </div>
 
-        {/* Bottom: the live camera + hand-skeleton overlay. */}
+        {/* Bottom: the live camera + hand-skeleton overlay. Like the reference,
+            the window runs off the bottom edge of the frame. */}
         <div
-          className="absolute inset-x-3 bottom-3"
-          style={{ height: 'calc(40% - 18px)' }}
+          className="absolute"
+          style={{ left: '4%', right: '4%', top: '50.75%', bottom: 0 }}
         >
           <MacWindow
             title="camera.live"
-            className="flex h-full w-full flex-col"
+            className="flex h-full w-full flex-col rounded-b-none"
             contentClassName="relative min-h-0 flex-1 bg-black"
           >
             <video
@@ -115,7 +120,11 @@ export default function ReelsClient({
                   type="button"
                   onClick={enable}
                   disabled={cameraState === 'requesting'}
-                  className="pointer-events-auto rounded-full border border-white/30 bg-black/50 px-5 py-2.5 font-mono text-[11px] tracking-[0.2em] text-white/90 backdrop-blur transition-colors hover:border-white hover:text-white disabled:opacity-60"
+                  className="pointer-events-auto rounded-full border border-white/30 bg-black/50 px-5 py-2.5 text-[12px] font-medium tracking-[0.12em] text-white/90 backdrop-blur transition-colors hover:border-white hover:text-white disabled:opacity-60"
+                  style={{
+                    fontFamily:
+                      '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif',
+                  }}
                 >
                   {cameraLabel(cameraState)}
                 </button>

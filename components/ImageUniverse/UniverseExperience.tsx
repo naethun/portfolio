@@ -74,6 +74,7 @@ export default function UniverseExperience({
   externalCameraActive = false,
   hideChrome = false,
   hideGuidance = false,
+  background,
 }: {
   media: UniverseMedia[];
   shoppable: ShoppableManifest;
@@ -98,6 +99,8 @@ export default function UniverseExperience({
    * enable button shows; once the camera is on, nothing overlays the frame.
    */
   hideGuidance?: boolean;
+  /** Scene background color; defaults to the universe's warm off-white. */
+  background?: string;
 }) {
   const external = externalLandmarksRef != null;
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -173,6 +176,7 @@ export default function UniverseExperience({
     <div className={className ?? 'relative h-[100svh] w-full'}>
       <ImageUniverse
         media={media}
+        background={background}
         formationTargetRef={formationTargetRef}
         shapeTargetRef={shapeTargetRef}
         flatTargetRef={flatTargetRef}
