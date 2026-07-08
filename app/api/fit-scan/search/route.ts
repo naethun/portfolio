@@ -12,6 +12,7 @@ import {
 } from '@/lib/fit-scan/serpapiClient.mjs';
 
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
