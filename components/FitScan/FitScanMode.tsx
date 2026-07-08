@@ -12,6 +12,7 @@ import {
   expandRect,
   pickNearestBound,
 } from '@/lib/fit-scan/poseBounds.mjs';
+import { claimBoundSearch } from '@/lib/fit-scan/boundSearchLocks.mjs';
 import type { FitScanBound, FitScanMatch, FitScanSearchPayload, NormalizedRect } from './types';
 import { usePoseBounds, type PoseBoundsStatus } from './usePoseBounds';
 
@@ -164,6 +165,8 @@ export default function FitScanMode({ mode }: { mode: Mode }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const handRef = useRef<HandLandmarks | null>(null);
   const previousPinchRef = useRef(false);
+  const scanInFlightRef = useRef(false);
+  const searchedBoundIdsRef = useRef<Set<string>>(new Set());
   const [metrics, setMetrics] = useState<CoverMetrics | null>(null);
   const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
   const [handError, setHandError] = useState<string | null>(null);
@@ -235,7 +238,14 @@ export default function FitScanMode({ mode }: { mode: Mode }) {
   }, [cameraActive]);
 
   const runScan = useCallback(async () => {
-    if (phase === 'capturing' || phase === 'uploading' || phase === 'searching') return;
+    if (
+      scanInFlightRef.current ||
+      phase === 'capturing' ||
+      phase === 'uploading' ||
+      phase === 'searching'
+    ) {
+      return;
+    }
     const video = videoRef.current;
     if (!video) return;
     if (!selected) {
@@ -243,11 +253,21 @@ export default function FitScanMode({ mode }: { mode: Mode }) {
       setMessage('Point at a live body bound before pinching.');
       return;
     }
-    setResult(null);
+
+    if (searchedBoundIdsRef.current.has(selected.id)) {
+      return;
+    }
+
+    scanInFlightRef.current = true;
     setMessage(null);
     try {
       setPhase('capturing');
       const crop = await captureBoundCrop(video, selected);
+      if (!claimBoundSearch(searchedBoundIdsRef.current, selected.id)) {
+        setPhase('idle');
+        return;
+      }
+      setResult(null);
       setPhase('uploading');
       const form = new FormData();
       form.append('crop', crop, `fit-scan-${selected.kind}.jpg`);
@@ -274,6 +294,8 @@ export default function FitScanMode({ mode }: { mode: Mode }) {
     } catch (err) {
       setPhase('error');
       setMessage(err instanceof Error ? err.message : 'Fit scan failed.');
+    } finally {
+      scanInFlightRef.current = false;
     }
   }, [phase, selected]);
 
