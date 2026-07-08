@@ -59,17 +59,19 @@ export default function ReelsClient({
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-white">
-      {/* The reel canvas matches the visible reel area on-phone (~9:17.5), with
-          the light-gray Instagram backdrop and window proportions taken from
-          the reference screenshot. */}
+      {/* Upload-native 9:16 reel canvas (1080×1920). The 8% side margins look
+          wide in the browser on purpose: tall phones display reels filled to
+          screen height, cropping ~4% off each side — what remains on-screen
+          matches the reference screenshot's composition. Vertical proportions
+          are unaffected by that crop. */}
       <div
         className="relative overflow-hidden bg-[#d1d1d6]"
-        style={{ aspectRatio: '9 / 17.5', height: '100vh', maxWidth: '100vw' }}
+        style={{ aspectRatio: '9 / 16', height: '100vh', maxWidth: '100vw' }}
       >
         {/* Top: the shoppable image universe, gesture-driven by the shared camera. */}
         <div
           className="absolute"
-          style={{ left: '4%', right: '4%', top: '7.8%', height: '42%' }}
+          style={{ left: '8%', right: '8%', top: '7.8%', height: '42%' }}
         >
           <MacWindow
             title="moodboard.app"
@@ -92,7 +94,7 @@ export default function ReelsClient({
             the window runs off the bottom edge of the frame. */}
         <div
           className="absolute"
-          style={{ left: '4%', right: '4%', top: '50.75%', bottom: 0 }}
+          style={{ left: '8%', right: '8%', top: '50.75%', bottom: 0 }}
         >
           <MacWindow
             title="camera.live"
