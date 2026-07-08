@@ -68,10 +68,12 @@ export default function ReelsClient({
         className="relative overflow-hidden bg-[#d1d1d6]"
         style={{ aspectRatio: '9 / 16', height: '100vh', maxWidth: '100vw' }}
       >
-        {/* Top: the shoppable image universe, gesture-driven by the shared camera. */}
+        {/* Top: the shoppable image universe, gesture-driven by the shared camera.
+            Both windows keep the reference's 42:49 height ratio, scaled down so
+            the bottom margin equals the top's 7.8% (IG zooms in a bit anyway). */}
         <div
           className="absolute"
-          style={{ left: '8%', right: '8%', top: '7.8%', height: '42%' }}
+          style={{ left: '8%', right: '8%', top: '7.8%', height: '38.4%' }}
         >
           <MacWindow
             title="moodboard.app"
@@ -90,15 +92,14 @@ export default function ReelsClient({
           </MacWindow>
         </div>
 
-        {/* Bottom: the live camera + hand-skeleton overlay. Like the reference,
-            the window runs off the bottom edge of the frame. */}
+        {/* Bottom: the live camera + hand-skeleton overlay. */}
         <div
           className="absolute"
-          style={{ left: '8%', right: '8%', top: '50.75%', bottom: 0 }}
+          style={{ left: '8%', right: '8%', top: '47.15%', bottom: '7.8%' }}
         >
           <MacWindow
-            title="camera.live"
-            className="flex h-full w-full flex-col rounded-b-none"
+            title="camera"
+            className="flex h-full w-full flex-col"
             contentClassName="relative min-h-0 flex-1 bg-black"
           >
             <video
