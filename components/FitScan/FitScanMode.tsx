@@ -39,19 +39,19 @@ function cameraLabel(state: CameraState): string {
 function poseStatusLabel(status: PoseBoundsStatus): string {
   switch (status) {
     case 'loading':
-      return 'LOADING BLOB MODELS';
+      return 'LOADING BODY MODEL';
     case 'no_pose':
-      return 'NO BODY OR OBJECT DETECTED';
+      return 'NO BODY DETECTED';
     case 'missing_segmentation':
-      return 'BODY BLOBS UNAVAILABLE';
+      return 'BODY SEGMENTATION UNAVAILABLE';
     case 'no_bounds':
-      return 'NO TRACKABLE BLOBS';
+      return 'NO MASKED BODY REGIONS';
     case 'model_error':
-      return 'BLOB TRACKING UNAVAILABLE';
+      return 'BODY TRACKING UNAVAILABLE';
     case 'tracking':
-      return 'BLOB BOUNDS LIVE';
+      return 'BODY BOUNDS LIVE';
     default:
-      return 'BLOB MODELS IDLE';
+      return 'BODY MODEL IDLE';
   }
 }
 
@@ -122,82 +122,6 @@ function pointToScreen(point: { x: number; y: number }, metrics: CoverMetrics) {
   return {
     x: metrics.offsetX + point.x * metrics.displayW,
     y: metrics.offsetY + point.y * metrics.displayH,
-  };
-}
-
-function hashString(value: string) {
-  let hash = 2166136261;
-  for (let i = 0; i < value.length; i++) {
-    hash ^= value.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
-}
-
-function blobJitter(seed: number, index: number, range: number) {
-  const value = Math.sin(seed * 0.000001 + index * 12.9898) * 43758.5453;
-  return (value - Math.floor(value) - 0.5) * range;
-}
-
-function blobPath(width: number, height: number, id: string) {
-  const seed = hashString(id);
-  const insetX = Math.min(8, width * 0.04);
-  const insetY = Math.min(8, height * 0.04);
-  const left = insetX;
-  const right = Math.max(left + 1, width - insetX);
-  const top = insetY;
-  const bottom = Math.max(top + 1, height - insetY);
-  const x = (ratio: number, jitterIndex: number) =>
-    clamp(width * (ratio + blobJitter(seed, jitterIndex, 0.08)), left, right);
-  const y = (ratio: number, jitterIndex: number) =>
-    clamp(height * (ratio + blobJitter(seed, jitterIndex, 0.08)), top, bottom);
-  const n = (value: number) => Number(value.toFixed(2));
-  const start = { x: x(0.5, 1), y: top };
-
-  return [
-    `M ${n(start.x)} ${n(start.y)}`,
-    `C ${n(x(0.76, 2))} ${n(top)} ${n(right)} ${n(y(0.22, 3))} ${n(right)} ${n(y(0.48, 4))}`,
-    `C ${n(right)} ${n(y(0.76, 5))} ${n(x(0.76, 6))} ${n(bottom)} ${n(x(0.5, 7))} ${n(bottom)}`,
-    `C ${n(x(0.22, 8))} ${n(bottom)} ${n(left)} ${n(y(0.76, 9))} ${n(left)} ${n(y(0.52, 10))}`,
-    `C ${n(left)} ${n(y(0.24, 11))} ${n(x(0.24, 12))} ${n(top)} ${n(start.x)} ${n(start.y)}`,
-    'Z',
-  ].join(' ');
-}
-
-function boundTone(bound: FitScanBound, active: boolean) {
-  const objectBound = bound.derivedFrom.includes('object_detector');
-  const maskBound =
-    bound.derivedFrom.includes('segmentation_mask') &&
-    !bound.derivedFrom.includes('pose_landmarks');
-
-  if (active) {
-    return {
-      stroke: 'rgba(255,255,255,0.95)',
-      fill: 'rgba(255,255,255,0.12)',
-      glow: 'drop-shadow(0 0 18px rgba(255,255,255,0.55))',
-    };
-  }
-
-  if (objectBound) {
-    return {
-      stroke: 'rgba(248,188,178,0.72)',
-      fill: 'rgba(248,188,178,0.055)',
-      glow: 'drop-shadow(0 0 10px rgba(248,188,178,0.22))',
-    };
-  }
-
-  if (maskBound) {
-    return {
-      stroke: 'rgba(145,202,255,0.35)',
-      fill: 'rgba(145,202,255,0.035)',
-      glow: 'drop-shadow(0 0 12px rgba(145,202,255,0.16))',
-    };
-  }
-
-  return {
-    stroke: 'rgba(255,255,255,0.48)',
-    fill: 'rgba(255,255,255,0.035)',
-    glow: 'drop-shadow(0 0 10px rgba(255,255,255,0.18))',
   };
 }
 
@@ -316,7 +240,7 @@ export default function FitScanMode({ mode }: { mode: Mode }) {
     if (!video) return;
     if (!selected) {
       setPhase('error');
-      setMessage('Point at a live blob bound before pinching.');
+      setMessage('Point at a live body bound before pinching.');
       return;
     }
     setResult(null);
@@ -363,9 +287,9 @@ export default function FitScanMode({ mode }: { mode: Mode }) {
   const activeMessage =
     phaseLabel(phase) ??
     (handError ? 'HAND TRACKING UNAVAILABLE' : null) ??
-    (poseError ? 'BLOB TRACKING UNAVAILABLE' : null) ??
+    (poseError ? 'BODY TRACKING UNAVAILABLE' : null) ??
     (!handReady && cameraActive ? 'LOADING HAND MODEL' : null) ??
-    (!poseReady && cameraActive ? 'LOADING BLOB MODELS' : null) ??
+    (!poseReady && cameraActive ? 'LOADING BODY MODEL' : null) ??
     (cameraActive ? poseStatusLabel(poseStatus) : 'CAMERA OFF');
 
   const resultLayout = useMemo(() => {
@@ -405,55 +329,28 @@ export default function FitScanMode({ mode }: { mode: Mode }) {
           bounds.map((bound) => {
             const rect = rectToScreen(bound.rect, metrics);
             const active = selected?.id === bound.id;
-            const tone = boundTone(bound, active);
-            const showLabel = rect.width >= 58 && rect.height >= 34;
             return (
-              <div key={bound.id} className="absolute" style={{ inset: 0 }}>
-                <svg
-                  aria-hidden
-                  className={`absolute overflow-visible transition-opacity duration-150 ${
-                    active ? 'opacity-100' : 'opacity-80'
-                  }`}
-                  style={{
-                    left: rect.left,
-                    top: rect.top,
-                    width: rect.width,
-                    height: rect.height,
-                    filter: tone.glow,
-                  }}
-                  viewBox={`0 0 ${Math.max(1, rect.width)} ${Math.max(1, rect.height)}`}
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d={blobPath(Math.max(1, rect.width), Math.max(1, rect.height), bound.id)}
-                    fill={tone.fill}
-                    stroke={tone.stroke}
-                    strokeWidth={active ? 1.8 : 1.15}
-                    vectorEffect="non-scaling-stroke"
-                  />
-                  {active && (phase === 'capturing' || phase === 'uploading' || phase === 'searching') && (
-                    <path
-                      className="animate-pulse"
-                      d={blobPath(Math.max(1, rect.width), Math.max(1, rect.height), `${bound.id}-pulse`)}
-                      fill="none"
-                      stroke="rgba(255,255,255,0.7)"
-                      strokeWidth={3}
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  )}
-                </svg>
-                {showLabel && (
-                  <span
-                    className="absolute bg-black/50 px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-white/85 backdrop-blur"
-                    style={{
-                      left: rect.left + Math.min(12, rect.width * 0.16),
-                      top: rect.top + Math.min(12, rect.height * 0.16),
-                      borderRadius: 999,
-                    }}
-                  >
-                    {bound.label}
-                  </span>
+              <div
+                key={bound.id}
+                className={`absolute border transition-all duration-150 ${
+                  active
+                    ? 'border-white bg-white/10 shadow-[0_0_30px_rgba(255,255,255,0.55)]'
+                    : 'border-white/25 bg-white/0'
+                }`}
+                style={{
+                  left: rect.left,
+                  top: rect.top,
+                  width: rect.width,
+                  height: rect.height,
+                  borderRadius: 10,
+                }}
+              >
+                {active && (phase === 'capturing' || phase === 'uploading' || phase === 'searching') && (
+                  <span className="absolute inset-0 animate-ping rounded-[10px] border border-white/70" />
                 )}
+                <span className="absolute left-2 top-2 rounded-full bg-black/50 px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-white/85 backdrop-blur">
+                  {bound.label}
+                </span>
               </div>
             );
           })}

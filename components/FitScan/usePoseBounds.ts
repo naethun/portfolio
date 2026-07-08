@@ -3,25 +3,19 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import {
   FilesetResolver,
-  ObjectDetector,
   PoseLandmarker,
-  type ObjectDetectorResult,
   type PoseLandmarkerResult,
 } from '@mediapipe/tasks-vision';
 
 import type { FitScanBound } from './types';
 import {
   clipBoundsToMask,
-  deriveMaskBlobBounds,
-  deriveObjectBounds,
   derivePoseBounds,
 } from '@/lib/fit-scan/poseBounds.mjs';
 
 const WASM_URL = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm';
 const POSE_MODEL_URL =
   'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
-const OBJECT_MODEL_URL =
-  'https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite';
 
 export type PoseBoundsStatus =
   | 'idle'
@@ -52,19 +46,7 @@ async function createPoseLandmarker(
   });
 }
 
-async function createObjectDetector(
-  fileset: Awaited<ReturnType<typeof FilesetResolver.forVisionTasks>>,
-  delegate: 'GPU' | 'CPU',
-) {
-  return ObjectDetector.createFromOptions(fileset, {
-    baseOptions: { modelAssetPath: OBJECT_MODEL_URL, delegate },
-    runningMode: 'VIDEO',
-    maxResults: 12,
-    scoreThreshold: 0.28,
-  });
-}
-
-function boundsFromPoseResult(result: PoseLandmarkerResult): {
+function boundsFromResult(result: PoseLandmarkerResult): {
   bounds: FitScanBound[];
   status: PoseBoundsStatus;
 } {
@@ -74,28 +56,16 @@ function boundsFromPoseResult(result: PoseLandmarkerResult): {
   const mask = result.segmentationMasks?.[0];
   if (!mask) return { bounds: [], status: 'missing_segmentation' };
 
-  let maskData: Float32Array;
-  try {
-    maskData = mask.getAsFloat32Array();
-  } catch {
-    return { bounds: [], status: 'missing_segmentation' };
-  }
-
-  const maskBlobs = deriveMaskBlobBounds({
-    data: maskData,
-    width: mask.width,
-    height: mask.height,
-    mirrored: true,
-  }) as FitScanBound[];
   const candidates = derivePoseBounds({
     landmarks,
     segmentationMasksPresent: true,
   }) as FitScanBound[];
+  if (candidates.length === 0) return { bounds: [], status: 'no_bounds' };
 
   let clipped: FitScanBound[] = [];
   try {
     clipped = clipBoundsToMask(candidates, {
-      data: maskData,
+      data: mask.getAsFloat32Array(),
       width: mask.width,
       height: mask.height,
       mirrored: true,
@@ -104,24 +74,8 @@ function boundsFromPoseResult(result: PoseLandmarkerResult): {
     return { bounds: [], status: 'missing_segmentation' };
   }
 
-  const bounds = [...maskBlobs, ...clipped];
-  if (bounds.length === 0) return { bounds: [], status: 'no_bounds' };
-  return { bounds, status: 'tracking' };
-}
-
-function boundsFromObjectResult(
-  result: ObjectDetectorResult | null,
-  video: HTMLVideoElement,
-  includePerson: boolean,
-): FitScanBound[] {
-  if (!result) return [];
-  return deriveObjectBounds({
-    detections: result.detections,
-    videoWidth: video.videoWidth,
-    videoHeight: video.videoHeight,
-    mirrored: true,
-    includePerson,
-  }) as FitScanBound[];
+  if (clipped.length === 0) return { bounds: [], status: 'no_bounds' };
+  return { bounds: clipped, status: 'tracking' };
 }
 
 export function usePoseBounds({ videoRef, enabled }: Options) {
@@ -129,8 +83,7 @@ export function usePoseBounds({ videoRef, enabled }: Options) {
   const [bounds, setBounds] = useState<FitScanBound[]>([]);
   const [status, setStatus] = useState<PoseBoundsStatus>('idle');
   const [error, setError] = useState<string | null>(null);
-  const lastPoseDetectRef = useRef(0);
-  const lastObjectDetectRef = useRef(0);
+  const lastDetectRef = useRef(0);
 
   useEffect(() => {
     if (!enabled) {
@@ -145,57 +98,31 @@ export function usePoseBounds({ videoRef, enabled }: Options) {
     let rafId = 0;
     let rvfcId = 0;
     let landmarker: PoseLandmarker | null = null;
-    let objectDetector: ObjectDetector | null = null;
-    let latestPose = { bounds: [] as FitScanBound[], status: 'loading' as PoseBoundsStatus };
-    let latestObjects: FitScanBound[] = [];
     const cleanupVideo = videoRef.current;
     setStatus('loading');
     setError(null);
 
     const detect = (now: number) => {
-      if (cancelled || (!landmarker && !objectDetector)) return;
+      if (cancelled || !landmarker) return;
       const video = videoRef.current;
       if (!video || video.readyState < 2) return;
-      const shouldRunPose = !!landmarker && now - lastPoseDetectRef.current >= 120;
-      const shouldRunObject =
-        !!objectDetector && now - lastObjectDetectRef.current >= 360;
-      if (!shouldRunPose && !shouldRunObject) return;
+      if (now - lastDetectRef.current < 120) return;
+      lastDetectRef.current = now;
 
       let result: PoseLandmarkerResult | null = null;
-      if (shouldRunPose && landmarker) {
-        lastPoseDetectRef.current = now;
-        try {
-          result = landmarker.detectForVideo(video, now);
-          latestPose = boundsFromPoseResult(result);
-        } catch (err) {
-          console.error('[usePoseBounds] pose detect failed', err);
-          latestPose = { bounds: [], status: 'model_error' };
-          setError(err instanceof Error ? err.message : 'Pose detection failed.');
-        } finally {
-          result?.close();
-        }
+      try {
+        result = landmarker.detectForVideo(video, now);
+        const next = boundsFromResult(result);
+        setBounds(next.bounds);
+        setStatus(next.status);
+      } catch (err) {
+        console.error('[usePoseBounds] detect failed', err);
+        setBounds([]);
+        setStatus('model_error');
+        setError(err instanceof Error ? err.message : 'Pose detection failed.');
+      } finally {
+        result?.close();
       }
-
-      if (shouldRunObject && objectDetector) {
-        lastObjectDetectRef.current = now;
-        try {
-          const objectResult = objectDetector.detectForVideo(video, now);
-          latestObjects = boundsFromObjectResult(
-            objectResult,
-            video,
-            latestPose.bounds.length === 0,
-          );
-        } catch (err) {
-          console.warn('[usePoseBounds] object detect failed', err);
-          latestObjects = [];
-          objectDetector.close();
-          objectDetector = null;
-        }
-      }
-
-      const nextBounds = [...latestPose.bounds, ...latestObjects];
-      setBounds(nextBounds);
-      setStatus(nextBounds.length > 0 ? 'tracking' : latestPose.status);
     };
 
     (async () => {
@@ -205,31 +132,11 @@ export function usePoseBounds({ videoRef, enabled }: Options) {
         try {
           landmarker = await createPoseLandmarker(fileset, 'GPU');
         } catch {
-          try {
-            landmarker = await createPoseLandmarker(fileset, 'CPU');
-          } catch (err) {
-            console.warn('[usePoseBounds] pose detector unavailable', err);
-            landmarker = null;
-          }
-        }
-        try {
-          objectDetector = await createObjectDetector(fileset, 'GPU');
-        } catch {
-          try {
-            objectDetector = await createObjectDetector(fileset, 'CPU');
-          } catch (err) {
-            console.warn('[usePoseBounds] object detector unavailable', err);
-            objectDetector = null;
-          }
-        }
-        if (!landmarker && !objectDetector) {
-          throw new Error('MediaPipe fit-scan models could not be loaded.');
+          landmarker = await createPoseLandmarker(fileset, 'CPU');
         }
         if (cancelled) {
-          landmarker?.close();
+          landmarker.close();
           landmarker = null;
-          objectDetector?.close();
-          objectDetector = null;
           return;
         }
         setReady(true);
@@ -276,8 +183,6 @@ export function usePoseBounds({ videoRef, enabled }: Options) {
       }
       landmarker?.close();
       landmarker = null;
-      objectDetector?.close();
-      objectDetector = null;
       setReady(false);
       setBounds([]);
     };
