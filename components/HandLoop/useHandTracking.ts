@@ -15,9 +15,10 @@ interface Options {
   videoRef: RefObject<HTMLVideoElement | null>;
   enabled: boolean;
   onResult: (result: HandLandmarkerResult, timestampMs: number) => void;
+  onError?: (error: unknown) => void;
 }
 
-export function useHandTracking({ videoRef, enabled, onResult }: Options) {
+export function useHandTracking({ videoRef, enabled, onResult, onError }: Options) {
   const [ready, setReady] = useState(false);
   const [fps, setFps] = useState(0);
 
@@ -35,6 +36,7 @@ export function useHandTracking({ videoRef, enabled, onResult }: Options) {
     let landmarker: HandLandmarker | null = null;
     const fpsWindow: number[] = [];
     let lastFpsUpdate = 0;
+    const cleanupVideo = videoRef.current;
 
     const recordFps = (now: number) => {
       fpsWindow.push(now);
@@ -100,22 +102,26 @@ export function useHandTracking({ videoRef, enabled, onResult }: Options) {
         }
       } catch (err) {
         console.error('[useHandTracking] init failed', err);
+        onError?.(err);
       }
     })();
 
     return () => {
       cancelled = true;
       if (rafId) cancelAnimationFrame(rafId);
-      const v = videoRef.current;
-      if (rvfcId && v && typeof v.cancelVideoFrameCallback === 'function') {
-        v.cancelVideoFrameCallback(rvfcId);
+      if (
+        rvfcId &&
+        cleanupVideo &&
+        typeof cleanupVideo.cancelVideoFrameCallback === 'function'
+      ) {
+        cleanupVideo.cancelVideoFrameCallback(rvfcId);
       }
       landmarker?.close();
       landmarker = null;
       setReady(false);
       setFps(0);
     };
-  }, [enabled, videoRef]);
+  }, [enabled, videoRef, onError]);
 
   return { ready, fps };
 }

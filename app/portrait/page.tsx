@@ -1,7 +1,8 @@
 import { JetBrains_Mono } from 'next/font/google';
 import { getUniverseMedia } from '@/lib/getUniverseMedia';
 import { getShoppable } from '@/lib/shoppable/getShoppable';
-import UniverseExperience from '@/components/ImageUniverse/UniverseExperience';
+import { PortraitModeShell } from './_components/PortraitModeShell';
+import { PortraitUniverseMode } from './_components/PortraitUniverseMode';
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
@@ -25,17 +26,9 @@ export default function PortraitPage() {
     <main
       className={`${jetbrainsMono.className} ${jetbrainsMono.variable} flex min-h-screen w-full items-center justify-center bg-white`}
     >
-      <div
-        className="relative overflow-hidden bg-[#f4f2ee]"
-        style={{ aspectRatio: '9 / 16', height: '100vh', maxWidth: '100vw' }}
-      >
-        <UniverseExperience
-          media={media}
-          shoppable={shoppable}
-          className="relative h-full w-full"
-          hideGuidance
-        />
-      </div>
+      <PortraitModeShell>
+        <PortraitUniverseMode media={media} shoppable={shoppable} />
+      </PortraitModeShell>
     </main>
   );
 }

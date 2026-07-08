@@ -10,6 +10,7 @@ import { useHandTracking } from '@/components/HandLoop/useHandTracking';
 import { useCameraStream, type CameraState } from '@/components/ImageUniverse/useCameraStream';
 import UniverseExperience from '@/components/ImageUniverse/UniverseExperience';
 import { SkeletonOverlay } from './SkeletonOverlay';
+import { ReelsModeShell } from './_components/ReelsModeShell';
 
 function cameraLabel(state: CameraState): string {
   switch (state) {
@@ -58,16 +59,12 @@ export default function ReelsClient({
   });
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-white">
+    <ReelsModeShell>
       {/* Upload-native 9:16 reel canvas (1080×1920). The 8% side margins look
           wide in the browser on purpose: tall phones display reels filled to
           screen height, cropping ~4% off each side — what remains on-screen
           matches the reference screenshot's composition. Vertical proportions
           are unaffected by that crop. */}
-      <div
-        className="relative overflow-hidden bg-[#d1d1d6]"
-        style={{ aspectRatio: '9 / 16', height: '100vh', maxWidth: '100vw' }}
-      >
         {/* Top: the shoppable image universe, gesture-driven by the shared camera.
             Both windows keep the reference's 42:49 height ratio, scaled down so
             the bottom margin equals the top's 7.8% (IG zooms in a bit anyway). */}
@@ -135,7 +132,6 @@ export default function ReelsClient({
             )}
           </MacWindow>
         </div>
-      </div>
-    </div>
+    </ReelsModeShell>
   );
 }
