@@ -6,6 +6,7 @@ import {
   HandLandmarker,
   type HandLandmarkerResult,
 } from '@mediapipe/tasks-vision';
+import { createWithHandDelegateFallback } from './handTrackingDelegate';
 
 const WASM_URL = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm';
 const MODEL_URL =
@@ -16,6 +17,17 @@ interface Options {
   enabled: boolean;
   onResult: (result: HandLandmarkerResult, timestampMs: number) => void;
   onError?: (error: unknown) => void;
+}
+
+function createHandLandmarker(
+  fileset: Awaited<ReturnType<typeof FilesetResolver.forVisionTasks>>,
+  delegate: 'GPU' | 'CPU'
+) {
+  return HandLandmarker.createFromOptions(fileset, {
+    baseOptions: { modelAssetPath: MODEL_URL, delegate },
+    runningMode: 'VIDEO',
+    numHands: 2,
+  });
 }
 
 export function useHandTracking({ videoRef, enabled, onResult, onError }: Options) {
@@ -51,11 +63,9 @@ export function useHandTracking({ videoRef, enabled, onResult, onError }: Option
       try {
         const fileset = await FilesetResolver.forVisionTasks(WASM_URL);
         if (cancelled) return;
-        landmarker = await HandLandmarker.createFromOptions(fileset, {
-          baseOptions: { modelAssetPath: MODEL_URL, delegate: 'GPU' },
-          runningMode: 'VIDEO',
-          numHands: 2,
-        });
+        landmarker = await createWithHandDelegateFallback((delegate) =>
+          createHandLandmarker(fileset, delegate)
+        );
         if (cancelled) {
           landmarker.close();
           landmarker = null;

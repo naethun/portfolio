@@ -42,10 +42,11 @@ export function resolveARSymbolTargetTransform({
   fallbackVisible,
   worldHeight,
 }: ARSymbolTargetOptions): ARSymbolTargetTransform {
-  if (palmAnchor && videoSize && frameSize) {
+  if (palmAnchor && frameSize) {
+    const projectionVideoSize = videoSize ?? frameSize;
     const framePoint = mediaPipeToCoveredFramePoint(
       palmAnchor,
-      videoSize,
+      projectionVideoSize,
       frameSize,
       true
     );
