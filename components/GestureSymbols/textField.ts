@@ -58,6 +58,16 @@ export function hash2(ix: number, iy: number): number {
   return (h >>> 0) / 4294967296;
 }
 
+/**
+ * Character for a cell at a given cycle tick. Advancing the tick swaps the
+ * glyph deterministically, so cells "type over" themselves as time passes;
+ * per-cell phase offsets in the caller keep the swaps asynchronous.
+ */
+export function charAt(col: number, row: number, tick: number): string {
+  const r = hash2(col + 13 + Math.imul(tick, 31), row + 17);
+  return CHAR_POOL[Math.floor(r * CHAR_POOL.length)];
+}
+
 /* ------------------------------------------------------------------ *
  * Types
  * ------------------------------------------------------------------ */
@@ -73,8 +83,6 @@ export interface TextCell {
   phase: number;
   /** -1..1 seed for per-row lateral drift. */
   drift: number;
-  /** 1–3 char fragment. */
-  char: string;
 }
 
 export interface TextField {
@@ -113,8 +121,7 @@ export function buildTextField(cols: number, rows: number, aspect: number): Text
       const ny = ((row + 0.5) / rows - 0.5) * 2 * aspect;
       const phase = hash2(col + 1, row + 1) * Math.PI * 2;
       const drift = hash2(col + 7, row + 3) * 2 - 1;
-      const char = CHAR_POOL[Math.floor(hash2(col + 13, row + 17) * CHAR_POOL.length)];
-      cells.push({ col, row, nx, ny, phase, drift, char });
+      cells.push({ col, row, nx, ny, phase, drift });
     }
   }
   return { cols, rows, aspect, cells };

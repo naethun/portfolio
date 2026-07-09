@@ -23,17 +23,27 @@ export function GestureSymbolsExperience() {
 
   const inverted = state.polarity === 'light-on-dark';
   const showEnable = cameraState === 'idle' || cameraState === 'requesting';
+  const cameraOn = cameraState === 'granted';
 
   return (
     <div className="absolute inset-0 overflow-hidden">
       <SymbolCanvas state={state} />
 
-      {/* Hidden video element used as input for HandLandmarker. */}
+      {/* HandLandmarker input. Hidden until the camera is granted, then shown
+          as a small mirrored monochrome viewfinder (CSS mirror only — the
+          tracking pipeline reads the raw frames). */}
       <video
         ref={videoRef}
         playsInline
         muted
-        className="pointer-events-none absolute -z-10 h-px w-px opacity-0"
+        className={
+          cameraOn
+            ? `absolute bottom-4 right-4 z-10 w-[26%] border object-cover grayscale ${
+                inverted ? 'border-white/40' : 'border-black/40'
+              }`
+            : 'pointer-events-none absolute -z-10 h-px w-px opacity-0'
+        }
+        style={{ transform: 'scaleX(-1)', aspectRatio: cameraOn ? '3 / 4' : undefined }}
       />
 
       {showEnable && (

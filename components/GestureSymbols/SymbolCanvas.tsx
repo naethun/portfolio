@@ -5,6 +5,7 @@ import type { Polarity, SymbolKind, SymbolState, TransitionSource } from './type
 import { FIELD_THRESHOLD, mix, morphValue } from './symbolMasks';
 import {
   buildTextField,
+  charAt,
   FONT_PX_RATIO,
   gridDimsFor,
   GRID_TARGET_CELL_PX,
@@ -52,9 +53,19 @@ const EDGE_SOFT = 0.06;
 const ALPHA_JITTER = 0.14;
 
 /** Jitter amplitudes (CSS px). */
-const JITTER_BASE = 0.35; // always-on breathing life
+const JITTER_BASE = 1.15; // always-on living motion, visible even at rest
 const JITTER_TRANS = 2.6; // added at mid-morph
 const JITTER_PULSE = 1.6; // added by the decaying "restart" pulse
+const JITTER_BASE_REDUCED = 0.35; // reduced-motion: gentle, not frozen
+
+/** Always-on ambient row drift (CSS px) — rows slide slowly out of phase. */
+const ROW_DRIFT_BASE = 1.4;
+const ROW_DRIFT_HZ = 0.07;
+
+/** Per-cell character cycling: glyph swaps per second (async per cell). */
+const CHAR_CYCLE_HZ = 0.7;
+const CHAR_CYCLE_TRANS_BOOST = 5; // extra scramble at mid-transition
+const CHAR_CYCLE_HZ_REDUCED = 0.12;
 
 /** Lateral smear (CSS px) at mid-morph, by source. Swipes smear more. */
 const SMEAR_SWIPE = 26;
@@ -254,9 +265,15 @@ export function SymbolCanvas({ state }: SymbolCanvasProps) {
       const sampleScale = baseScale * breathe;
       const invScale = 1 / sampleScale;
 
-      const jitterAmp = reduced ? 0 : JITTER_BASE + transAct * JITTER_TRANS + pulse * JITTER_PULSE;
+      const jitterAmp = reduced
+        ? JITTER_BASE_REDUCED
+        : JITTER_BASE + transAct * JITTER_TRANS + pulse * JITTER_PULSE;
       const jitHz = 1.7;
       const driftAmp = reduced ? 0 : ROW_DRIFT_PX * transAct;
+      const rowDriftT = time * Math.PI * 2 * ROW_DRIFT_HZ;
+      const cycleHz = reduced
+        ? CHAR_CYCLE_HZ_REDUCED
+        : CHAR_CYCLE_HZ * (1 + transAct * CHAR_CYCLE_TRANS_BOOST);
       const smearMag =
         reduced ? 0 : (morph.source === 'swipe' ? SMEAR_SWIPE : SMEAR_GESTURE) * transAct;
 
@@ -303,17 +320,21 @@ export function SymbolCanvas({ state }: SymbolCanvasProps) {
           px += Math.sin(c.phase + time * jitHz) * jitterAmp;
           py += Math.cos(c.phase * 1.3 + time * jitHz * 0.9) * jitterAmp * 0.7;
         }
+        if (!reduced) px += ROW_DRIFT_BASE * Math.sin(rowDriftT + c.row * 0.6);
         px += c.drift * driftAmp;
         const smearX = smearMag * (0.5 + 0.5 * c.drift);
         px += smearX;
 
+        // Live glyph: cells retype themselves over time, async via phase.
+        const glyph = charAt(c.col, c.row, (time * cycleHz + c.phase) | 0);
+
         // Faint trailing ghost for the smear (transition only).
         if (smearX > GHOST_MIN_PX) {
           ctx.globalAlpha = alpha * GHOST_ALPHA;
-          ctx.fillText(c.char, px - smearX * GHOST_FRAC, py);
+          ctx.fillText(glyph, px - smearX * GHOST_FRAC, py);
         }
         ctx.globalAlpha = alpha;
-        ctx.fillText(c.char, px, py);
+        ctx.fillText(glyph, px, py);
       }
       ctx.globalAlpha = 1;
     };

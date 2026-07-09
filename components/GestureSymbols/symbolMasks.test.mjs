@@ -9,8 +9,11 @@ import assert from 'node:assert/strict';
  */
 
 const FIELD_THRESHOLD = 0;
-const CROSS_ARM_HALF = 0.22;
-const CROSS_ARM_LEN = 0.82;
+const CROSS_BEAM_HALF = 0.15;
+const CROSS_TOP = -1.0;
+const CROSS_BOTTOM = 1.15;
+const CROSS_ARM_REACH = 0.6;
+const CROSS_BAR_Y = -0.45;
 const RING_OUTER = 0.86;
 const RING_INNER = 0.52;
 const SQUARE_HALF = 0.7;
@@ -20,8 +23,13 @@ const STAR_INNER = 0.4;
 const STAR_ROTATION = -Math.PI / 2 - Math.PI / STAR_POINTS;
 
 const box = (x, y, hx, hy) => Math.min(hx - Math.abs(x), hy - Math.abs(y));
-const crossField = (x, y) =>
-  Math.max(box(x, y, CROSS_ARM_HALF, CROSS_ARM_LEN), box(x, y, CROSS_ARM_LEN, CROSS_ARM_HALF));
+const crossField = (x, y) => {
+  const uprightCy = (CROSS_TOP + CROSS_BOTTOM) / 2;
+  const uprightHy = (CROSS_BOTTOM - CROSS_TOP) / 2;
+  const upright = box(x, y - uprightCy, CROSS_BEAM_HALF, uprightHy);
+  const crossbar = box(x, y - CROSS_BAR_Y, CROSS_ARM_REACH, CROSS_BEAM_HALF);
+  return Math.max(upright, crossbar);
+};
 const ringField = (x, y) => {
   const r = Math.hypot(x, y);
   const mid = (RING_OUTER + RING_INNER) / 2;
@@ -48,12 +56,15 @@ const morphValue = (from, to, t, x, y) => {
   return a + (b - a) * t;
 };
 
-test('cross: arms are solid, corners are empty', () => {
-  assert.ok(inside(crossField, 0, 0)); // center
-  assert.ok(inside(crossField, 0, 0.7)); // up the vertical arm
-  assert.ok(inside(crossField, 0.7, 0)); // out the horizontal arm
-  assert.ok(!inside(crossField, 0.6, 0.6)); // diagonal corner is empty
-  assert.ok(!inside(crossField, 0.95, 0)); // beyond arm reach
+test('cross: latin proportions — upright and crossbar solid, corners empty', () => {
+  assert.ok(inside(crossField, 0, 0)); // center of the upright
+  assert.ok(inside(crossField, 0, 1.0)); // long lower shaft
+  assert.ok(inside(crossField, 0, -0.9)); // upright above the crossbar
+  assert.ok(inside(crossField, 0.5, CROSS_BAR_Y)); // out the crossbar
+  assert.ok(!inside(crossField, 0.5, 0)); // beside the shaft, below the bar
+  assert.ok(!inside(crossField, 0.7, CROSS_BAR_Y)); // beyond crossbar reach
+  assert.ok(!inside(crossField, 0, -1.15)); // above the top
+  assert.ok(!inside(crossField, 0.4, -0.9)); // upper corner beside the upright
 });
 
 test('ring: hollow center, solid band, empty outside', () => {

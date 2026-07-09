@@ -22,9 +22,12 @@ import type { SymbolKind } from './types';
 /** A point is "inside" when its mixed field value exceeds this. */
 export const FIELD_THRESHOLD = 0;
 
-/** Cross — two overlapping bars. */
-export const CROSS_ARM_HALF = 0.22; // half-thickness of each arm
-export const CROSS_ARM_LEN = 0.82; // half-length of each arm (reach from center)
+/** Cross — a Latin (crucifix) cross: tall upright, crossbar above center. */
+export const CROSS_BEAM_HALF = 0.15; // half-thickness of both beams
+export const CROSS_TOP = -1.0; // top of the upright (negative y = up)
+export const CROSS_BOTTOM = 1.15; // bottom of the upright
+export const CROSS_ARM_REACH = 0.6; // crossbar half-length
+export const CROSS_BAR_Y = -0.45; // crossbar center height (above center)
 
 /** Ring — a hollow annulus band. */
 export const RING_OUTER = 0.86; // outer radius
@@ -49,10 +52,12 @@ function boxField(x: number, y: number, hx: number, hy: number): number {
 }
 
 export function crossField(x: number, y: number): number {
-  const vertical = boxField(x, y, CROSS_ARM_HALF, CROSS_ARM_LEN);
-  const horizontal = boxField(x, y, CROSS_ARM_LEN, CROSS_ARM_HALF);
-  // union of the two bars → whichever is "more inside"
-  return Math.max(vertical, horizontal);
+  const uprightCy = (CROSS_TOP + CROSS_BOTTOM) / 2;
+  const uprightHy = (CROSS_BOTTOM - CROSS_TOP) / 2;
+  const upright = boxField(x, y - uprightCy, CROSS_BEAM_HALF, uprightHy);
+  const crossbar = boxField(x, y - CROSS_BAR_Y, CROSS_ARM_REACH, CROSS_BEAM_HALF);
+  // union of the two beams → whichever is "more inside"
+  return Math.max(upright, crossbar);
 }
 
 export function ringField(x: number, y: number): number {
