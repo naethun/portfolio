@@ -99,3 +99,12 @@ test('returns a right-palm anchor independently from left-hand selection', () =>
   assert.equal(arState.userRightDetected, true);
   assert.equal(arState.userLeftDetected, true);
 });
+
+test('uses a lone detected hand as the palm anchor even when handedness is mirrored', () => {
+  const arState = getARHandState(
+    result([{ label: 'Left', landmarks: handWithExtendedCount(4, 1) }])
+  );
+
+  assert.ok(arState.palmAnchor);
+  assert.equal(arState.userLeftDetected, true);
+});

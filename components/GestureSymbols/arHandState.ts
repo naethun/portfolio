@@ -54,6 +54,8 @@ export function getARHandState(
   const userRight = roles.userRight;
   const leftDetected = hasHand(userLeft);
   const rightDetected = hasHand(userRight);
+  const palmHand = userRight ?? (result?.landmarks?.length === 1 ? userLeft : null);
+  const palmDetected = hasHand(palmHand);
   const extendedFingers = leftDetected ? countExtendedFingers(userLeft) : 0;
   const shape = leftDetected ? classifyShape(userLeft) : 'unknown';
   const facing = leftDetected
@@ -62,8 +64,8 @@ export function getARHandState(
 
   return {
     symbol: symbolForFingerCount(leftDetected, extendedFingers),
-    palmAnchor: rightDetected ? computePalmAnchor(userRight) : null,
-    userRightDetected: rightDetected,
+    palmAnchor: palmDetected ? computePalmAnchor(palmHand) : null,
+    userRightDetected: rightDetected || palmDetected,
     userLeftDetected: leftDetected,
     debug: {
       ...DEFAULT_DEBUG,

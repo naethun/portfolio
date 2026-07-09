@@ -5,14 +5,16 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 import {
-  framePointToWorld,
-  mediaPipeToCoveredFramePoint,
   type FrameSize,
   type VideoSize,
 } from './cameraProjection';
 import type { PalmAnchor } from './palmAnchor';
 import { PalmParticles } from './PalmParticles';
 import { SymbolMesh } from './SymbolMesh';
+import {
+  resolveARSymbolTargetTransform,
+  SYMBOL_LOCAL_Y_OFFSET,
+} from './arSymbolTransform';
 import type { SymbolState } from './types';
 
 interface ARSymbolOverlayProps {
@@ -34,8 +36,6 @@ interface TargetTransform {
 }
 
 const WORLD_HEIGHT = 10;
-const SYMBOL_SCALE_MULTIPLIER = 1.18;
-const PALM_LIFT_MULTIPLIER = 0.72;
 const ANCHOR_LERP = 0.16;
 const SCALE_LERP = 0.14;
 const OPACITY_LERP = 0.12;
@@ -72,30 +72,22 @@ function useTargetTransform({
   worldHeight,
 }: SymbolSceneProps): TargetTransform {
   return useMemo(() => {
-    if (palmAnchor && videoSize && frameSize) {
-      const framePoint = mediaPipeToCoveredFramePoint(
-        palmAnchor,
-        videoSize,
-        frameSize,
-        true
-      );
-      const worldPoint = framePointToWorld(framePoint, frameSize, worldHeight);
-      const scale = palmAnchor.scale * worldHeight * SYMBOL_SCALE_MULTIPLIER;
-      return {
-        position: new THREE.Vector3(
-          worldPoint.x,
-          worldPoint.y + scale * PALM_LIFT_MULTIPLIER,
-          0
-        ),
-        scale,
-        opacity: palmAnchor.confidence,
-      };
-    }
+    const target = resolveARSymbolTargetTransform({
+      palmAnchor,
+      videoSize,
+      frameSize,
+      fallbackVisible,
+      worldHeight,
+    });
 
     return {
-      position: new THREE.Vector3(0, 0, 0),
-      scale: fallbackVisible ? 1.9 : 0.6,
-      opacity: fallbackVisible ? 0.86 : 0,
+      position: new THREE.Vector3(
+        target.position.x,
+        target.position.y,
+        target.position.z
+      ),
+      scale: target.scale,
+      opacity: target.opacity,
     };
   }, [fallbackVisible, frameSize, palmAnchor, videoSize, worldHeight]);
 }
@@ -127,7 +119,7 @@ function SymbolScene(props: SymbolSceneProps) {
       <pointLight position={[-2, 1.8, 3]} intensity={1.15} />
       <group ref={groupRef} scale={0.001}>
         <PalmParticles symbol={props.state.symbol} />
-        <group position={[0, 0.68, 0]}>
+        <group position={[0, SYMBOL_LOCAL_Y_OFFSET, 0]}>
           <SymbolMesh symbol={props.state.symbol} />
         </group>
       </group>
