@@ -13,7 +13,6 @@ import {
   updateWindowGestureFromHands,
 } from './windowGesture.mjs';
 
-type WindowModeKind = 'portrait' | 'reels';
 type WindowPhase = 'idle' | 'sizingWidth' | 'sizingHeight' | 'locked';
 
 interface Point {
@@ -194,7 +193,7 @@ function drawAsciiWindow({
   ctx.restore();
 }
 
-export default function WindowMode({ mode }: { mode: WindowModeKind }) {
+export default function WindowMode() {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const landmarksRef = useRef<HandLandmarkerResult | null>(null);
@@ -286,7 +285,7 @@ export default function WindowMode({ mode }: { mode: WindowModeKind }) {
   return (
     <div
       ref={rootRef}
-      className={`relative h-full w-full overflow-hidden bg-black ${mode === 'reels' ? 'font-mono' : ''}`}
+      className="relative h-full w-full overflow-hidden bg-black font-mono"
     >
       <video
         ref={videoRef}

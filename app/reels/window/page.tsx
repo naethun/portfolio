@@ -1,6 +1,5 @@
 import { JetBrains_Mono } from 'next/font/google';
-import { ReelsModeShell } from '../_components/ReelsModeShell';
-import { ReelsWindowMode } from '../_components/ReelsWindowMode';
+import { ReelsWindowClient } from '../_components/ReelsWindowClient';
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
@@ -17,9 +16,7 @@ export default function ReelsWindowPage() {
     <main
       className={`${jetbrainsMono.className} ${jetbrainsMono.variable} min-h-screen bg-white text-black`}
     >
-      <ReelsModeShell>
-        <ReelsWindowMode />
-      </ReelsModeShell>
+      <ReelsWindowClient />
     </main>
   );
 }

@@ -5,12 +5,12 @@ import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
 
 import type { UniverseMedia } from '@/lib/getUniverseMedia';
 import type { ShoppableManifest } from '@/lib/shoppable/types';
-import { MacWindow } from '@/components/HandLoop/MacWindow';
 import { useHandTracking } from '@/components/HandLoop/useHandTracking';
 import { useCameraStream, type CameraState } from '@/components/ImageUniverse/useCameraStream';
 import UniverseExperience from '@/components/ImageUniverse/UniverseExperience';
 import { SkeletonOverlay } from './SkeletonOverlay';
 import { ReelsModeShell } from './_components/ReelsModeShell';
+import { ReelsStageWindow } from './_components/ReelsStageWindow';
 
 function cameraLabel(state: CameraState): string {
   switch (state) {
@@ -65,73 +65,63 @@ export default function ReelsClient({
           screen height, cropping ~4% off each side — what remains on-screen
           matches the reference screenshot's composition. Vertical proportions
           are unaffected by that crop. */}
-        {/* Top: the shoppable image universe, gesture-driven by the shared camera.
-            Both windows keep the reference's 42:49 height ratio, scaled down so
-            the bottom margin equals the top's 7.8% (IG zooms in a bit anyway). */}
-        <div
-          className="absolute"
-          style={{ left: '8%', right: '8%', top: '7.8%', height: '38.4%' }}
-        >
-          <MacWindow
-            title="moodboard.app"
-            className="flex h-full w-full flex-col"
-            contentClassName="min-h-0 flex-1 bg-white"
-          >
-            <UniverseExperience
-              media={media}
-              shoppable={shoppable}
-              externalLandmarksRef={landmarksRef}
-              externalCameraActive={cameraActive}
-              hideChrome
-              background="#ffffff"
-              className="relative h-full w-full"
-            />
-          </MacWindow>
-        </div>
+      {/* Top: the shoppable image universe, gesture-driven by the shared camera.
+          Both windows keep the reference's 42:49 height ratio, scaled down so
+          the bottom margin equals the top's 7.8% (IG zooms in a bit anyway). */}
+      <ReelsStageWindow
+        slot="top"
+        title="moodboard.app"
+        contentClassName="min-h-0 flex-1 bg-white"
+      >
+        <UniverseExperience
+          media={media}
+          shoppable={shoppable}
+          externalLandmarksRef={landmarksRef}
+          externalCameraActive={cameraActive}
+          hideChrome
+          background="#ffffff"
+          className="relative h-full w-full"
+        />
+      </ReelsStageWindow>
 
-        {/* Bottom: the live camera + hand-skeleton overlay. */}
-        <div
-          className="absolute"
-          style={{ left: '8%', right: '8%', top: '47.15%', bottom: '7.8%' }}
-        >
-          <MacWindow
-            title="camera"
-            className="flex h-full w-full flex-col"
-            contentClassName="relative min-h-0 flex-1 bg-black"
-          >
-            <video
-              ref={camRef}
-              playsInline
-              muted
-              className="h-full w-full object-cover"
-              style={{ transform: 'scaleX(-1)' }}
-            />
-            <SkeletonOverlay
-              landmarksRef={landmarksRef}
-              videoRef={camRef}
-              enabled={cameraActive}
-            />
+      {/* Bottom: the live camera + hand-skeleton overlay. */}
+      <ReelsStageWindow
+        slot="bottom"
+        title="camera"
+        contentClassName="relative min-h-0 flex-1 bg-black"
+      >
+        <video
+          ref={camRef}
+          playsInline
+          muted
+          className="h-full w-full object-cover"
+          style={{ transform: 'scaleX(-1)' }}
+        />
+        <SkeletonOverlay
+          landmarksRef={landmarksRef}
+          videoRef={camRef}
+          enabled={cameraActive}
+        />
 
-            {/* Camera enable button — only before the camera is on. Once live,
-                nothing overlays the frame (clean for recording). */}
-            {!cameraActive && (
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-4">
-                <button
-                  type="button"
-                  onClick={enable}
-                  disabled={cameraState === 'requesting'}
-                  className="pointer-events-auto rounded-full border border-white/30 bg-black/50 px-5 py-2.5 text-[12px] font-medium tracking-[0.12em] text-white/90 backdrop-blur transition-colors hover:border-white hover:text-white disabled:opacity-60"
-                  style={{
-                    fontFamily:
-                      '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif',
-                  }}
-                >
-                  {cameraLabel(cameraState)}
-                </button>
-              </div>
-            )}
-          </MacWindow>
-        </div>
+        {/* Camera enable button — only before the camera is on. Once live,
+            nothing overlays the frame (clean for recording). */}
+        {!cameraActive && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-4">
+            <button
+              type="button"
+              onClick={enable}
+              disabled={cameraState === 'requesting'}
+              className="pointer-events-auto rounded-full border border-white/30 bg-black/50 px-5 py-2.5 text-[12px] font-medium tracking-[0.12em] text-white/90 backdrop-blur transition-colors hover:border-white hover:text-white disabled:opacity-60"
+              style={{
+                fontFamily:
+                  '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif',
+              }}
+            >
+              {cameraLabel(cameraState)}
+            </button>
+          </div>
+        )}
+      </ReelsStageWindow>
     </ReelsModeShell>
   );
 }
