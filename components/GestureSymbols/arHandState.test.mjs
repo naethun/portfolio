@@ -108,3 +108,14 @@ test('uses a lone detected hand as the palm anchor even when handedness is mirro
   assert.ok(arState.palmAnchor);
   assert.equal(arState.userLeftDetected, true);
 });
+
+test('uses a lone right hand as both the palm anchor and symbol selector', () => {
+  const arState = getARHandState(
+    result([{ label: 'Right', landmarks: handWithExtendedCount(4, 1) }])
+  );
+
+  assert.equal(arState.symbol, 'star');
+  assert.ok(arState.palmAnchor);
+  assert.equal(arState.userRightDetected, true);
+  assert.equal(arState.userLeftDetected, false);
+});

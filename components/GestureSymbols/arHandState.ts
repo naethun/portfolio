@@ -56,14 +56,21 @@ export function getARHandState(
   const rightDetected = hasHand(userRight);
   const palmHand = userRight ?? (result?.landmarks?.length === 1 ? userLeft : null);
   const palmDetected = hasHand(palmHand);
-  const extendedFingers = leftDetected ? countExtendedFingers(userLeft) : 0;
-  const shape = leftDetected ? classifyShape(userLeft) : 'unknown';
-  const facing = leftDetected
-    ? classifyFacing(userLeft, roles.userLeftLabel)
+  const selectionHand = userLeft ?? (result?.landmarks?.length === 1 ? palmHand : null);
+  const selectionDetected = hasHand(selectionHand);
+  const selectionLabel = selectionHand === userLeft
+    ? roles.userLeftLabel
+    : selectionHand === userRight
+      ? roles.userRightLabel
+      : undefined;
+  const extendedFingers = selectionDetected ? countExtendedFingers(selectionHand) : 0;
+  const shape = selectionDetected ? classifyShape(selectionHand) : 'unknown';
+  const facing = selectionDetected
+    ? classifyFacing(selectionHand, selectionLabel)
     : 'unknown';
 
   return {
-    symbol: symbolForFingerCount(leftDetected, extendedFingers),
+    symbol: symbolForFingerCount(selectionDetected, extendedFingers),
     palmAnchor: palmDetected ? computePalmAnchor(palmHand) : null,
     userRightDetected: rightDetected || palmDetected,
     userLeftDetected: leftDetected,

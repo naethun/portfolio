@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
 import { useCameraStream } from '../ImageUniverse/useCameraStream';
 import { ARCameraBackdrop } from './ARCameraBackdrop';
-import { ARSymbolOverlay } from './ARSymbolOverlay';
+import { ARSymbolFallbackOverlay } from './ARSymbolFallbackOverlay';
 import type { FrameSize, VideoSize } from './cameraProjection';
 import { SymbolCanvas } from './SymbolCanvas';
 import { useGestureSymbolState } from './useGestureSymbolState';
@@ -104,13 +104,14 @@ export function GestureSymbolsExperience() {
       <ARCameraBackdrop videoRef={videoRef} cameraEnabled={cameraOn} />
       {!cameraOn && <SymbolCanvas state={state} />}
 
-      <ARSymbolOverlay
-        state={state}
-        palmAnchor={palmAnchor}
-        frameSize={frameSize}
-        videoSize={cameraOn ? videoSize : null}
-        fallbackVisible={false}
-      />
+      {cameraOn && (
+        <ARSymbolFallbackOverlay
+          symbol={state.symbol}
+          palmAnchor={palmAnchor}
+          frameSize={frameSize}
+          videoSize={videoSize}
+        />
+      )}
 
       {showEnable && (
         <button
