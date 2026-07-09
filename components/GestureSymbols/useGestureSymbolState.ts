@@ -12,16 +12,10 @@ import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
 
 import { useHandTracking } from '../HandLoop/useHandTracking';
 import { useSwipeGesture, type SwipeDirection } from '../HandLoop/useSwipeGesture';
-import {
-  countExtendedFingers,
-  classifyFacing,
-  classifyShape,
-  hasHand,
-  symbolForFingerCount,
-  type HandFacing,
-  type HandLandmarks,
-  type HandShape,
-} from './gestureClassifier';
+import { getARHandState } from './arHandState';
+import type { HandFacing, HandShape } from './gestureClassifier';
+import { splitHandRoles } from './handRoles';
+import type { PalmAnchor } from './palmAnchor';
 import {
   INITIAL_SYMBOL_STATE,
   SYMBOL_ORDER,
@@ -63,6 +57,8 @@ interface DebugReadout {
 
 export interface GestureSymbolStateResult {
   state: SymbolState;
+  /** Right-palm anchor for the AR overlay. */
+  palmAnchor: PalmAnchor | null;
   /** True when a hand is currently detected with confidence. */
   handDetected: boolean;
   /** Live classification readouts for an optional debug HUD. */
@@ -81,6 +77,19 @@ function now(): number {
 
 function opposite(p: Polarity): Polarity {
   return p === 'dark-on-light' ? 'light-on-dark' : 'dark-on-light';
+}
+
+function anchorsClose(a: PalmAnchor | null, b: PalmAnchor | null): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    Math.abs(a.x - b.x) < 0.003 &&
+    Math.abs(a.y - b.y) < 0.003 &&
+    Math.abs(a.z - b.z) < 0.003 &&
+    Math.abs(a.scale - b.scale) < 0.003 &&
+    Math.abs(a.roll - b.roll) < 0.01 &&
+    Math.abs(a.confidence - b.confidence) < 0.01
+  );
 }
 
 // --- symbol-state reducer ---------------------------------------------------
@@ -139,13 +148,13 @@ export function useGestureSymbolState(
   const { videoRef, landmarksResultRef, trackingEnabled } = options;
 
   const [state, dispatch] = useReducer(reducer, INITIAL_SYMBOL_STATE);
+  const [palmAnchor, setPalmAnchor] = useState<PalmAnchor | null>(null);
   const [handDetected, setHandDetected] = useState(false);
   const [debug, setDebug] = useState<DebugReadout>(DEFAULT_DEBUG);
 
-  // Latest primary-hand landmarks + handedness, written by the tracking loop
-  // and read by the classification loop. Refs so per-frame writes don't render.
-  const landmarksRef = useRef<HandLandmarks | null>(null);
-  const handednessRef = useRef<string | undefined>(undefined);
+  // Latest two-hand MediaPipe result, written by the tracking loop and read by
+  // the classification loop. Ref writes avoid rendering on every camera frame.
+  const resultRef = useRef<HandLandmarkerResult | null>(null);
 
   // Current committed state, mirrored to a ref so the rAF loop and DOM event
   // handlers can read it without re-subscribing.
@@ -186,24 +195,23 @@ export function useGestureSymbolState(
     },
     [cycleSymbol]
   );
-  const { pushSample } = useSwipeGesture(onSwipe);
+  const { pushSample, reset: resetSwipe } = useSwipeGesture(onSwipe);
 
   // --- MediaPipe tracking (reused HandLoop hook) ---------------------------
   const onResult = useCallback(
     (result: HandLandmarkerResult, timestampMs: number) => {
       if (landmarksResultRef) landmarksResultRef.current = result;
-      const primary = result.landmarks?.[0];
-      if (primary && primary.length >= 21) {
-        landmarksRef.current = primary as HandLandmarks;
-        handednessRef.current = result.handedness?.[0]?.[0]?.categoryName;
+      resultRef.current = result;
+
+      const { userRight } = splitHandRoles(result);
+      if (userRight && userRight.length >= 21) {
         // Mirror wrist-x to match HandLoop's swipe convention (user-right => dx>0).
-        pushSample(1 - primary[0].x, timestampMs);
+        pushSample(1 - userRight[0].x, timestampMs);
       } else {
-        landmarksRef.current = null;
-        handednessRef.current = undefined;
+        resetSwipe();
       }
     },
-    [pushSample, landmarksResultRef]
+    [pushSample, resetSwipe, landmarksResultRef]
   );
   useHandTracking({ videoRef, enabled: trackingEnabled, onResult });
 
@@ -213,8 +221,7 @@ export function useGestureSymbolState(
     // handDetected/debug are reset by the outgoing effect's cleanup when
     // tracking flips off, and start at their defaults on mount.
     if (!trackingEnabled) {
-      landmarksRef.current = null;
-      handednessRef.current = undefined;
+      resultRef.current = null;
       if (landmarksResultRef) landmarksResultRef.current = null;
       return;
     }
@@ -224,15 +231,12 @@ export function useGestureSymbolState(
     let polarityCandidate: { polarity: Polarity; since: number } | null = null;
     let lastDetected = false;
     let lastDebug = DEFAULT_DEBUG;
+    let lastAnchor: PalmAnchor | null = null;
 
     const tick = (t: number) => {
-      const lm = landmarksRef.current;
-      const detected = hasHand(lm);
-      const shape: HandShape = detected ? classifyShape(lm) : 'unknown';
-      const extendedFingers = detected ? countExtendedFingers(lm) : 0;
-      const facing: HandFacing = detected
-        ? classifyFacing(lm, handednessRef.current)
-        : 'unknown';
+      const arHandState = getARHandState(resultRef.current);
+      const detected = arHandState.userRightDetected || arHandState.userLeftDetected;
+      const { shape, facing, extendedFingers } = arHandState.debug;
 
       if (detected !== lastDetected) {
         lastDetected = detected;
@@ -246,10 +250,14 @@ export function useGestureSymbolState(
         lastDebug = { shape, facing, extendedFingers };
         setDebug(lastDebug);
       }
+      if (!anchorsClose(arHandState.palmAnchor, lastAnchor)) {
+        lastAnchor = arHandState.palmAnchor;
+        setPalmAnchor(arHandState.palmAnchor);
+      }
 
       // Held-gesture symbol: commit only after the candidate dwells, and never
       // during the manual hold-off window.
-      const target = symbolForFingerCount(detected, extendedFingers);
+      const target = arHandState.symbol;
       if (target === stateRef.current.symbol) {
         symbolCandidate = null;
       } else if (!symbolCandidate || symbolCandidate.symbol !== target) {
@@ -292,6 +300,8 @@ export function useGestureSymbolState(
     return () => {
       cancelAnimationFrame(raf);
       if (landmarksResultRef) landmarksResultRef.current = null;
+      resultRef.current = null;
+      setPalmAnchor(null);
       setHandDetected(false);
       setDebug(DEFAULT_DEBUG);
     };
@@ -384,5 +394,10 @@ export function useGestureSymbolState(
     };
   }, [cycleSymbol]);
 
-  return { state, handDetected, debug };
+  return {
+    state,
+    palmAnchor: trackingEnabled ? palmAnchor : null,
+    handDetected,
+    debug,
+  };
 }
