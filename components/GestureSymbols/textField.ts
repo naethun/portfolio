@@ -9,6 +9,8 @@
  * with no `Math.random` and no per-frame allocation.
  */
 
+import type { SymbolKind } from './types';
+
 /* ------------------------------------------------------------------ *
  * Tunable constants (density / texture)
  * ------------------------------------------------------------------ */
@@ -22,30 +24,33 @@ export const FONT_PX_RATIO = 0.92;
 /** Minimum grid dimension so tiny frames still produce a lattice. */
 export const MIN_GRID = 2;
 
+export interface SymbolTextTexture {
+  fontFamily: string;
+  chars: readonly string[];
+}
+
 /**
- * Fragments drawn per cell. Kept to 1 char (plus a couple of 2-char pairs)
- * so the monospace texture stays tight and even. Reads as texture, not copy.
+ * Each symbol has a distinct typographic texture: font stack + character pool.
+ * The pools stay ASCII so the poster is crisp and predictable across browsers.
  */
-export const CHAR_POOL: readonly string[] = [
-  'A',
-  'E',
-  'S',
-  'T',
-  'H',
-  'C',
-  '0',
-  '1',
-  '+',
-  '*',
-  '/',
-  '\\',
-  '.',
-  ':',
-  '=',
-  'x',
-  '//',
-  '::',
-];
+export const SYMBOL_TEXT_TEXTURES: Record<SymbolKind, SymbolTextTexture> = {
+  cross: {
+    fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+    chars: ['A', 'E', 'S', 'T', 'H', 'C', '0', '1', '+', '*', '/', '\\', '.', ':', '=', 'x', '//', '::'],
+  },
+  ring: {
+    fontFamily: "Georgia, 'Times New Roman', Times, serif",
+    chars: ['O', '0', 'Q', 'C', 'G', 'D', 'o', '8', '9', '6', '@', 'c', '()', 'oo', '.', ':'],
+  },
+  square: {
+    fontFamily: "'Arial Black', Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif",
+    chars: ['H', 'I', 'L', 'T', 'E', 'F', '#', '=', '+', '|', '_', '[', ']', '[]', 'II', '::'],
+  },
+  star: {
+    fontFamily: "'Courier New', Courier, ui-monospace, monospace",
+    chars: ['V', 'W', 'X', 'Y', 'Z', '*', '+', 'x', '^', '/', '\\', '<', '>', '.', ':', '><'],
+  },
+};
 
 /* ------------------------------------------------------------------ *
  * Hashing (deterministic, seeded by integer cell coords)
@@ -63,9 +68,19 @@ export function hash2(ix: number, iy: number): number {
  * glyph deterministically, so cells "type over" themselves as time passes;
  * per-cell phase offsets in the caller keep the swaps asynchronous.
  */
-export function charAt(col: number, row: number, tick: number): string {
+export function charForSymbol(
+  symbol: SymbolKind,
+  col: number,
+  row: number,
+  tick: number,
+): string {
+  const pool = SYMBOL_TEXT_TEXTURES[symbol].chars;
   const r = hash2(col + 13 + Math.imul(tick, 31), row + 17);
-  return CHAR_POOL[Math.floor(r * CHAR_POOL.length)];
+  return pool[Math.floor(r * pool.length)];
+}
+
+export function charAt(col: number, row: number, tick: number): string {
+  return charForSymbol('cross', col, row, tick);
 }
 
 /* ------------------------------------------------------------------ *

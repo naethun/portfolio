@@ -28,10 +28,11 @@ Gestures are mapped, not sequential:
 
 | Gesture | Result |
 | --- | --- |
-| Rest / no confident gesture | Cross |
-| Open palm | Ring |
-| Closed fist | Square |
-| Pinch | Star |
+| Rest / closed palm / no confident gesture | Cross |
+| One raised finger | Cross |
+| Two raised fingers | Ring |
+| Three raised fingers | Square |
+| Four raised fingers | Star |
 | Back-of-hand / facing flip | Invert black/white polarity for the current shape |
 | Swipe left/right | Manual cycle through cross -> ring -> square -> star |
 
@@ -75,6 +76,8 @@ Both routes should render the same shared component so behavior does not drift.
 - `components/GestureSymbols/useGestureSymbolState.ts`
   - Converts MediaPipe landmarks plus keyboard/touch fallback events into the current
     target symbol and polarity.
+- `components/GestureSymbols/gestureClassifier.ts`
+  - Pure hand classifier for raised-finger counts and hand-facing polarity.
 - `components/GestureSymbols/symbolMasks.ts`
   - Pure math mask helpers for cross, ring, square, and star.
 - `components/GestureSymbols/textField.ts`
@@ -95,8 +98,7 @@ Reuse existing hooks and concepts from `components/HandLoop` where practical:
 - `useHandTracking` for MediaPipe hand-landmarker timing.
 - `useCameraStream` from `components/ImageUniverse` if it remains the cleanest
   camera state seam.
-- `useHandShape` or equivalent open/closed classification.
-- `usePinch` for star activation.
+- Raised-finger counting for index/middle/ring/pinky.
 - `useHandFacing` or equivalent palmar/dorsal classification for polarity inversion.
 - `useSwipeGesture` for manual symbol cycling.
 
@@ -104,10 +106,10 @@ Priority should be deterministic when multiple readings are active:
 
 1. Swipe is an event, not a held state. It manually cycles the target symbol and then
    returns control to held gestures after the debounce window.
-2. Pinch maps to star.
-3. Closed fist maps to square.
-4. Open palm maps to ring.
-5. No confident held gesture maps to cross.
+2. Four raised fingers map to star.
+3. Three raised fingers map to square.
+4. Two raised fingers map to ring.
+5. One raised finger, closed palm, and no confident held gesture map to cross.
 6. Hand-facing inversion is orthogonal: it changes polarity but does not choose a
    symbol.
 
@@ -143,9 +145,9 @@ makes them responsive, crisp, and easy to test.
 - Swipe cycle: more lateral smear than the mapped held gestures, so manual cycling
   feels distinct.
 
-All text should stay legible enough to read as texture, not as primary copy. Use
-JetBrains Mono if available through the route font setup; otherwise use the existing
-monospace stack.
+All text should stay legible enough to read as texture, not as primary copy. Each
+symbol should have its own font stack and character pool so cross, ring, square,
+and star feel typographically distinct.
 
 ## UI Affordances
 

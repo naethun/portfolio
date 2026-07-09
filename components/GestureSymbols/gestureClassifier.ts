@@ -7,6 +7,8 @@
 // gesture loop can call them per frame and apply its own dwell/hold-off timing.
 // Kept in sync with the HandLoop conventions (same landmark indices/ratios).
 
+import type { SymbolKind } from './types';
+
 export interface Landmark {
   x: number;
   y: number;
@@ -49,14 +51,32 @@ export function hasHand(lm: HandLandmarks | null | undefined): lm is HandLandmar
 
 /** Open vs closed palm from how many fingers are extended (3D, wrist-relative). */
 export function classifyShape(lm: HandLandmarks): HandShape {
+  const count = countExtendedFingers(lm);
+  if (count >= 3) return 'open';
+  if (count <= 1) return 'closed';
+  return 'unknown';
+}
+
+/** Count raised index/middle/ring/pinky fingers. Thumb is ignored for stability. */
+export function countExtendedFingers(lm: HandLandmarks): number {
   const wrist = lm[0];
   let count = 0;
   for (const [tip, mcp] of FINGERS) {
     if (dist3D(lm[tip], wrist) > dist3D(lm[mcp], wrist) * EXTEND_RATIO) count += 1;
   }
-  if (count >= 3) return 'open';
-  if (count <= 1) return 'closed';
-  return 'unknown';
+  return count;
+}
+
+/** Camera gesture mapping mirrors the 1/2/3/4 keyboard fallback. */
+export function symbolForFingerCount(
+  detected: boolean,
+  extendedFingers: number,
+): SymbolKind {
+  if (!detected) return 'cross';
+  if (extendedFingers >= 4) return 'star';
+  if (extendedFingers === 3) return 'square';
+  if (extendedFingers === 2) return 'ring';
+  return 'cross';
 }
 
 /** Pinch = thumb-tip ↔ index-tip distance normalized by hand size (wrist↔mid MCP). */

@@ -5,11 +5,12 @@ import type { Polarity, SymbolKind, SymbolState, TransitionSource } from './type
 import { FIELD_THRESHOLD, mix, morphValue } from './symbolMasks';
 import {
   buildTextField,
-  charAt,
+  charForSymbol,
   FONT_PX_RATIO,
   gridDimsFor,
   GRID_TARGET_CELL_PX,
   hash2,
+  SYMBOL_TEXT_TEXTURES,
   type TextField,
 } from './textField';
 
@@ -130,7 +131,6 @@ interface SizeRef {
   h: number; // CSS px
   dpr: number;
   fontPx: number;
-  fontFamily: string;
   field: TextField;
 }
 
@@ -205,16 +205,11 @@ export function SymbolCanvas({ state }: SymbolCanvasProps) {
       canvas.height = Math.round(h * dpr);
       const { cols, rows } = gridDimsFor(w, h, GRID_TARGET_CELL_PX);
       const cellPx = w / cols;
-      const varFam = getComputedStyle(canvas)
-        .getPropertyValue('--font-jetbrains-mono')
-        .trim();
-      const fontFamily = `${varFam ? varFam + ', ' : ''}'JetBrains Mono', ui-monospace, monospace`;
       sizeRef.current = {
         w,
         h,
         dpr,
         fontPx: cellPx * FONT_PX_RATIO,
-        fontFamily,
         field: buildTextField(cols, rows, h / w),
       };
     };
@@ -229,7 +224,7 @@ export function SymbolCanvas({ state }: SymbolCanvasProps) {
     const render = (now: number) => {
       const size = sizeRef.current;
       if (!size) return;
-      const { w, h, dpr, fontPx, fontFamily, field } = size;
+      const { w, h, dpr, fontPx, field } = size;
       const reduced = reducedRef.current;
       const st = stateRef.current;
       const morph = morphRef.current;
@@ -283,6 +278,7 @@ export function SymbolCanvas({ state }: SymbolCanvasProps) {
       const shim = shimElapsed >= 0 && shimElapsed < shimMs ? 1 - shimElapsed / shimMs : 0;
 
       // --- draw cells ---------------------------------------------------
+      const fontFamily = SYMBOL_TEXT_TEXTURES[morph.to].fontFamily;
       ctx.font = `${fontPx}px ${fontFamily}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -326,7 +322,7 @@ export function SymbolCanvas({ state }: SymbolCanvasProps) {
         px += smearX;
 
         // Live glyph: cells retype themselves over time, async via phase.
-        const glyph = charAt(c.col, c.row, (time * cycleHz + c.phase) | 0);
+        const glyph = charForSymbol(morph.to, c.col, c.row, (time * cycleHz + c.phase) | 0);
 
         // Faint trailing ghost for the smear (transition only).
         if (smearX > GHOST_MIN_PX) {

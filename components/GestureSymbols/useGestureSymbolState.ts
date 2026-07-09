@@ -13,10 +13,11 @@ import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
 import { useHandTracking } from '../HandLoop/useHandTracking';
 import { useSwipeGesture, type SwipeDirection } from '../HandLoop/useSwipeGesture';
 import {
+  countExtendedFingers,
   classifyFacing,
-  classifyPinch,
   classifyShape,
   hasHand,
+  symbolForFingerCount,
   type HandFacing,
   type HandLandmarks,
   type HandShape,
@@ -48,6 +49,8 @@ const TOUCH_SWIPE_AXIS_RATIO = 1.5;
 export interface UseGestureSymbolStateOptions {
   /** Video element fed by the camera stream. May be null before camera starts. */
   videoRef: RefObject<HTMLVideoElement | null>;
+  /** Full MediaPipe result, exposed for the shared camera HUD overlay. */
+  landmarksResultRef?: RefObject<HandLandmarkerResult | null>;
   /** True once the camera stream is live and hand tracking should run. */
   trackingEnabled: boolean;
 }
@@ -55,7 +58,7 @@ export interface UseGestureSymbolStateOptions {
 interface DebugReadout {
   shape: HandShape;
   facing: HandFacing;
-  pinching: boolean;
+  extendedFingers: number;
 }
 
 export interface GestureSymbolStateResult {
@@ -69,7 +72,7 @@ export interface GestureSymbolStateResult {
 const DEFAULT_DEBUG: DebugReadout = {
   shape: 'unknown',
   facing: 'unknown',
-  pinching: false,
+  extendedFingers: 0,
 };
 
 function now(): number {
@@ -130,23 +133,10 @@ function reducer(state: SymbolState, action: Action): SymbolState {
   }
 }
 
-/** Priority: pinch → star, closed → square, open → ring, else (rest) → cross. */
-function symbolForPose(
-  detected: boolean,
-  shape: HandShape,
-  pinching: boolean
-): SymbolKind {
-  if (!detected) return 'cross';
-  if (pinching) return 'star';
-  if (shape === 'closed') return 'square';
-  if (shape === 'open') return 'ring';
-  return 'cross';
-}
-
 export function useGestureSymbolState(
   options: UseGestureSymbolStateOptions
 ): GestureSymbolStateResult {
-  const { videoRef, trackingEnabled } = options;
+  const { videoRef, landmarksResultRef, trackingEnabled } = options;
 
   const [state, dispatch] = useReducer(reducer, INITIAL_SYMBOL_STATE);
   const [handDetected, setHandDetected] = useState(false);
@@ -201,6 +191,7 @@ export function useGestureSymbolState(
   // --- MediaPipe tracking (reused HandLoop hook) ---------------------------
   const onResult = useCallback(
     (result: HandLandmarkerResult, timestampMs: number) => {
+      if (landmarksResultRef) landmarksResultRef.current = result;
       const primary = result.landmarks?.[0];
       if (primary && primary.length >= 21) {
         landmarksRef.current = primary as HandLandmarks;
@@ -212,7 +203,7 @@ export function useGestureSymbolState(
         handednessRef.current = undefined;
       }
     },
-    [pushSample]
+    [pushSample, landmarksResultRef]
   );
   useHandTracking({ videoRef, enabled: trackingEnabled, onResult });
 
@@ -224,6 +215,7 @@ export function useGestureSymbolState(
     if (!trackingEnabled) {
       landmarksRef.current = null;
       handednessRef.current = undefined;
+      if (landmarksResultRef) landmarksResultRef.current = null;
       return;
     }
 
@@ -237,7 +229,7 @@ export function useGestureSymbolState(
       const lm = landmarksRef.current;
       const detected = hasHand(lm);
       const shape: HandShape = detected ? classifyShape(lm) : 'unknown';
-      const pinching = detected ? classifyPinch(lm) : false;
+      const extendedFingers = detected ? countExtendedFingers(lm) : 0;
       const facing: HandFacing = detected
         ? classifyFacing(lm, handednessRef.current)
         : 'unknown';
@@ -249,15 +241,15 @@ export function useGestureSymbolState(
       if (
         shape !== lastDebug.shape ||
         facing !== lastDebug.facing ||
-        pinching !== lastDebug.pinching
+        extendedFingers !== lastDebug.extendedFingers
       ) {
-        lastDebug = { shape, facing, pinching };
+        lastDebug = { shape, facing, extendedFingers };
         setDebug(lastDebug);
       }
 
       // Held-gesture symbol: commit only after the candidate dwells, and never
       // during the manual hold-off window.
-      const target = symbolForPose(detected, shape, pinching);
+      const target = symbolForFingerCount(detected, extendedFingers);
       if (target === stateRef.current.symbol) {
         symbolCandidate = null;
       } else if (!symbolCandidate || symbolCandidate.symbol !== target) {
@@ -299,10 +291,11 @@ export function useGestureSymbolState(
 
     return () => {
       cancelAnimationFrame(raf);
+      if (landmarksResultRef) landmarksResultRef.current = null;
       setHandDetected(false);
       setDebug(DEFAULT_DEBUG);
     };
-  }, [trackingEnabled]);
+  }, [trackingEnabled, landmarksResultRef]);
 
   // --- keyboard fallback (always active, camera or not) --------------------
   useEffect(() => {

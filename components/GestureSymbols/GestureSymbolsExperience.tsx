@@ -1,6 +1,8 @@
 'use client';
 
 import { useRef } from 'react';
+import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
+import { HUD } from '../HandLoop/HUD';
 import { useCameraStream } from '../ImageUniverse/useCameraStream';
 import { SymbolCanvas } from './SymbolCanvas';
 import { useGestureSymbolState } from './useGestureSymbolState';
@@ -15,9 +17,11 @@ import { useGestureSymbolState } from './useGestureSymbolState';
  */
 export function GestureSymbolsExperience() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const landmarksRef = useRef<HandLandmarkerResult | null>(null);
   const { state: cameraState, enable } = useCameraStream({ videoRef });
   const { state, handDetected, debug } = useGestureSymbolState({
     videoRef,
+    landmarksResultRef: landmarksRef,
     trackingEnabled: cameraState === 'granted',
   });
 
@@ -29,21 +33,18 @@ export function GestureSymbolsExperience() {
     <div className="absolute inset-0 overflow-hidden">
       <SymbolCanvas state={state} />
 
-      {/* HandLandmarker input. Hidden until the camera is granted, then shown
-          as a small mirrored monochrome viewfinder (CSS mirror only — the
-          tracking pipeline reads the raw frames). */}
+      {/* HandLandmarker input. The shared HUD renders the visible camera window. */}
       <video
         ref={videoRef}
         playsInline
         muted
-        className={
-          cameraOn
-            ? `absolute bottom-4 right-4 z-10 w-[26%] border object-cover grayscale ${
-                inverted ? 'border-white/40' : 'border-black/40'
-              }`
-            : 'pointer-events-none absolute -z-10 h-px w-px opacity-0'
-        }
-        style={{ transform: 'scaleX(-1)', aspectRatio: cameraOn ? '3 / 4' : undefined }}
+        className="pointer-events-none absolute -z-10 h-px w-px opacity-0"
+      />
+
+      <HUD
+        videoRef={videoRef}
+        landmarksRef={landmarksRef}
+        cameraEnabled={cameraOn}
       />
 
       {showEnable && (
@@ -73,7 +74,7 @@ export function GestureSymbolsExperience() {
           </div>
           <div>
             hand:{handDetected ? 'y' : 'n'} {debug.shape}/{debug.facing}
-            {debug.pinching ? '/pinch' : ''}
+            /{debug.extendedFingers}f
           </div>
         </div>
       )}

@@ -51,10 +51,11 @@ Task:
   - `components/HandLoop/useSwipeGesture.ts`
   - `components/ImageUniverse/useCameraStream.ts`
 - Implement mapped gestures:
-  - rest -> cross
-  - open palm -> ring
-  - closed fist -> square
-  - pinch -> star
+  - rest / closed palm -> cross
+  - one raised finger -> cross
+  - two raised fingers -> ring
+  - three raised fingers -> square
+  - four raised fingers -> star
   - back-of-hand / facing flip -> polarity inversion
   - swipe -> manual symbol cycle
 
@@ -76,6 +77,7 @@ Task:
 - Build the 2D canvas symbol renderer.
 - Implement math-defined masks for cross, ring, square, and star.
 - Draw dense repeated monospace text clipped to the interpolated shape.
+- Give every symbol its own font stack and character pool.
 - Add subtle transition jitter/reflow inspired by the reference video.
 - Support black-on-white and white-on-black polarity.
 - Respect reduced motion.
@@ -119,7 +121,7 @@ After subagents finish:
   shell.
 - `/portrait/gesture-symbols` renders the same animation inside the portrait shell.
 - Initial state is the text-filled cross.
-- Mapped gestures select ring, square, and star as specified.
+- Mapped raised-finger gestures select cross, ring, square, and star as specified.
 - Swipe cycles cross -> ring -> square -> star.
 - Polarity can invert without changing the current symbol.
 - Keyboard fallback works without camera permission.
