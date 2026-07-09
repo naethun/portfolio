@@ -1,6 +1,7 @@
 const DEFAULTS = {
   startPinchRatio: 0.32,
   heightPinchRatio: 0.42,
+  heightPinchSmoothing: 0.45,
   minWidth: 0.08,
   minHeight: 0.08,
   heightScale: 0.9,
@@ -97,6 +98,11 @@ function rectWithHeight(widthRect, centerY, pinchRatio, startRatio, options) {
   };
 }
 
+function smoothPinchRatio(previous, next, options) {
+  if (!Number.isFinite(previous)) return next;
+  return previous + (next - previous) * options.heightPinchSmoothing;
+}
+
 function canStart(input, options) {
   return input && input.pinchRatio <= options.startPinchRatio;
 }
@@ -113,15 +119,22 @@ function withOptions(options) {
   return { ...DEFAULTS, ...options };
 }
 
+function normalizeState(previous) {
+  const state = previous ?? initialWindowGestureState();
+  return ['idle', 'sizingWidth', 'sizingHeight'].includes(state.phase)
+    ? state
+    : initialWindowGestureState();
+}
+
 export function initialWindowGestureState() {
   return { phase: 'idle', rect: null };
 }
 
 export function updateWindowGesture(previous, input, optionsArg = {}) {
   const options = withOptions(optionsArg);
-  const state = previous ?? initialWindowGestureState();
+  const state = normalizeState(previous);
 
-  if (!input) return state.phase === 'locked' ? state : state;
+  if (!input) return state;
 
   if (state.phase === 'idle') {
     if (!canStart(input, options)) return state;
@@ -136,24 +149,8 @@ export function updateWindowGesture(previous, input, optionsArg = {}) {
     };
   }
 
-  if (state.phase === 'locked') {
-    if (!canStart(input, options)) return state;
-    const rect = rectFromWidth(input.center, input.center, options);
-    return {
-      phase: 'sizingWidth',
-      anchor: input.center,
-      widthRect: rect,
-      heightStartRatio: options.heightPinchRatio,
-      centerY: input.center.y,
-      rect,
-    };
-  }
-
   if (state.phase === 'sizingWidth') {
     const widthRect = rectFromWidth(state.anchor, input.center, options);
-    if (input.openPalm) {
-      return { phase: 'locked', rect: state.rect ?? widthRect };
-    }
     if (input.pinchRatio >= options.heightPinchRatio) {
       const centerY = clamp(input.center.y, 0, 1);
       const rect = rectWithHeight(
@@ -168,6 +165,7 @@ export function updateWindowGesture(previous, input, optionsArg = {}) {
         anchor: state.anchor,
         widthRect,
         heightStartRatio: options.heightPinchRatio,
+        smoothedPinchRatio: input.pinchRatio,
         centerY,
         rect,
       };
@@ -181,19 +179,23 @@ export function updateWindowGesture(previous, input, optionsArg = {}) {
   }
 
   if (state.phase === 'sizingHeight') {
-    if (input.openPalm) {
-      return { phase: 'locked', rect: state.rect };
-    }
-    const centerY = state.centerY ?? input.center.y;
+    const widthRect = state.anchor ? rectFromWidth(state.anchor, input.center, options) : state.widthRect;
+    const centerY = clamp(input.center.y, 0, 1);
+    const smoothedPinchRatio = input.openPalm
+      ? input.pinchRatio
+      : smoothPinchRatio(state.smoothedPinchRatio, input.pinchRatio, options);
     const rect = rectWithHeight(
-      state.widthRect,
+      widthRect,
       centerY,
-      input.pinchRatio,
+      smoothedPinchRatio,
       state.heightStartRatio ?? options.heightPinchRatio,
       options,
     );
     return {
       ...state,
+      widthRect,
+      centerY,
+      smoothedPinchRatio,
       rect,
     };
   }
@@ -203,12 +205,12 @@ export function updateWindowGesture(previous, input, optionsArg = {}) {
 
 export function updateWindowGestureFromHands(previous, hands, optionsArg = {}) {
   const options = withOptions(optionsArg);
-  const state = previous ?? initialWindowGestureState();
+  const state = normalizeState(previous);
   const pair = pairFromHands(hands);
 
   if (!pair) return state;
 
-  if (state.phase === 'idle' || state.phase === 'locked') {
+  if (state.phase === 'idle') {
     if (!canPairStart(pair, options)) return state;
     const rect = rectFromHandPair(pair.left, pair.right, options);
     return {
@@ -218,10 +220,6 @@ export function updateWindowGestureFromHands(previous, hands, optionsArg = {}) {
       centerY: pair.center.y,
       rect,
     };
-  }
-
-  if (pair.openPalm) {
-    return { phase: 'locked', rect: state.rect };
   }
 
   const widthRect = rectFromHandPair(pair.left, pair.right, options);
@@ -240,6 +238,7 @@ export function updateWindowGestureFromHands(previous, hands, optionsArg = {}) {
         phase: 'sizingHeight',
         widthRect,
         heightStartRatio: options.heightPinchRatio,
+        smoothedPinchRatio: pair.pinchRatio,
         centerY,
         rect,
       };
@@ -253,10 +252,13 @@ export function updateWindowGestureFromHands(previous, hands, optionsArg = {}) {
   }
 
   if (state.phase === 'sizingHeight') {
+    const smoothedPinchRatio = pair.openPalm
+      ? pair.pinchRatio
+      : smoothPinchRatio(state.smoothedPinchRatio, pair.pinchRatio, options);
     const rect = rectWithHeight(
       widthRect,
       centerY,
-      pair.pinchRatio,
+      smoothedPinchRatio,
       state.heightStartRatio ?? options.heightPinchRatio,
       options,
     );
@@ -264,6 +266,7 @@ export function updateWindowGestureFromHands(previous, hands, optionsArg = {}) {
       ...state,
       widthRect,
       centerY,
+      smoothedPinchRatio,
       rect,
     };
   }

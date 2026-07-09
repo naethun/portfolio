@@ -47,7 +47,7 @@ describe('updateWindowGesture', () => {
     );
   });
 
-  it('locks the last dimensions when the palm opens', () => {
+  it('keeps sizing live when the palm opens', () => {
     const state = updateSequence([
       { center: { x: 0.3, y: 0.48 }, pinchRatio: 0.18, openPalm: false },
       { center: { x: 0.62, y: 0.48 }, pinchRatio: 0.2, openPalm: false },
@@ -55,27 +55,25 @@ describe('updateWindowGesture', () => {
       { center: { x: 0.62, y: 0.48 }, pinchRatio: 1.05, openPalm: true },
     ]);
 
-    assert.equal(state.phase, 'locked');
+    assert.equal(state.phase, 'sizingHeight');
     assert.equal(Number(state.rect.w.toFixed(2)), 0.32);
-    assert.ok(state.rect.h > 0.3);
+    assert.ok(state.rect.h > 0.6);
   });
 
-  it('allows a new pinch to replace a locked window', () => {
-    const locked = updateSequence([
-      { center: { x: 0.3, y: 0.5 }, pinchRatio: 0.18, openPalm: false },
-      { center: { x: 0.68, y: 0.5 }, pinchRatio: 0.2, openPalm: false },
-      { center: { x: 0.68, y: 0.5 }, pinchRatio: 0.68, openPalm: false },
-      { center: { x: 0.68, y: 0.5 }, pinchRatio: 1.0, openPalm: true },
+  it('keeps following the hand while height is growing', () => {
+    const state = updateSequence([
+      { center: { x: 0.25, y: 0.45 }, pinchRatio: 0.18, openPalm: false },
+      { center: { x: 0.65, y: 0.45 }, pinchRatio: 0.2, openPalm: false },
+      { center: { x: 0.65, y: 0.45 }, pinchRatio: 0.62, openPalm: false },
+      { center: { x: 0.82, y: 0.62 }, pinchRatio: 0.66, openPalm: false },
     ]);
 
-    const restarted = updateWindowGesture(locked, {
-      center: { x: 0.12, y: 0.22 },
-      pinchRatio: 0.18,
-      openPalm: false,
-    });
-
-    assert.equal(restarted.phase, 'sizingWidth');
-    assert.equal(Number(restarted.anchor.x.toFixed(2)), 0.12);
+    assert.equal(state.phase, 'sizingHeight');
+    assert.equal(Number(state.rect.w.toFixed(2)), 0.57);
+    assert.equal(
+      Number((state.rect.y + state.rect.h / 2).toFixed(2)),
+      0.62,
+    );
   });
 });
 
@@ -154,7 +152,32 @@ describe('updateWindowGestureFromHands', () => {
     assert.ok(state.rect.h <= 0.31);
   });
 
-  it('locks a paired window when either hand opens into a palm', () => {
+  it('keeps following both hands while height is growing', () => {
+    let state = initialWindowGestureState();
+    state = updateWindowGestureFromHands(state, [
+      { center: { x: 0.24, y: 0.5 }, pinchRatio: 0.18, openPalm: false },
+      { center: { x: 0.76, y: 0.5 }, pinchRatio: 0.18, openPalm: false },
+    ]);
+    state = updateWindowGestureFromHands(state, [
+      { center: { x: 0.24, y: 0.5 }, pinchRatio: 0.62, openPalm: false },
+      { center: { x: 0.76, y: 0.5 }, pinchRatio: 0.64, openPalm: false },
+    ]);
+    const stableRect = state.rect;
+
+    state = updateWindowGestureFromHands(state, [
+      { center: { x: 0.2, y: 0.58 }, pinchRatio: 0.65, openPalm: false },
+      { center: { x: 0.84, y: 0.64 }, pinchRatio: 0.64, openPalm: false },
+    ]);
+
+    assert.ok(state.rect.w > stableRect.w);
+    assert.ok(state.rect.h > stableRect.h);
+    assert.equal(
+      Number((state.rect.y + state.rect.h / 2).toFixed(2)),
+      0.61,
+    );
+  });
+
+  it('keeps a paired window live when either hand opens into a palm', () => {
     let state = initialWindowGestureState();
     state = updateWindowGestureFromHands(state, [
       { center: { x: 0.24, y: 0.5 }, pinchRatio: 0.18, openPalm: false },
@@ -171,8 +194,8 @@ describe('updateWindowGestureFromHands', () => {
       { center: { x: 0.76, y: 0.5 }, pinchRatio: 0.66, openPalm: false },
     ]);
 
-    assert.equal(state.phase, 'locked');
-    assert.deepEqual(state.rect, grown);
+    assert.equal(state.phase, 'sizingHeight');
+    assert.ok(state.rect.h > grown.h);
   });
 });
 

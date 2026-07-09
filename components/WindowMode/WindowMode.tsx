@@ -13,7 +13,7 @@ import {
   updateWindowGestureFromHands,
 } from './windowGesture.mjs';
 
-type WindowPhase = 'idle' | 'sizingWidth' | 'sizingHeight' | 'locked';
+type WindowPhase = 'idle' | 'sizingWidth' | 'sizingHeight';
 
 interface Point {
   x: number;
@@ -40,6 +40,7 @@ interface WindowGestureState {
   widthRect?: NormalizedRect;
   centerY?: number;
   heightStartRatio?: number;
+  smoothedPinchRatio?: number;
 }
 
 interface CoverMetrics {
@@ -104,13 +105,94 @@ function rectToScreen(rect: NormalizedRect, metrics: CoverMetrics) {
   };
 }
 
+function roundedRectPath(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+) {
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawAsciiWindowShell({
+  ctx,
+  left,
+  top,
+  width,
+  height,
+  radius,
+  dpr,
+}: {
+  ctx: CanvasRenderingContext2D;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  radius: number;
+  dpr: number;
+}) {
+  const accent = 'rgba(255, 198, 186, 0.9)';
+  const lift = Math.max(2, 5 * dpr);
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(255, 142, 116, 0.26)';
+  ctx.shadowBlur = 24 * dpr;
+  ctx.fillStyle = 'rgba(255, 172, 148, 0.06)';
+  roundedRectPath(ctx, left - 1 * dpr, top - 1 * dpr, width + 2 * dpr, height + 2 * dpr, radius + 1 * dpr);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  const edge = ctx.createLinearGradient(left, top, left + width, top + height);
+  edge.addColorStop(0, 'rgba(55, 50, 48, 0.92)');
+  edge.addColorStop(0.62, 'rgba(18, 17, 18, 0.9)');
+  edge.addColorStop(1, 'rgba(255, 171, 150, 0.24)');
+  ctx.fillStyle = edge;
+  roundedRectPath(ctx, left + lift, top + lift * 0.75, width, height, radius);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+  ctx.shadowBlur = 22 * dpr;
+  ctx.shadowOffsetY = 12 * dpr;
+  ctx.shadowOffsetX = 0;
+  ctx.fillStyle = 'rgba(7, 7, 9, 0.94)';
+  roundedRectPath(ctx, left, top, width, height, radius);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  const bevel = ctx.createLinearGradient(left, top, left + width, top + height);
+  bevel.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+  bevel.addColorStop(0.45, accent);
+  bevel.addColorStop(1, 'rgba(0, 0, 0, 0.72)');
+  ctx.strokeStyle = bevel;
+  ctx.lineWidth = Math.max(1.25, 1.35 * dpr);
+  roundedRectPath(ctx, left + 0.75 * dpr, top + 0.75 * dpr, width - 1.5 * dpr, height - 1.5 * dpr, radius);
+  ctx.stroke();
+  ctx.restore();
+}
+
 function drawAsciiWindow({
   ctx,
   sampleCanvas,
   sampleCtx,
   video,
   rect,
-  phase,
   metrics,
   dpr,
 }: {
@@ -119,7 +201,6 @@ function drawAsciiWindow({
   sampleCtx: CanvasRenderingContext2D;
   video: HTMLVideoElement;
   rect: NormalizedRect;
-  phase: WindowPhase;
   metrics: CoverMetrics;
   dpr: number;
 }) {
@@ -155,12 +236,18 @@ function drawAsciiWindow({
   const font = fontCss * dpr;
   const drawCellW = (screen.width / cols) * dpr;
   const drawCellH = (screen.height / rows) * dpr;
+  const radius = clamp(Math.min(width, height) * 0.035, 4 * dpr, 12 * dpr);
+
+  drawAsciiWindowShell({ ctx, left, top, width, height, radius, dpr });
 
   ctx.save();
-  ctx.beginPath();
-  ctx.rect(left, top, width, height);
+  roundedRectPath(ctx, left, top, width, height, radius);
   ctx.clip();
-  ctx.fillStyle = 'rgb(0, 0, 0)';
+  const screenGradient = ctx.createLinearGradient(left, top, left + width, top + height);
+  screenGradient.addColorStop(0, 'rgb(15, 15, 16)');
+  screenGradient.addColorStop(0.45, 'rgb(1, 1, 2)');
+  screenGradient.addColorStop(1, 'rgb(20, 18, 17)');
+  ctx.fillStyle = screenGradient;
   ctx.fillRect(left, top, width, height);
   ctx.font = `${font}px ${FONT_STACK}`;
   ctx.textBaseline = 'alphabetic';
@@ -183,13 +270,46 @@ function drawAsciiWindow({
       );
     }
   }
+
+  const shine = ctx.createLinearGradient(left, top, left, top + height);
+  shine.addColorStop(0, 'rgba(255, 255, 255, 0.16)');
+  shine.addColorStop(0.22, 'rgba(255, 255, 255, 0.03)');
+  shine.addColorStop(0.58, 'rgba(255, 255, 255, 0)');
+  shine.addColorStop(1, 'rgba(255, 138, 118, 0.08)');
+  ctx.fillStyle = shine;
+  ctx.fillRect(left, top, width, height);
+
+  const vignette = ctx.createRadialGradient(
+    left + width * 0.5,
+    top + height * 0.5,
+    Math.min(width, height) * 0.12,
+    left + width * 0.5,
+    top + height * 0.5,
+    Math.max(width, height) * 0.72,
+  );
+  vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  vignette.addColorStop(1, 'rgba(0, 0, 0, 0.35)');
+  ctx.fillStyle = vignette;
+  ctx.fillRect(left, top, width, height);
   ctx.restore();
 
   ctx.save();
-  ctx.strokeStyle =
-    phase === 'locked' ? 'rgba(255, 255, 255, 0.96)' : 'rgba(248, 188, 178, 0.88)';
-  ctx.lineWidth = Math.max(1, dpr);
-  ctx.strokeRect(left + 0.5 * dpr, top + 0.5 * dpr, width - dpr, height - dpr);
+  roundedRectPath(ctx, left + 2 * dpr, top + 2 * dpr, width - 4 * dpr, height - 4 * dpr, Math.max(0, radius - 2 * dpr));
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+  ctx.lineWidth = Math.max(0.75, 0.75 * dpr);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(left + radius, top + 1.5 * dpr);
+  ctx.lineTo(left + width - radius, top + 1.5 * dpr);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.34)';
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(left + width - 1.5 * dpr, top + radius);
+  ctx.lineTo(left + width - 1.5 * dpr, top + height - radius);
+  ctx.moveTo(left + radius, top + height - 1.5 * dpr);
+  ctx.lineTo(left + width - radius, top + height - 1.5 * dpr);
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.48)';
+  ctx.stroke();
   ctx.restore();
 }
 
@@ -269,7 +389,6 @@ export default function WindowMode() {
             sampleCtx,
             video,
             rect: state.rect,
-            phase: state.phase,
             metrics,
             dpr: window.devicePixelRatio || 1,
           });
