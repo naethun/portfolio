@@ -35,6 +35,44 @@ type CameraState =
   | 'insecure';
 
 const TOUCH_SWIPE_PX = 50;
+const HIGH_QUALITY_CONSTRAINTS: MediaTrackConstraints = {
+  width: { ideal: 1920 },
+  height: { ideal: 1080 },
+  frameRate: { ideal: 60 },
+  facingMode: 'user',
+};
+
+function attachStream(video: HTMLVideoElement, stream: MediaStream) {
+  video.srcObject = stream;
+  void video.play().catch(() => {});
+}
+
+function deriveTimelineMode({
+  current,
+  handShape,
+  handFacing,
+  primaryPinch,
+  secondaryPinch,
+  frameActive,
+}: {
+  current: TimelineMode;
+  handShape: ReturnType<typeof useHandShape>;
+  handFacing: ReturnType<typeof useHandFacing>;
+  primaryPinch: boolean;
+  secondaryPinch: boolean;
+  frameActive: boolean;
+}): TimelineMode {
+  if (current === 'cube') {
+    return handShape === 'closed' ? 'cluster' : current;
+  }
+  if (handShape === 'closed') return 'cluster';
+  if (frameActive) return 'cube';
+  if (handShape !== 'open') return current;
+  if (primaryPinch && secondaryPinch) return 'ring-zoom';
+  if (primaryPinch) return 'ring';
+  if (handFacing === 'palmar') return 'deck';
+  return 'helix';
+}
 
 export default function HandLoop({
   images,
@@ -143,39 +181,35 @@ export default function HandLoop({
   // (via the picture-frame gesture), it persists through pinches and brief
   // tracking blips, and only releases when the user closes a fist.
   useEffect(() => {
-    if (timelineMode === 'cube') {
-      if (handShape === 'closed') setTimelineMode('cluster');
-      return;
-    }
-    if (handShape === 'closed') {
-      setTimelineMode('cluster');
-    } else if (frameActive) {
-      setTimelineMode('cube');
-    } else if (handShape === 'open') {
-      if (primaryPinch && secondaryPinch) setTimelineMode('ring-zoom');
-      else if (primaryPinch) setTimelineMode('ring');
-      else if (handFacing === 'palmar') setTimelineMode('deck');
-      else setTimelineMode('helix');
-    }
+    const rafId = requestAnimationFrame(() => {
+      setTimelineMode((current) =>
+        deriveTimelineMode({
+          current,
+          handShape,
+          handFacing,
+          primaryPinch,
+          secondaryPinch,
+          frameActive,
+        }),
+      );
+    });
+    return () => cancelAnimationFrame(rafId);
   }, [
     handShape,
     handFacing,
     primaryPinch,
     secondaryPinch,
     frameActive,
-    timelineMode,
   ]);
-
-  // Mobile / coarse pointer: no palm-shape input, default to helix.
-  useEffect(() => {
-    if (isCoarsePointer) setTimelineMode('helix');
-  }, [isCoarsePointer]);
 
   // Detect coarse pointer (mobile). Skip camera UI; touch swipe instead.
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const mq = window.matchMedia('(pointer: coarse)');
-    const update = () => setIsCoarsePointer(mq.matches);
+    const update = () => {
+      setIsCoarsePointer(mq.matches);
+      if (mq.matches) setTimelineMode('helix');
+    };
     update();
     mq.addEventListener('change', update);
     return () => mq.removeEventListener('change', update);
@@ -247,11 +281,7 @@ export default function HandLoop({
     setCameraState('requesting');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: cameraConstraints ?? {
-          width: 640,
-          height: 480,
-          frameRate: { ideal: 60, max: 60 },
-        },
+        video: cameraConstraints ?? HIGH_QUALITY_CONSTRAINTS,
         audio: false,
       });
       streamRef.current = stream;
@@ -269,8 +299,7 @@ export default function HandLoop({
       }
       const display = displayVideoRef?.current;
       if (display) {
-        display.srcObject = stream;
-        display.play().catch(() => {});
+        attachStream(display, stream);
       }
       setCameraState('granted');
     } catch (err) {

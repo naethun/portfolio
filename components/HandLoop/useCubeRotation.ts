@@ -80,9 +80,12 @@ export function useCubeRotation(
   const frameRef = useRef(frameActive);
   const cubeRef = useRef(modeIsCube);
   const pinchRef = useRef(primaryPinch);
-  frameRef.current = frameActive;
-  cubeRef.current = modeIsCube;
-  pinchRef.current = primaryPinch;
+
+  useEffect(() => {
+    frameRef.current = frameActive;
+    cubeRef.current = modeIsCube;
+    pinchRef.current = primaryPinch;
+  }, [frameActive, modeIsCube, primaryPinch]);
 
   useEffect(() => {
     let rafId = 0;

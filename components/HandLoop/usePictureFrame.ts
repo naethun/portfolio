@@ -67,10 +67,10 @@ export function usePictureFrame(
 
   useEffect(() => {
     if (!enabled) {
-      setActive(false);
       publishedRef.current = false;
       pendingRef.current = null;
-      return;
+      const resetId = requestAnimationFrame(() => setActive(false));
+      return () => cancelAnimationFrame(resetId);
     }
     let rafId = 0;
     const tick = (t: number) => {
@@ -92,5 +92,5 @@ export function usePictureFrame(
     return () => cancelAnimationFrame(rafId);
   }, [enabled, primaryRef, secondaryRef]);
 
-  return active;
+  return enabled ? active : false;
 }

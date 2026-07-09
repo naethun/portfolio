@@ -27,10 +27,10 @@ export function usePinch(
 
   useEffect(() => {
     if (!enabled) {
-      setPinching(false);
       publishedRef.current = false;
       pendingRef.current = null;
-      return;
+      const resetId = requestAnimationFrame(() => setPinching(false));
+      return () => cancelAnimationFrame(resetId);
     }
     let rafId = 0;
     const tick = (t: number) => {
@@ -60,5 +60,5 @@ export function usePinch(
     return () => cancelAnimationFrame(rafId);
   }, [enabled, handRef]);
 
-  return pinching;
+  return enabled ? pinching : false;
 }

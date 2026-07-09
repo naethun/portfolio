@@ -564,7 +564,7 @@ export const Timeline = forwardRef<TimelineHandle, Props>(function Timeline(
           }}
         >
           {cubeTiles.map(
-            ({ img, tileIdx, faceIdx, slotIdx, key, sourceIdx, isDuplicate }) => {
+            ({ img, faceIdx, slotIdx, key, sourceIdx, isDuplicate }) => {
               const inCube = mode === 'cube';
               const flat = transforms[sourceIdx];
               const cube = cubeTileTransform(faceIdx, slotIdx, faceSize);

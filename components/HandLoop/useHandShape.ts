@@ -50,10 +50,10 @@ export function useHandShape(
 
   useEffect(() => {
     if (!enabled) {
-      setShape('unknown');
       publishedRef.current = 'unknown';
       pendingRef.current = null;
-      return;
+      const resetId = requestAnimationFrame(() => setShape('unknown'));
+      return () => cancelAnimationFrame(resetId);
     }
     let rafId = 0;
     const tick = (t: number) => {
@@ -76,5 +76,5 @@ export function useHandShape(
     return () => cancelAnimationFrame(rafId);
   }, [enabled, handRef]);
 
-  return shape;
+  return enabled ? shape : 'unknown';
 }

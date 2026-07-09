@@ -39,10 +39,10 @@ export function useHandFacing(
 
   useEffect(() => {
     if (!enabled) {
-      setFacing('unknown');
       publishedRef.current = 'unknown';
       pendingRef.current = null;
-      return;
+      const resetId = requestAnimationFrame(() => setFacing('unknown'));
+      return () => cancelAnimationFrame(resetId);
     }
     let rafId = 0;
     const tick = (t: number) => {
@@ -65,5 +65,5 @@ export function useHandFacing(
     return () => cancelAnimationFrame(rafId);
   }, [enabled, handRef]);
 
-  return facing;
+  return enabled ? facing : 'unknown';
 }
