@@ -6,6 +6,7 @@ import { useCameraStream } from '../ImageUniverse/useCameraStream';
 import { ARCameraBackdrop } from './ARCameraBackdrop';
 import { ARSymbolOverlay } from './ARSymbolOverlay';
 import type { FrameSize, VideoSize } from './cameraProjection';
+import { SymbolCanvas } from './SymbolCanvas';
 import { useGestureSymbolState } from './useGestureSymbolState';
 
 /**
@@ -101,13 +102,14 @@ export function GestureSymbolsExperience() {
       className="absolute inset-0 overflow-hidden bg-black text-white"
     >
       <ARCameraBackdrop videoRef={videoRef} cameraEnabled={cameraOn} />
+      {!cameraOn && <SymbolCanvas state={state} />}
 
       <ARSymbolOverlay
         state={state}
         palmAnchor={palmAnchor}
         frameSize={frameSize}
         videoSize={cameraOn ? videoSize : null}
-        fallbackVisible={!cameraOn}
+        fallbackVisible={false}
       />
 
       {showEnable && (

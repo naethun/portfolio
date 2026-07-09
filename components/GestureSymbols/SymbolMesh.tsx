@@ -1,111 +1,94 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
+import {
+  buildAsciiSymbolDrawCommands,
+  fontSizeForTexture,
+} from './asciiSymbolTexture';
+import { SYMBOL_TEXT_TEXTURES } from './textField';
 import type { SymbolKind } from './types';
 
 interface SymbolMeshProps {
   symbol: SymbolKind;
 }
 
-const MATERIAL_PROPS = {
-  color: '#ffffff',
-  emissive: '#ffffff',
-  emissiveIntensity: 0.42,
-  metalness: 0.08,
-  roughness: 0.38,
-  transparent: true,
-  opacity: 1,
-} as const;
+const TEXTURE_SIZE = 512;
+const TEXTURE_WORLD_SIZE = 1.95;
 
-function SymbolMaterial() {
-  return <meshStandardMaterial {...MATERIAL_PROPS} />;
+function createTextureCanvas(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = TEXTURE_SIZE;
+  canvas.height = TEXTURE_SIZE;
+  return canvas;
 }
 
-function CrossMesh() {
-  return (
-    <group>
-      <mesh>
-        <boxGeometry args={[0.28, 1.32, 0.18]} />
-        <SymbolMaterial />
-      </mesh>
-      <mesh>
-        <boxGeometry args={[1.32, 0.28, 0.18]} />
-        <SymbolMaterial />
-      </mesh>
-    </group>
-  );
-}
+function drawAsciiSymbolTexture(
+  canvas: HTMLCanvasElement,
+  symbol: SymbolKind,
+  timeSeconds: number
+) {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
 
-function RingMesh() {
-  return (
-    <mesh>
-      <torusGeometry args={[0.48, 0.085, 20, 72]} />
-      <SymbolMaterial />
-    </mesh>
-  );
-}
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const commands = buildAsciiSymbolDrawCommands({
+    symbol,
+    width: canvas.width,
+    height: canvas.height,
+    timeSeconds,
+    cellPx: 9,
+  });
+  const texture = SYMBOL_TEXT_TEXTURES[symbol];
+  ctx.font = `${fontSizeForTexture(canvas.width) * 1.05}px ${texture.fontFamily}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#ffffff';
 
-function SquareMesh() {
-  return (
-    <group>
-      <mesh position={[0, 0.55, 0]}>
-        <boxGeometry args={[1.16, 0.16, 0.16]} />
-        <SymbolMaterial />
-      </mesh>
-      <mesh position={[0, -0.55, 0]}>
-        <boxGeometry args={[1.16, 0.16, 0.16]} />
-        <SymbolMaterial />
-      </mesh>
-      <mesh position={[-0.55, 0, 0]}>
-        <boxGeometry args={[0.16, 1.16, 0.16]} />
-        <SymbolMaterial />
-      </mesh>
-      <mesh position={[0.55, 0, 0]}>
-        <boxGeometry args={[0.16, 1.16, 0.16]} />
-        <SymbolMaterial />
-      </mesh>
-    </group>
-  );
-}
-
-function StarMesh() {
-  const geometry = useMemo(() => {
-    const shape = new THREE.Shape();
-    const points = 10;
-    const outer = 0.72;
-    const inner = 0.32;
-
-    for (let i = 0; i < points; i++) {
-      const radius = i % 2 === 0 ? outer : inner;
-      const angle = -Math.PI / 2 + (i / points) * Math.PI * 2;
-      const x = Math.cos(angle) * radius;
-      const y = Math.sin(angle) * radius;
-      if (i === 0) shape.moveTo(x, y);
-      else shape.lineTo(x, y);
-    }
-    shape.closePath();
-
-    return new THREE.ExtrudeGeometry(shape, {
-      depth: 0.14,
-      bevelEnabled: true,
-      bevelSegments: 2,
-      bevelSize: 0.025,
-      bevelThickness: 0.025,
-    });
-  }, []);
-
-  return (
-    <mesh geometry={geometry} position={[0, 0, -0.07]}>
-      <SymbolMaterial />
-    </mesh>
-  );
+  for (const command of commands) {
+    ctx.globalAlpha = command.alpha;
+    ctx.fillText(command.glyph, command.x, command.y);
+  }
+  ctx.globalAlpha = 1;
 }
 
 export function SymbolMesh({ symbol }: SymbolMeshProps) {
-  if (symbol === 'ring') return <RingMesh />;
-  if (symbol === 'square') return <SquareMesh />;
-  if (symbol === 'star') return <StarMesh />;
-  return <CrossMesh />;
+  const canvas = useMemo(
+    () => (typeof document === 'undefined' ? null : createTextureCanvas()),
+    []
+  );
+  const texture = useMemo(() => {
+    if (!canvas) return null;
+    const next = new THREE.CanvasTexture(canvas);
+    next.colorSpace = THREE.SRGBColorSpace;
+    next.minFilter = THREE.LinearFilter;
+    next.magFilter = THREE.LinearFilter;
+    next.generateMipmaps = false;
+    return next;
+  }, [canvas]);
+  const materialRef = useRef<THREE.MeshBasicMaterial | null>(null);
+
+  useFrame(({ clock }) => {
+    if (!canvas || !materialRef.current?.map) return;
+    drawAsciiSymbolTexture(canvas, symbol, clock.elapsedTime);
+    materialRef.current.map.needsUpdate = true;
+  });
+
+  if (!texture) return null;
+
+  return (
+    <mesh>
+      <planeGeometry args={[TEXTURE_WORLD_SIZE, TEXTURE_WORLD_SIZE]} />
+      <meshBasicMaterial
+        ref={materialRef}
+        map={texture}
+        transparent
+        opacity={1}
+        depthWrite={false}
+        side={THREE.DoubleSide}
+      />
+    </mesh>
+  );
 }
