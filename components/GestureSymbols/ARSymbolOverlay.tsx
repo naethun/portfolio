@@ -31,7 +31,6 @@ interface TargetTransform {
   position: THREE.Vector3;
   scale: number;
   opacity: number;
-  roll: number;
 }
 
 const WORLD_HEIGHT = 10;
@@ -54,8 +53,13 @@ function setMaterialOpacity(root: THREE.Object3D, opacity: number) {
         : [];
 
     for (const material of materials) {
+      if (typeof material.userData.baseOpacity !== 'number') {
+        material.userData.baseOpacity =
+          typeof material.opacity === 'number' ? material.opacity : 1;
+      }
       material.transparent = true;
-      material.opacity = mesh.isPoints ? opacity * 0.72 : opacity;
+      material.opacity =
+        material.userData.baseOpacity * (mesh.isPoints ? opacity * 0.72 : opacity);
     }
   });
 }
@@ -85,7 +89,6 @@ function useTargetTransform({
         ),
         scale,
         opacity: palmAnchor.confidence,
-        roll: palmAnchor.roll,
       };
     }
 
@@ -93,7 +96,6 @@ function useTargetTransform({
       position: new THREE.Vector3(0, 0, 0),
       scale: fallbackVisible ? 1.9 : 0.6,
       opacity: fallbackVisible ? 0.86 : 0,
-      roll: 0,
     };
   }, [fallbackVisible, frameSize, palmAnchor, videoSize, worldHeight]);
 }
@@ -103,7 +105,7 @@ function SymbolScene(props: SymbolSceneProps) {
   const opacityRef = useRef(0);
   const target = useTargetTransform(props);
 
-  useFrame(({ clock }, delta) => {
+  useFrame((_, delta) => {
     const group = groupRef.current;
     if (!group) return;
 
@@ -113,10 +115,10 @@ function SymbolScene(props: SymbolSceneProps) {
     opacityRef.current += (target.opacity - opacityRef.current) * OPACITY_LERP;
 
     group.rotation.y += delta * 1.55;
-    group.rotation.x = Math.sin(clock.elapsedTime * 1.15) * 0.16;
-    group.rotation.z += (target.roll - group.rotation.z) * 0.12;
+    group.rotation.x = 0;
+    group.rotation.z = 0;
     setMaterialOpacity(group, opacityRef.current);
-  });
+  }, 1);
 
   return (
     <>

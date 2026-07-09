@@ -32,6 +32,11 @@ export interface AsciiGlyphCommand {
   row: number;
 }
 
+export interface AsciiVolumeLayerSpec {
+  z: number;
+  opacity: number;
+}
+
 const EDGE_SOFT = 0.06;
 const ALPHA_JITTER = 0.14;
 const JITTER_BASE = 1.05;
@@ -105,4 +110,23 @@ export function buildAsciiSymbolDrawCommands({
 export function fontSizeForTexture(width: number): number {
   const { cols } = gridDimsFor(width, width, GRID_TARGET_CELL_PX);
   return (width / cols) * FONT_PX_RATIO;
+}
+
+export function buildAsciiVolumeLayerSpecs(
+  depth: number,
+  count: number
+): AsciiVolumeLayerSpec[] {
+  const layerCount = Math.max(1, Math.round(count));
+  if (layerCount === 1) return [{ z: 0, opacity: 1 }];
+
+  const halfDepth = depth / 2;
+  const center = (layerCount - 1) / 2;
+  return Array.from({ length: layerCount }, (_, index) => {
+    const normalized = index / (layerCount - 1);
+    const distanceFromFace = Math.min(index, layerCount - 1 - index) / center;
+    return {
+      z: Number((-halfDepth + normalized * depth).toFixed(6)),
+      opacity: 0.24 + (1 - distanceFromFace) * 0.76,
+    };
+  });
 }
