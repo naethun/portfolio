@@ -43,6 +43,13 @@ function railSpread(rail) {
   );
 }
 
+function railSpread2d(rail) {
+  return Math.hypot(
+    rail[0].x - rail[4].x,
+    rail[0].y - rail[4].y,
+  );
+}
+
 function firstTriangleArea(positions) {
   const ab = [
     positions[3] - positions[0],
@@ -198,6 +205,53 @@ describe('faceted window state', () => {
     assert.ok(railSpread(state.pair.a.rail) > 0.005);
     assert.ok(railSpread(state.pair.a.rail) < 0.05);
     assert.ok(railSpread(state.pair.b.rail) > 0.25);
+  });
+
+  it('expands a fully open fan by 20% without changing its camera UVs', () => {
+    const pinchedHands = [
+      meshHand({ x: 0.3, label: 'Left', pinch: true }),
+      meshHand({ x: 0.7, label: 'Right', pinch: true }),
+    ];
+    const openHands = [
+      meshHand({ x: 0.3, label: 'Left', pinch: true }),
+      meshHand({ x: 0.7, label: 'Right' }),
+    ];
+    const baselineArmed = updateFacetedWindowState(
+      initialFacetedWindowState(),
+      pinchedHands,
+      0,
+      { dampingLambda: 100, openFanBoost: 0 },
+    );
+    const boostedArmed = updateFacetedWindowState(
+      initialFacetedWindowState(),
+      pinchedHands,
+      0,
+      { dampingLambda: 100, openFanBoost: 0.2 },
+    );
+    const baselineOpen = updateFacetedWindowState(
+      baselineArmed,
+      openHands,
+      1000,
+      { dampingLambda: 100, openFanBoost: 0 },
+    );
+    const boostedOpen = updateFacetedWindowState(
+      boostedArmed,
+      openHands,
+      1000,
+      { dampingLambda: 100, openFanBoost: 0.2 },
+    );
+
+    const spreadRatio = railSpread2d(boostedOpen.pair.b.rail)
+      / railSpread2d(baselineOpen.pair.b.rail);
+    assert.ok(Math.abs(spreadRatio - 1.2) < 1e-9);
+    assert.equal(boostedOpen.pair.b.rail[4].u, baselineOpen.pair.b.rail[4].u);
+    assert.equal(boostedOpen.pair.b.rail[4].v, baselineOpen.pair.b.rail[4].v);
+    assert.ok(
+      Math.abs(
+        railSpread2d(boostedOpen.pair.a.rail)
+          - railSpread2d(baselineOpen.pair.a.rail),
+      ) < 1e-9,
+    );
   });
 
   it('damps equivalent elapsed time consistently across frame rates', () => {

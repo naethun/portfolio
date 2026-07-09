@@ -19,7 +19,6 @@ export const FACET_FRAGMENT_SHADER = /* glsl */ `
   precision highp float;
 
   uniform sampler2D uVideo;
-  uniform sampler2D uAscii;
   uniform float uOpacity;
   uniform float uMode;
   uniform float uTime;
@@ -30,10 +29,17 @@ export const FACET_FRAGMENT_SHADER = /* glsl */ `
   varying vec3 vWorldPosition;
 
   const vec3 INK = vec3(0.02745098, 0.02745098, 0.03529412);
-  const vec3 BONE = vec3(0.95686275, 0.94117647, 0.90196078);
-  const vec3 COBALT = vec3(0.09411765, 0.29019608, 0.53333333);
-  const vec3 CHLOROPHYLL = vec3(0.15686275, 0.47843137, 0.27058824);
-  const vec3 CORAL = vec3(0.84313725, 0.39215686, 0.33333333);
+  const vec3 POLKA_VIOLET = vec3(0.42352941, 0.16862745, 0.85098039);
+  const vec3 POLKA_WHITE = vec3(0.97254902, 0.96862745, 1.00000000);
+  const vec3 INDIGO = vec3(0.15686275, 0.20000000, 0.43529412);
+  const vec3 PEARL = vec3(0.94117647, 0.94901961, 0.91372549);
+  const vec3 CHROME_DARK = vec3(0.03529412, 0.04705882, 0.07058824);
+  const vec3 CHROME_SILVER = vec3(0.58039216, 0.63137255, 0.70196078);
+  const vec3 CHROME_WHITE = vec3(0.94901961, 0.98039216, 1.00000000);
+  const vec3 CHROME_CYAN = vec3(0.18039216, 0.85882353, 0.94117647);
+  const vec3 CHROME_VIOLET = vec3(0.52156863, 0.27843137, 0.92156863);
+  const vec3 BRICK = vec3(0.70980392, 0.28235294, 0.21176471);
+  const vec3 COOL_PAPER = vec3(0.90980392, 0.92941176, 0.94117647);
 
   float facetLuminance(vec3 color) {
     return dot(color, vec3(0.2126, 0.7152, 0.0722));
@@ -56,38 +62,91 @@ export const FACET_FRAGMENT_SHADER = /* glsl */ `
     vec3 color;
 
     if (uMode < 0.5) {
-      // mode 0: dark ASCII texture
-      color = texture2D(uAscii, sourceUv).rgb;
+      // mode 0: camera-reactive violet polka
+      vec2 polkaGrid = gl_FragCoord.xy / 10.0;
+      float polkaRow = floor(polkaGrid.y);
+      polkaGrid.x += mod(polkaRow, 2.0) * 0.5;
+      vec2 polkaCell = fract(polkaGrid) - 0.5;
+      float polkaAmount = clamp(1.0 - luma, 0.0, 1.0);
+      float polkaRadius = mix(
+        0.08,
+        0.47,
+        smoothstep(0.06, 0.94, polkaAmount)
+      );
+      float dotMask = 1.0 - smoothstep(
+        polkaRadius - 0.055,
+        polkaRadius,
+        length(polkaCell)
+      );
+      color = mix(POLKA_WHITE, POLKA_VIOLET, dotMask);
     } else if (uMode < 1.5) {
-      // mode 1: cobalt/chalk cyanotype threshold
-      float threshold = smoothstep(0.34, 0.70, luma);
-      float grain = hash21(floor(gl_FragCoord.xy * 0.55));
-      threshold = clamp(
-        threshold + (grain - 0.5) * 0.055 + sin(uTime * 0.35) * 0.008,
+      // mode 1: indigo riso cyanotype
+      vec2 risoCell = floor(gl_FragCoord.xy * 0.42);
+      float grain = hash21(risoCell);
+      float fiber = sin(
+        gl_FragCoord.y * 0.38
+        + hash21(floor(gl_FragCoord.xy * vec2(0.12, 0.05))) * 6.28318
+      );
+      float threshold = smoothstep(
+        0.32,
+        0.72,
+        luma + (grain - 0.5) * 0.075 + fiber * 0.012
+          + sin(uTime * 0.28) * 0.006
+      );
+      color = mix(INDIGO, PEARL, threshold);
+    } else if (uMode < 2.5) {
+      // mode 2: camera-reactive liquid chrome
+      float chromePixel = 1.35 / max(uViewport.x, 1.0);
+      float leftLuma = facetLuminance(
+        texture2D(uVideo, sourceUv - vec2(chromePixel, 0.0)).rgb
+      );
+      float rightLuma = facetLuminance(
+        texture2D(uVideo, sourceUv + vec2(chromePixel, 0.0)).rgb
+      );
+      float chromeEdge = clamp(abs(rightLuma - leftLuma) * 4.2, 0.0, 1.0);
+      float reflectionBand = 0.5 + 0.5 * cos(
+        (luma * 1.34 + sourceUv.y * 0.18) * 18.0
+      );
+      reflectionBand = pow(reflectionBand, 1.7);
+      vec3 chrome = mix(
+        CHROME_DARK,
+        CHROME_SILVER,
+        smoothstep(0.04, 0.72, luma)
+      );
+      chrome = mix(chrome, CHROME_WHITE, reflectionBand * 0.76);
+      float sweepPosition = fract(uTime * 0.07) * 1.7 - 0.35;
+      float specularSweep = 1.0 - smoothstep(
+        0.0,
+        0.085,
+        abs(sourceUv.x + sourceUv.y * 0.38 - sweepPosition)
+      );
+      chrome = mix(chrome, CHROME_WHITE, specularSweep * 0.78);
+      chrome = mix(chrome, CHROME_CYAN, chromeEdge * 0.24);
+      chrome = mix(
+        chrome,
+        CHROME_VIOLET,
+        clamp((rightLuma - leftLuma) * 3.5, 0.0, 0.18)
+      );
+      color = chrome;
+    } else {
+      // mode 3: brick elliptical stipple
+      vec2 safeViewport = max(uViewport, vec2(1.0));
+      vec2 viewportUv = gl_FragCoord.xy / safeViewport;
+      vec2 grid = viewportUv * safeViewport / vec2(7.0, 5.8);
+      vec2 cell = (fract(grid) - 0.5) * vec2(0.82, 1.18);
+      float grain = hash21(floor(grid));
+      float inkAmount = clamp(
+        1.0 - luma + (grain - 0.5) * 0.09,
         0.0,
         1.0
       );
-      color = mix(COBALT, BONE, threshold);
-    } else if (uMode < 2.5) {
-      // mode 2: green/cream duotone with restrained RGB separation
-      float pixel = 1.35 / max(uViewport.x, 1.0);
-      float redLuma = facetLuminance(texture2D(uVideo, sourceUv + vec2(pixel, 0.0)).rgb);
-      float blueLuma = facetLuminance(texture2D(uVideo, sourceUv - vec2(pixel, 0.0)).rgb);
-      float tone = smoothstep(0.22, 0.82, luma);
-      color = mix(CHLOROPHYLL, BONE, tone);
-      color = mix(color, CORAL, clamp((redLuma - luma) * 0.9, 0.0, 0.075));
-      color = mix(color, COBALT, clamp((blueLuma - luma) * 0.9, 0.0, 0.075));
-    } else {
-      // mode 3: coral stipple-halftone on a light ground
-      vec2 safeViewport = max(uViewport, vec2(1.0));
-      vec2 viewportUv = gl_FragCoord.xy / safeViewport;
-      vec2 grid = viewportUv * safeViewport / 6.0;
-      vec2 cell = fract(grid) - 0.5;
-      float grain = hash21(floor(grid));
-      float inkAmount = clamp(1.0 - luma + (grain - 0.5) * 0.12, 0.0, 1.0);
-      float radius = mix(0.08, 0.47, inkAmount);
-      float dotMask = 1.0 - smoothstep(radius - 0.045, radius, length(cell));
-      color = mix(BONE, CORAL, dotMask);
+      float radius = mix(0.07, 0.46, inkAmount);
+      float dotMask = 1.0 - smoothstep(
+        radius - 0.05,
+        radius,
+        length(cell)
+      );
+      color = mix(COOL_PAPER, BRICK, dotMask);
     }
 
     vec3 faceNormal = normalize(gl_FrontFacing ? vNormal : -vNormal);

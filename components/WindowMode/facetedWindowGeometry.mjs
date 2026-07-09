@@ -4,6 +4,7 @@ const DEFAULTS = Object.freeze({
   armPinchRatio: 0.32,
   openPinchRatio: 0.78,
   maxCollapse: 0.94,
+  openFanBoost: 0.20,
   depthLimit: 0.9,
   dampingLambda: 18,
   holdMs: 150,
@@ -138,14 +139,32 @@ function interpolatePoint(point, pinch, collapse) {
   };
 }
 
-function collapseHand(hand, maxCollapse) {
+export function fanScaleForCollapse(
+  collapse,
+  maxCollapse = DEFAULTS.maxCollapse,
+  openFanBoost = DEFAULTS.openFanBoost,
+) {
+  const safeMax = Math.max(1e-6, maxCollapse);
+  const openness = clamp(1 - clamp(collapse, 0, safeMax) / safeMax);
+  return 1 + Math.max(0, openFanBoost) * openness;
+}
+
+function collapseHand(hand, maxCollapse, openFanBoost) {
   const collapse = clamp(hand.collapse, 0, maxCollapse);
+  const fanScale = fanScaleForCollapse(collapse, maxCollapse, openFanBoost);
   return {
     ...hand,
     collapse,
     center: { ...hand.center },
     pinch: { ...hand.pinch },
-    rail: hand.rail.map((point) => interpolatePoint(point, hand.pinch, collapse)),
+    rail: hand.rail.map((point) => {
+      const collapsed = interpolatePoint(point, hand.pinch, collapse);
+      return {
+        ...collapsed,
+        x: hand.pinch.x + (collapsed.x - hand.pinch.x) * fanScale,
+        y: hand.pinch.y + (collapsed.y - hand.pinch.y) * fanScale,
+      };
+    }),
   };
 }
 
@@ -199,8 +218,8 @@ export function updateFacetedWindowState(
     }
 
     const targetPair = {
-      a: collapseHand(assigned.a, options.maxCollapse),
-      b: collapseHand(assigned.b, options.maxCollapse),
+      a: collapseHand(assigned.a, options.maxCollapse, options.openFanBoost),
+      b: collapseHand(assigned.b, options.maxCollapse, options.openFanBoost),
     };
     const deltaSeconds = Math.max(0, timestamp - previous.lastUpdateMs) / 1000;
     const pair = previous.armed && previous.pair

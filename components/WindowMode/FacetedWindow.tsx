@@ -19,14 +19,6 @@ import {
 
 const CAMERA = { fov: 50, z: 3, depthScale: 0.32 } as const;
 const FACET_MODES = [0, 1, 2, 3] as const;
-const ASCII_RAMP = ' .,:;irsXA253hMHGS#9B&@';
-const ASCII_REFRESH_MS = 80;
-const ASCII_COLUMNS = 72;
-const ASCII_CELL_WIDTH = 6;
-const ASCII_CELL_HEIGHT = 10;
-const ASCII_FONT_STACK = '"SF Mono", "JetBrains Mono", Menlo, Consolas, monospace';
-const INK = '#070709';
-const BONE = '#F4F0E6';
 const BLUSH = '#F8BCB2';
 const MIRRORED_INPUT = Object.freeze({ mirrored: true });
 const EMPTY_HANDEDNESS: HandLandmarkerResult['handedness'][number] = [];
@@ -39,17 +31,13 @@ interface FacetedWindowProps {
 
 type FacetUniforms = Record<string, THREE.IUniform> & {
   uVideo: { value: THREE.VideoTexture | null };
-  uAscii: { value: THREE.CanvasTexture | null };
   uOpacity: { value: number };
   uMode: { value: number };
   uTime: { value: number };
   uViewport: { value: THREE.Vector2 };
 };
 
-interface TextureResources {
-  asciiCanvas: HTMLCanvasElement;
-  asciiContext: CanvasRenderingContext2D;
-  asciiTexture: THREE.CanvasTexture;
+interface VideoResources {
   videoTexture: THREE.VideoTexture;
 }
 
@@ -63,7 +51,6 @@ interface MetricsDimensions {
 function createUniforms(mode: number): FacetUniforms {
   return {
     uVideo: { value: null },
-    uAscii: { value: null },
     uOpacity: { value: 0 },
     uMode: { value: mode },
     uTime: { value: 0 },
@@ -71,7 +58,7 @@ function createUniforms(mode: number): FacetUniforms {
   };
 }
 
-function createTextureResources(video: HTMLVideoElement): TextureResources | null {
+function createVideoResources(video: HTMLVideoElement): VideoResources | null {
   if (
     video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA
     || video.videoWidth <= 0
@@ -80,22 +67,6 @@ function createTextureResources(video: HTMLVideoElement): TextureResources | nul
     return null;
   }
 
-  const rows = Math.max(
-    1,
-    Math.round(
-      (video.videoHeight / video.videoWidth)
-      * ASCII_COLUMNS
-      * (ASCII_CELL_WIDTH / ASCII_CELL_HEIGHT),
-    ),
-  );
-  const asciiCanvas = document.createElement('canvas');
-  asciiCanvas.width = ASCII_COLUMNS * ASCII_CELL_WIDTH;
-  asciiCanvas.height = rows * ASCII_CELL_HEIGHT;
-  const asciiContext = asciiCanvas.getContext('2d', { willReadFrequently: true });
-  if (!asciiContext) return null;
-  asciiContext.fillStyle = INK;
-  asciiContext.fillRect(0, 0, asciiCanvas.width, asciiCanvas.height);
-
   const videoTexture = new THREE.VideoTexture(video);
   videoTexture.colorSpace = THREE.SRGBColorSpace;
   videoTexture.minFilter = THREE.LinearFilter;
@@ -103,73 +74,7 @@ function createTextureResources(video: HTMLVideoElement): TextureResources | nul
   videoTexture.generateMipmaps = false;
   videoTexture.flipY = false;
 
-  const asciiTexture = new THREE.CanvasTexture(asciiCanvas);
-  asciiTexture.colorSpace = THREE.SRGBColorSpace;
-  asciiTexture.minFilter = THREE.LinearFilter;
-  asciiTexture.magFilter = THREE.LinearFilter;
-  asciiTexture.generateMipmaps = false;
-  asciiTexture.flipY = false;
-
-  return { asciiCanvas, asciiContext, asciiTexture, videoTexture };
-}
-
-function drawAsciiTexture(resources: TextureResources, video: HTMLVideoElement) {
-  if (
-    video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA
-    || video.videoWidth <= 0
-    || video.videoHeight <= 0
-  ) {
-    return;
-  }
-
-  const { asciiCanvas: canvas, asciiContext: context } = resources;
-  const rows = Math.max(1, Math.floor(canvas.height / ASCII_CELL_HEIGHT));
-  const outputWidth = canvas.width;
-  const outputHeight = canvas.height;
-
-  context.globalAlpha = 1;
-  context.imageSmoothingEnabled = true;
-  context.clearRect(0, 0, outputWidth, outputHeight);
-  context.drawImage(video, 0, 0, ASCII_COLUMNS, rows);
-
-  let pixels: Uint8ClampedArray;
-  try {
-    pixels = context.getImageData(0, 0, ASCII_COLUMNS, rows).data;
-  } catch {
-    return;
-  }
-
-  context.clearRect(0, 0, outputWidth, outputHeight);
-  context.fillStyle = INK;
-  context.fillRect(0, 0, outputWidth, outputHeight);
-  context.fillStyle = BONE;
-  context.font = `${ASCII_CELL_HEIGHT - 1}px ${ASCII_FONT_STACK}`;
-  context.textAlign = 'center';
-  context.textBaseline = 'middle';
-
-  for (let y = 0; y < rows; y += 1) {
-    for (let x = 0; x < ASCII_COLUMNS; x += 1) {
-      const pixelIndex = (y * ASCII_COLUMNS + x) * 4;
-      const luminance = (
-        0.2126 * pixels[pixelIndex]
-        + 0.7152 * pixels[pixelIndex + 1]
-        + 0.0722 * pixels[pixelIndex + 2]
-      ) / 255;
-      const characterIndex = Math.min(
-        ASCII_RAMP.length - 1,
-        Math.floor(luminance * ASCII_RAMP.length),
-      );
-      context.globalAlpha = 0.3 + luminance * 0.7;
-      context.fillText(
-        ASCII_RAMP[characterIndex],
-        x * ASCII_CELL_WIDTH + ASCII_CELL_WIDTH * 0.5,
-        y * ASCII_CELL_HEIGHT + ASCII_CELL_HEIGHT * 0.54,
-      );
-    }
-  }
-
-  context.globalAlpha = 1;
-  resources.asciiTexture.needsUpdate = true;
+  return { videoTexture };
 }
 
 function updateFacetNormal(
@@ -213,7 +118,7 @@ function FacetedScene({ landmarksRef, videoRef, enabled }: FacetedWindowProps) {
   const materialRefs = useRef<Array<THREE.ShaderMaterial | null>>([]);
   const seamGroupRef = useRef<THREE.Group | null>(null);
   const seamMaterialRef = useRef<THREE.LineBasicMaterial | null>(null);
-  const resourcesRef = useRef<TextureResources | null>(null);
+  const resourcesRef = useRef<VideoResources | null>(null);
   const facetedStateRef = useRef<ReturnType<typeof updateFacetedWindowState>>(
     initialFacetedWindowState(),
   );
@@ -221,7 +126,6 @@ function FacetedScene({ landmarksRef, videoRef, enabled }: FacetedWindowProps) {
     Array<NonNullable<ReturnType<typeof handMeshInputFromLandmarks>>>
   >([]);
   const lastLandmarkerResultRef = useRef<HandLandmarkerResult | null>(null);
-  const lastAsciiUpdateRef = useRef(Number.NEGATIVE_INFINITY);
   const wasEnabledRef = useRef(enabled);
   const drawingBufferSizeRef = useRef(new THREE.Vector2(1, 1));
   const metricsDimensionsRef = useRef<MetricsDimensions>({
@@ -254,7 +158,6 @@ function FacetedScene({ landmarksRef, videoRef, enabled }: FacetedWindowProps) {
     const resources = resourcesRef.current;
     if (!resources) return;
     resources.videoTexture.dispose();
-    resources.asciiTexture.dispose();
     resourcesRef.current = null;
   }, []);
 
@@ -328,7 +231,6 @@ function FacetedScene({ landmarksRef, videoRef, enabled }: FacetedWindowProps) {
       materials.forEach((material) => {
         if (!material) return;
         material.uniforms.uVideo.value = null;
-        material.uniforms.uAscii.value = null;
         material.dispose();
       });
       seamEntries.forEach(({ geometry, index }) => {
@@ -363,14 +265,13 @@ function FacetedScene({ landmarksRef, videoRef, enabled }: FacetedWindowProps) {
     wasEnabledRef.current = true;
 
     if (!resources && video) {
-      resources = createTextureResources(video);
+      resources = createVideoResources(video);
       if (resources) {
         resourcesRef.current = resources;
         for (let mode = 0; mode < FACET_MODES.length; mode += 1) {
           const material = materialRefs.current[mode];
           if (!material) continue;
           material.uniforms.uVideo.value = resources.videoTexture;
-          material.uniforms.uAscii.value = resources.asciiTexture;
         }
       }
     }
@@ -462,15 +363,6 @@ function FacetedScene({ landmarksRef, videoRef, enabled }: FacetedWindowProps) {
         uvAttribute.needsUpdate = true;
         normalAttribute.needsUpdate = true;
       }
-    }
-
-    if (
-      resources
-      && video
-      && elapsedMilliseconds - lastAsciiUpdateRef.current >= ASCII_REFRESH_MS
-    ) {
-      drawAsciiTexture(resources, video);
-      lastAsciiUpdateRef.current = elapsedMilliseconds;
     }
 
     frameState.gl.getDrawingBufferSize(drawingBufferSizeRef.current);

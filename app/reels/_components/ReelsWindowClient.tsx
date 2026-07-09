@@ -4,7 +4,7 @@ import { ReelsWindowMode } from './ReelsWindowMode';
 
 export function ReelsWindowClient() {
   return (
-    <ReelsModeShell>
+    <ReelsModeShell aspectRatio="11 / 16">
       <ReelsStageWindow
         slot="full"
         title="camera"
