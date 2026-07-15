@@ -16,6 +16,25 @@ The homepage becomes a three-part layout:
 
 The desktop layout should use a centered max-width container with equal or visually balanced outer rails and a flexible middle column. The Mac window keeps its existing title bar, sidebar, folder interactions, and detail overlay behavior.
 
+## Visual hierarchy and polish
+
+The composition must feel deliberately art-directed rather than like three unrelated columns placed beside each other.
+
+The hierarchy is:
+
+1. The centered Mac window is the primary focal point.
+2. The existing top-left image anchors the identity of the page without competing with the window.
+3. The age line and current-role blocks establish the right rail's reading path.
+4. The two proof signals close the rail with emphasis but remain subordinate to the centered work surface.
+
+The three columns should share intentional top and bottom relationships. Use optical centering where strict mathematical centering looks unbalanced, but keep the middle window centered in the viewport. Align major content starts where doing so strengthens the composition, and use a consistent vertical spacing rhythm within each rail.
+
+Typography should use a limited, deliberate scale. The age line is the opening statement on the right; role titles are the next level; descriptions and metadata are quieter; the proof numbers are visually strong closing beats. Avoid arbitrary font-size changes, excessive tracking, all-caps labels, or decorative treatments that do not reinforce this order.
+
+Within the Finder window, highlighted cards must have consistent 4:3 crops, equal dimensions, aligned metadata, and balanced whitespace. The `selected work` and `other work` labels should be quiet lowercase orientation cues. Other-work separators, dates, hover states, and focus states should feel like part of the same Finder system rather than a second visual language.
+
+Polish must be checked at the rendered desktop and mobile sizes. Fix awkward empty space, crowding, uneven gaps, accidental misalignment, clipped copy, inconsistent corner radii, weak contrast, or elements that compete for attention. A green build alone is not sufficient acceptance for this change.
+
 ## Right status rail
 
 The content is one uninterrupted vertical stack:
@@ -102,6 +121,7 @@ Implementation will follow test-driven development:
 3. Run the focused Node tests, TypeScript, lint, and production build.
 4. Verify the real homepage in the browser at desktop and 390 × 844 mobile sizes.
 5. Confirm the left image remains unchanged, the Mac window is visually centered on desktop, labels render lowercase, highlighted images are 4:3, all eight work items remain reachable, and the page has no horizontal overflow or console errors.
+6. Perform a visual hierarchy pass at each target viewport, checking focal order, optical balance, typography scale, spacing rhythm, card consistency, row alignment, and interaction polish before declaring the work complete.
 
 ## Out of scope
 
