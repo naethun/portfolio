@@ -12,7 +12,7 @@ export const experiences: Experience[] = [
   {
     id: 0,
     img: "/aedemo1.gif",
-    role: "Founding Software Engineer",
+    role: "Founding Engineer",
     company: "Aesthetic",
     date: "December 2025 - Present",
     desc: `Aesthetic is a all-in-one shopping platform that allows users to buy products through our fully autounomus shopping assistant. 100k+ users, 250k+ GMV, 160k+ on Instagram
@@ -32,7 +32,7 @@ export const experiences: Experience[] = [
   {
     id: 1,
     img: "/energex.gif",
-    role: "Software Engineer - 6-figure ARR",
+    role: "Software Engineer",
     company: "EnergeX AI",
     date: "September 2025 - April 2026",
     desc: `EnergeX AI is an AI-driven CRM platform that automates outbound sales calls & real-time analytics for high-volume teams.
@@ -115,7 +115,7 @@ export const experiences: Experience[] = [
   },
   {
     id: 6,
-    img: "https://pbs.twimg.com/profile_images/1549089349119139843/AuqvKpSs_400x400.png",
+    img: "https://lightningatc.com/assets/ui-newhome.png",
     role: "Software Developer",
     company: "LightningATC",
     date: "May 2022 - Jun 2023",
@@ -139,130 +139,6 @@ export const experiences: Experience[] = [
 ];
 
 export const projects: Project[] = [
-  {
-    id: 3,
-    title: "Helping Anxious Beginners Learn Before They Invest",
-    date: "COGS 127 · Spring 2026",
-    description: `A live case study from UCSD's COGS 127 (Data-Driven UX/Product Design). My team studied how young, first-time investors with mental health conditions actually behave inside Robinhood, then designed a practice-first learning layer that lets them build confidence before risking real money.`,
-    image: "/portfolio/cogs127/cover.svg",
-    tags: [
-      "UX Research",
-      "Interaction Design",
-      "Figma",
-      "Usability Testing",
-      "Fintech",
-      "Accessibility",
-    ],
-    category: "UX Research & Design — COGS 127",
-    github: "https://www.figma.com/design/Mr9830xmwwIq5Q7SmdtJIw/COGS-127---Robinhood-Extension-Hi-Fi-Prototype",
-    caseStudy: {
-      hero: "/portfolio/cogs127/cover.svg",
-      subtitle:
-        "A practice-first learning layer that helps overwhelmed first-time investors build confidence before risking real money.",
-      sections: [
-        { type: "heading", content: "Overview" },
-        {
-          type: "text",
-          content: `Robinhood made investing feel as easy as tapping a button — but for millions of young, first-time investors, "easy to access" never meant "easy to understand." Over a quarter, my team studied people who genuinely wanted to invest responsibly yet felt overwhelmed, anxious, or unsure the moment they opened the app, then defaulted to guessing. Our answer is a practice-first learning layer built into Robinhood: a zero-risk sandbox and bite-sized, plain-language lessons that let beginners build real confidence before a single dollar is on the line.`,
-        },
-        {
-          type: "image",
-          content: "/portfolio/cogs127/sandbox.png",
-          alt: "Zero-risk Practice Sandbox with mock funds",
-        },
-        { type: "heading", content: "The problem" },
-        {
-          type: "text",
-          content: `Young, first-time investors who also live with mental health conditions — anxiety, depression, BPD — want to grow their money, but mobile trading apps amplify impulsive, emotionally-reactive decisions and offer no real path to understanding. Left without guidance, they fall back on surface cues like trending lists, green percentages, and whatever sits at the top of the screen, rather than informed reasoning. The need isn't a flashier app; it's a way to feel safe enough to learn before money is on the line.`,
-        },
-        { type: "heading", content: "Why it matters" },
-        {
-          type: "text",
-          content: `Robinhood sits at the intersection of two trends in our generation. It reports 26.5M funded accounts — roughly 75% under 43 and nearly half first-time investors (Fortune, 2026) — and that same group is the most psychologically vulnerable: 46% of Gen Z hold a formal mental health diagnosis (Harmony Healthcare IT, 2025). Participation is climbing while comprehension lags: Gen Z has the lowest financial literacy of any generation at ~38% (2025 TIAA Institute-GFLEC Index), yet 56% of 18–25-year-olds already invest.
-
-In January 2024, Robinhood was charged with trivializing investing and nudging inexperienced users toward riskier, more frequent trades through confetti, streaks, and frictionless purchasing — design patterns that map directly onto the negative urgency seen in conditions like BPD. With an estimated $80T in wealth transferring to younger generations in the coming decades, designing for understanding rather than impulse isn't just ethical; it's how a platform earns long-term trust.`,
-        },
-        { type: "heading", content: "My role" },
-        {
-          type: "text",
-          content: `A four-person team project (James, Alex, Natalin, and me) spanning a full quarter. I contributed across the full process rather than owning a single lane:
-
-- User research & interviews: helped design the interview protocol and the live "$300 to invest" task, then ran moderated, think-aloud sessions with participants and captured their behavior, hesitations, and quotes.
-
-- Synthesis & findings: turned raw interview notes into per-participant findings and the cross-participant insights that exposed the real pattern — confidence without comprehension, and safety mattering more than lesson depth.
-
-- Problem framing & thesis: helped sharpen the problem statement to focus on people rather than the app, and drove the point-of-view that reframed the project from "add more education" to "give beginners a zero-risk place to learn by doing."
-
-- Design & prototyping: contributed to the high-fidelity design directions and iterations in Figma (the sandbox, lesson flows, and landing-page concepts), and to the design edits made in response to user-testing feedback.
-
-- Closing the loop with users: brought the designs back to people from our original interview group, walked them through the prototype, and captured what resonated and what fell flat — feeding their reactions directly into the next round of design decisions.`,
-        },
-        { type: "heading", content: "Research: how do beginners actually behave?" },
-        {
-          type: "text",
-          content: `We ran moderated, think-aloud interviews with four participants spanning low to intermediate financial literacy — Isabella (19), Clara (20), Dylan (19), and Aaron (17). Each started with background questions, told a real "last time you had extra money" story, then attempted a live task: "You just got paid and have $300 left after expenses. Using the Robinhood app, walk me through what you'd do." We watched where attention went, where people hesitated, and where confidence and understanding came apart.`,
-        },
-        { type: "heading", content: "What we saw" },
-        {
-          type: "text",
-          content: `Confidence rarely meant understanding. Isabella chose a stock simply because it was "at the top" of the app, feeling sure despite having done no research. Beginners leaned on visual hierarchy — trending lists, big percentages, familiar brand names — to stand in for reasoning the app never taught.
-
-Risk and uncertainty were a universal barrier. Aaron, the least experienced, said the app "didn't feel welcoming to someone who's new to this" and wanted to call his parents before doing anything. Even Dylan, the most confident, held back because he couldn't see projected outcomes before committing. Clara showed that access to financial tools doesn't equal literacy — she used banking apps daily but still felt lost on investing, taxes, and retirement.
-
-Across everyone, jargon and on-screen overload were the friction points: moving numbers with no meaning, "top movers" that were moving down, and dense help text that explained nothing.`,
-        },
-        { type: "heading", content: "The insight" },
-        {
-          type: "text",
-          content: `The real barrier wasn't a lack of information — it was a lack of permission to explore without consequences. When we looked at where engagement actually clustered, it was around the feeling of safety, not the depth of any lesson. One participant wanted a parent present before touching anything; another specifically gravitated to "practice mode"; a third responded more to reduced visual overwhelm than to anything we taught. That reframed the project: don't add more content — give people a zero-risk place to learn by doing.`,
-        },
-        { type: "heading", content: "Designing the solution" },
-        {
-          type: "text",
-          content: `We explored two entry points: a dedicated, self-paced Tutorials tab that never disrupts the existing UI, and a re-accessible onboarding tutorial that can be reopened anytime from settings. Early sketches drew on Duolingo-style modular lessons — small, ordered, progress-saving — and taught us that button placement and visual hierarchy are far from obvious and worth iterating on directly.
-
-From there we built high-fidelity directions: a simplified portfolio hub that collapses the firehose of charts and numbers into a few expandable cards; a Standard / Focus View toggle that lets users dial down intensity depending on how they feel; and a Practice Sandbox using clearly-labeled mock funds. On the lesson side we prototyped a personalized learning-style setup feeding a short, one-concept-at-a-time flow (e.g. P/E ratio) with mock-money practice and hold-to-confirm friction, plus an annotated version layered over a realistic Robinhood screen.`,
-        },
-        {
-          type: "image",
-          content: "/portfolio/cogs127/lesson.png",
-          alt: "Lesson flow — one concept at a time with mock-money practice",
-        },
-        {
-          type: "image",
-          content: "/portfolio/cogs127/concepts.png",
-          alt: "Standard and Focus View concept for reducing visual intensity",
-        },
-        {
-          type: "embed",
-          content:
-            "https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FMr9830xmwwIq5Q7SmdtJIw%2FCOGS-127---Robinhood-Extension-Hi-Fi-Prototype%3Fnode-id%3D0-1",
-          title: "Interactive Figma prototype — Robinhood learning layer",
-          ratio: "16 / 10",
-        },
-        { type: "heading", content: "Testing two directions" },
-        {
-          type: "text",
-          content: `We compared two prototypes in a within-subjects A/B study, counterbalancing order to reduce bias, with sessions framed as a test of the design — never of the participant. Two takeaways were consistent: Prototype A's linear navigation and a clear "next" gave low-confidence users the structure they needed, while Prototype B's cleaner visual hierarchy and color lowered the barrier to engage at all. Both participants gravitated to the practice section precisely because no real money was involved. Testing also surfaced concrete fixes: font sizes were too small, and an all-green interface made it ambiguous which elements were actually interactive.`,
-        },
-        { type: "heading", content: "Where it landed" },
-        {
-          type: "text",
-          content: `The final direction makes the zero-risk sandbox the default entry point — keeping A's step-by-step navigation as the backbone while adopting B's visual language. Two changes mattered most. First, we replaced the real, volatile stock shown in an alarming red chart (which unsettled testers even with a "this is practice" banner) with a fictional stock on a gentle upward curve, removing real-market anxiety entirely. Second, instead of dropping users into an undifferentiated list, the learning tab now opens to pre-selected beginner lessons with time estimates and difficulty tags, tracked progress, and a clear "continue" — so users always know where to start, with plain-language definitions surfacing for any jargon they hit.`,
-        },
-        {
-          type: "image",
-          content: "/portfolio/cogs127/before-after.png",
-          alt: "Before and after — volatile real stock replaced with a calm fictional one, plus guided lessons",
-        },
-        { type: "heading", content: "What I'd do next" },
-        {
-          type: "text",
-          content: `Push the lessons fully inside the sandbox so users learn by doing rather than reading; validate specifically with the target population managing anxiety and BPD rather than general beginners; and run a dedicated accessibility pass on the font-size and button-affordance issues testing exposed. The throughline: the most ethical version of this product is also the most retentive one — trust and understanding become the reason people stay.`,
-        },
-      ],
-    },
-  },
   {
     id: 9,
     title: "Redacted CLI",
@@ -297,41 +173,5 @@ From there we built high-fidelity directions: a simplified portfolio hub that co
     tags: ["Google Chrome Extension", "JavaScript", "HTML", "CSS", "jQuery"],
     category: "Chrome Extension",
     github: "https://github.com/naethun/Telios-AIO/",
-  },
-  {
-    id: 2,
-    title: "CareFi (LIVE AI BEST COAST 2025 HACKATHON WINNER)",
-    date: "3 day hackathon",
-    description: `We were inspired by a friend’s dermatology club that asked us to create a website for skincare analysis. This sparked our idea to build an AI-powered platform that makes personalized skincare accessible and affordable for everyone.
-
-      CareFi uses advanced AI to analyze a user’s skin from photos and detect common conditions such as acne, dryness, oiliness, and sensitivity. It then recommends a customized skincare routine tailored to each user’s unique needs and budget, providing insights often associated with dermatologist-quality results.
-
-      Frontend/Backend: Next.js for high performance, API and App routing, SSR, and TypeScript + TailwindCSS
-
-      Database: PostgreSQL for highly consistent & horizontal data storage, user authentication, RLS policies for security, and real-time subscriptions / webhooks
-
-      AI + Analysis: We used OpenAI Vision (specifically gpt-4o-mini) to analyzing uploaded images. We have another agent for also the recommendation process too. Out of a list of 100 products, we send the agent 40 unique & well matched products (tier-based classification based on ingredients list) to the agent and have it write the list of recommended products and measure through a confidence scale.
-
-      Architecture: RESTful API routes in /app/api/ Endpoints include:
-      /api/signup - User registration
-      /api/signin - User authentication
-      /api/analysis/start - Start face analysis
-      /api/analysis/latest - Get latest analysis results
-      /api/recommendations - Get personalized recommendations
-      /api/uploadImage - Upload face images
-      /api/settings/* - User settings management
-
-      Key Features Built with This Stack:
-      Product Image Analysis - Upload photos → AI extracts ingredients
-      Personalized Dashboard - View analysis, recommendations, KPIs
-      Budget Optimizer - Track spending on skincare products
-      Routine Planner - Morning/evening skincare routines
-      Onboarding Flow - Collect user skin profile (type, concerns, allergies
-      `,
-    image:
-      "https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/003/966/990/datas/original.png",
-    tags: ["Next.js", "Node.js", "PostgreSQL", "OpenAI", "Docker", "Git"],
-    category: "Web Application",
-    github: "https://devpost.com/software/carefi",
   },
 ];
