@@ -24,16 +24,17 @@ export default function WorkCard({ item, onClick }: WorkCardProps) {
           src={image}
           alt={title}
           fill
+          loading="eager"
           sizes="(max-width: 767px) 42vw, 280px"
           className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.025]"
         />
       </div>
 
-      <div className="mt-2 flex min-w-0 items-baseline justify-between gap-3">
-        <p className="truncate text-[13px] font-medium tracking-[-0.02em] text-neutral-900 md:text-sm">
+      <div className="mt-2 flex min-w-0 flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+        <p className="w-full truncate text-[13px] font-medium leading-tight tracking-[-0.02em] text-neutral-900 md:text-sm">
           {title}
         </p>
-        <p className="shrink-0 text-[10px] text-neutral-500 md:text-[11px]">
+        <p className="shrink-0 text-[10px] leading-tight text-neutral-500 md:text-[11px]">
           {date}
         </p>
       </div>
