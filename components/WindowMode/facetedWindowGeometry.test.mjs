@@ -6,10 +6,26 @@ import {
   assignHandPair,
   buildFacetBuffers,
   coverMetrics,
+  dampMotionEnergy,
+  expireStaleMotionTarget,
   handMeshInputFromLandmarks,
   initialFacetedWindowState,
+  motionAnchorsForCurrentHands,
+  motionTargetForSpeed,
+  normalizedAnchorSpeed,
+  resampleRailToAnchors,
   updateFacetedWindowState,
+  updateMotionSampleLifecycle,
 } from './facetedWindowGeometry.mjs';
+
+function assertPointClose(actual, expected, epsilon = 1e-9) {
+  for (const key of ['x', 'y', 'z', 'u', 'v']) {
+    assert.ok(
+      Math.abs(actual[key] - expected[key]) < epsilon,
+      `${key}: expected ${expected[key]}, received ${actual[key]}`,
+    );
+  }
+}
 
 function handFixture({ x = 0.5, pinch = false, z = 0 } = {}) {
   const points = Array.from({ length: 21 }, () => ({ x, y: 0.6, z }));
@@ -154,6 +170,7 @@ describe('faceted window state', () => {
       coverMetrics(540, 960, 1920, 1080),
       { fov: 50, z: 3, depthScale: 0.32, aspect: 540 / 960 },
     );
+    assert.equal(pinchedFacets.length, 3);
     const pinchedAreas = pinchedFacets.map((facet) => firstTriangleArea(facet.positions));
     assert.ok(pinchedAreas.filter((area) => area > 1e-8).length >= 3);
     assert.ok(pinchedAreas.reduce((total, area) => total + area, 0) > 0.001);
@@ -316,26 +333,552 @@ describe('faceted window state', () => {
   });
 });
 
+describe('three-facet rail resampling', () => {
+  const metrics = {
+    stageWidth: 300,
+    stageHeight: 300,
+    displayWidth: 300,
+    displayHeight: 300,
+    offsetX: 0,
+    offsetY: 0,
+  };
+
+  it('preserves endpoints and samples interior anchors by display-space length', () => {
+    const rail = [
+      { x: 0, y: 0, z: 0, u: 0, v: 1 },
+      { x: 0.1, y: 0, z: 1, u: 0.1, v: 0.9 },
+      { x: 0.4, y: 0, z: 2, u: 0.4, v: 0.6 },
+      { x: 0.9, y: 0, z: 3, u: 0.9, v: 0.1 },
+      { x: 1, y: 0, z: 4, u: 1, v: 0 },
+    ];
+
+    const anchors = resampleRailToAnchors(rail, metrics);
+
+    assert.equal(anchors.length, 4);
+    assert.deepEqual(anchors[0], rail[0]);
+    assert.deepEqual(anchors[3], rail[4]);
+    assertPointClose(anchors[1], {
+      x: 1 / 3,
+      y: 0,
+      z: 1 + (7 / 9),
+      u: 1 / 3,
+      v: 2 / 3,
+    });
+    assertPointClose(anchors[2], {
+      x: 2 / 3,
+      y: 0,
+      z: 2 + (8 / 15),
+      u: 2 / 3,
+      v: 1 / 3,
+    });
+  });
+
+  it('uses finite index interpolation for a zero-length display rail', () => {
+    const rail = Array.from({ length: 5 }, (_, index) => ({
+      x: 0.5,
+      y: 0.5,
+      z: index,
+      u: index * 0.1,
+      v: 1 - index * 0.1,
+    }));
+
+    const anchors = resampleRailToAnchors(rail, metrics);
+
+    assert.equal(anchors.length, 4);
+    assertPointClose(anchors[1], {
+      x: 0.5,
+      y: 0.5,
+      z: 4 / 3,
+      u: 2 / 15,
+      v: 13 / 15,
+    });
+    assertPointClose(anchors[2], {
+      x: 0.5,
+      y: 0.5,
+      z: 8 / 3,
+      u: 4 / 15,
+      v: 11 / 15,
+    });
+  });
+});
+
+describe('motion energy', () => {
+  const metrics = {
+    stageWidth: 300,
+    stageHeight: 400,
+    displayWidth: 600,
+    displayHeight: 400,
+    offsetX: -150,
+    offsetY: 0,
+  };
+
+  function motionAnchors(x) {
+    return Array.from({ length: 8 }, (_, index) => ({
+      x,
+      y: index / 10,
+      z: 0,
+      u: x,
+      v: 1 - index / 10,
+    }));
+  }
+
+  it('starts the first valid changed motion sample at zero', () => {
+    assert.equal(
+      typeof updateMotionSampleLifecycle,
+      'function',
+    );
+    const anchors = motionAnchors(0.2);
+
+    const next = updateMotionSampleLifecycle(
+      { target: 0, anchors: null, timestampMs: null },
+      anchors,
+      metrics,
+      1_000,
+      true,
+      false,
+    );
+
+    assert.equal(next.target, 0);
+    assert.equal(next.anchors, anchors);
+    assert.equal(next.timestampMs, 1_000);
+  });
+
+  it('derives the next changed sample target from normalized speed', () => {
+    const previousAnchors = motionAnchors(0.2);
+    const currentAnchors = motionAnchors(0.21);
+    const expectedSpeed = normalizedAnchorSpeed(
+      previousAnchors,
+      currentAnchors,
+      metrics,
+      0.1,
+    );
+
+    const next = updateMotionSampleLifecycle(
+      { target: 0, anchors: previousAnchors, timestampMs: 1_000 },
+      currentAnchors,
+      metrics,
+      1_100,
+      true,
+      false,
+    );
+
+    assert.equal(next.target, motionTargetForSpeed(expectedSpeed));
+    assert.ok(next.target > 0 && next.target < 1);
+    assert.equal(next.anchors, currentAnchors);
+    assert.equal(next.timestampMs, 1_100);
+  });
+
+  it('rebases instead of deriving velocity when dimensions and result change together', () => {
+    const rail = [
+      { x: 0.1, y: 0.1, z: 0, u: 0.1, v: 0.9 },
+      { x: 0.12, y: 0.5, z: 0, u: 0.12, v: 0.5 },
+      { x: 0.5, y: 0.52, z: 0, u: 0.5, v: 0.48 },
+      { x: 0.52, y: 0.8, z: 0, u: 0.52, v: 0.2 },
+      { x: 0.9, y: 0.82, z: 0, u: 0.9, v: 0.18 },
+    ];
+    const previousMetrics = {
+      stageWidth: 400,
+      stageHeight: 300,
+      displayWidth: 400,
+      displayHeight: 300,
+    };
+    const nextMetrics = {
+      stageWidth: 1_600,
+      stageHeight: 900,
+      displayWidth: 1_600,
+      displayHeight: 900,
+    };
+    const previousRail = resampleRailToAnchors(rail, previousMetrics);
+    const currentRail = resampleRailToAnchors(rail, nextMetrics);
+    const previousAnchors = [...previousRail, ...previousRail];
+    const currentAnchors = [...currentRail, ...currentRail];
+    const falseResizeSpeed = normalizedAnchorSpeed(
+      previousAnchors,
+      currentAnchors,
+      nextMetrics,
+      0.016,
+    );
+    assert.ok(falseResizeSpeed > 0.8);
+
+    const next = updateMotionSampleLifecycle(
+      { target: 0.4, anchors: previousAnchors, timestampMs: 1_000 },
+      currentAnchors,
+      nextMetrics,
+      1_016,
+      true,
+      true,
+    );
+
+    assert.equal(next.target, 0);
+    assert.equal(next.anchors, currentAnchors);
+    assert.equal(next.timestampMs, 1_016);
+  });
+
+  it('clears target and history when a changed result has no valid pair', () => {
+    const previousAnchors = motionAnchors(0.2);
+
+    const next = updateMotionSampleLifecycle(
+      { target: 0.8, anchors: previousAnchors, timestampMs: 1_000 },
+      null,
+      metrics,
+      1_016,
+      true,
+      false,
+    );
+
+    assert.deepEqual(next, {
+      target: 0,
+      anchors: null,
+      timestampMs: null,
+    });
+  });
+
+  it('keeps cleared history empty through held-pair resize and restarts reacquisition', () => {
+    assert.equal(
+      typeof motionAnchorsForCurrentHands,
+      'function',
+    );
+    const pair = {
+      a: { rail: railFixture({ x: 0.2 }) },
+      b: { rail: railFixture({ x: 0.7 }) },
+    };
+    const movedPair = {
+      a: { rail: railFixture({ x: 0.21 }) },
+      b: { rail: railFixture({ x: 0.71 }) },
+    };
+    const firstAnchors = motionAnchorsForCurrentHands(
+      pair,
+      metrics,
+      2,
+    );
+    const first = updateMotionSampleLifecycle(
+      { target: 0, anchors: null, timestampMs: null },
+      firstAnchors,
+      metrics,
+      1_000,
+      true,
+      false,
+    );
+    const movedAnchors = motionAnchorsForCurrentHands(
+      movedPair,
+      metrics,
+      2,
+    );
+    const history = updateMotionSampleLifecycle(
+      first,
+      movedAnchors,
+      metrics,
+      1_016,
+      true,
+      false,
+    );
+    assert.ok(history.target > 0);
+
+    const noHandAnchors = motionAnchorsForCurrentHands(
+      movedPair,
+      metrics,
+      0,
+    );
+    const cleared = updateMotionSampleLifecycle(
+      history,
+      noHandAnchors,
+      metrics,
+      1_032,
+      true,
+      false,
+    );
+    assert.deepEqual(cleared, {
+      target: 0,
+      anchors: null,
+      timestampMs: null,
+    });
+
+    const resizedMetrics = {
+      ...metrics,
+      stageWidth: 900,
+      stageHeight: 500,
+      displayWidth: 900,
+      displayHeight: 500,
+    };
+    const heldPairResizeAnchors = motionAnchorsForCurrentHands(
+      movedPair,
+      resizedMetrics,
+      0,
+    );
+    const afterResize = updateMotionSampleLifecycle(
+      cleared,
+      heldPairResizeAnchors,
+      resizedMetrics,
+      1_048,
+      false,
+      true,
+    );
+    assert.equal(heldPairResizeAnchors, null);
+    assert.equal(afterResize, cleared);
+    assert.equal(afterResize.anchors, null);
+    assert.equal(afterResize.timestampMs, null);
+
+    const reacquiredAnchors = motionAnchorsForCurrentHands(
+      movedPair,
+      resizedMetrics,
+      2,
+    );
+    const reacquired = updateMotionSampleLifecycle(
+      afterResize,
+      reacquiredAnchors,
+      resizedMetrics,
+      1_064,
+      true,
+      false,
+    );
+    assert.equal(reacquired.target, 0);
+    assert.equal(reacquired.anchors, reacquiredAnchors);
+    assert.equal(reacquired.timestampMs, 1_064);
+  });
+
+  it('preserves the exact sample and history object on an unchanged frame', () => {
+    const previous = {
+      target: 0.7,
+      anchors: motionAnchors(0.2),
+      timestampMs: 1_000,
+    };
+
+    const next = updateMotionSampleLifecycle(
+      previous,
+      null,
+      metrics,
+      1_016,
+      false,
+      false,
+    );
+
+    assert.equal(next, previous);
+    assert.equal(next.anchors, previous.anchors);
+  });
+
+  it('expires a stale target only after the 100ms boundary', () => {
+    assert.equal(
+      typeof expireStaleMotionTarget,
+      'function',
+    );
+
+    assert.equal(
+      expireStaleMotionTarget(0.7, null, 1_000),
+      0,
+    );
+    assert.equal(
+      expireStaleMotionTarget(0.7, 1_000, 1_100),
+      0.7,
+    );
+    assert.equal(
+      expireStaleMotionTarget(0.7, 1_000, 1_100.001),
+      0,
+    );
+  });
+
+  it('averages varied display-space displacement by stage diagonal and time', () => {
+    const previous = motionAnchors(0.2).slice(0, 4);
+    const displacements = [
+      { x: 0.05, y: 0 },
+      { x: 0, y: 0.1 },
+      { x: 0.05, y: 0.1 },
+      { x: 0, y: 0 },
+    ];
+    const next = previous.map((point, index) => ({
+      ...point,
+      x: point.x + displacements[index].x,
+      y: point.y + displacements[index].y,
+    }));
+
+    const speed = normalizedAnchorSpeed(previous, next, metrics, 0.5);
+
+    assert.ok(Math.abs(speed - 0.12) < 1e-9);
+  });
+
+  it('maps the approved speed range into zero-to-one motion', () => {
+    const speed = 0.2;
+    const t = (speed - 0.03) / (0.45 - 0.03);
+    const expected = t * t * (3 - 2 * t);
+
+    assert.equal(motionTargetForSpeed(0.03), 0);
+    assert.ok(Math.abs(motionTargetForSpeed(speed) - expected) < 1e-12);
+    assert.equal(motionTargetForSpeed(0.45), 1);
+  });
+
+  it('attacks faster than it releases and decays toward zero', () => {
+    const attacked = dampMotionEnergy(0, 1, 0.1);
+    const released = dampMotionEnergy(1, 0, 0.1);
+    const decayed = dampMotionEnergy(released, 0, 0.5);
+
+    assert.ok(attacked > 1 - released);
+    assert.ok(decayed < released);
+    assert.ok(decayed >= 0 && decayed <= 1);
+  });
+
+  it('keeps attack damping equivalent across split time steps', () => {
+    const singleStep = dampMotionEnergy(0, 1, 0.1);
+    const splitStep = dampMotionEnergy(
+      dampMotionEnergy(0, 1, 0.04),
+      1,
+      0.06,
+    );
+
+    assert.ok(Math.abs(singleStep - splitStep) < 1e-12);
+  });
+
+  it('keeps release damping equivalent across split time steps', () => {
+    const singleStep = dampMotionEnergy(1, 0, 0.1);
+    const splitStep = dampMotionEnergy(
+      dampMotionEnergy(1, 0, 0.04),
+      0,
+      0.06,
+    );
+
+    assert.ok(Math.abs(singleStep - splitStep) < 1e-12);
+  });
+
+  it('uses the exact default attack lambda of 14', () => {
+    const attacked = dampMotionEnergy(0, 1, 0.1);
+    const expected = 1 - Math.exp(-14 * 0.1);
+
+    assert.ok(Math.abs(attacked - expected) < 1e-12);
+  });
+
+  it('uses the exact default release lambda of 5', () => {
+    const released = dampMotionEnergy(1, 0, 0.1);
+    const expected = Math.exp(-5 * 0.1);
+
+    assert.ok(Math.abs(released - expected) < 1e-12);
+  });
+
+  it('keeps the no-options damping path free of object construction', () => {
+    const source = dampMotionEnergy.toString();
+
+    assert.doesNotMatch(source, /optionsArg\s*=\s*\{\}/);
+    assert.doesNotMatch(source, /\.\.\.optionsArg/);
+    assert.doesNotMatch(source, /const options\s*=\s*\{/);
+    assert.ok(
+      Math.abs(dampMotionEnergy(0, 1, 0.1) - (1 - Math.exp(-1.4)))
+        < 1e-12,
+    );
+  });
+
+  it('honors a custom attack lambda override', () => {
+    const attacked = dampMotionEnergy(0.25, 0.75, 0.2, {
+      attackLambda: 3,
+      releaseLambda: 99,
+    });
+    const expected = 0.75 + (0.25 - 0.75) * Math.exp(-3 * 0.2);
+
+    assert.ok(Math.abs(attacked - expected) < 1e-12);
+  });
+
+  it('honors a custom release lambda override', () => {
+    const released = dampMotionEnergy(0.75, 0.25, 0.2, {
+      attackLambda: 99,
+      releaseLambda: 2,
+    });
+    const expected = 0.25 + (0.75 - 0.25) * Math.exp(-2 * 0.2);
+
+    assert.ok(Math.abs(released - expected) < 1e-12);
+  });
+
+  it('clamps current and target inputs to zero-to-one', () => {
+    assert.equal(
+      dampMotionEnergy(-2, 2, 0.1),
+      dampMotionEnergy(0, 1, 0.1),
+    );
+    assert.equal(
+      dampMotionEnergy(2, -2, 0.1),
+      dampMotionEnergy(1, 0, 0.1),
+    );
+  });
+
+  it('clamps damped output to zero-to-one', () => {
+    assert.equal(dampMotionEnergy(0, 1, 1, { attackLambda: -1 }), 0);
+    assert.equal(dampMotionEnergy(1, 0, 1, { releaseLambda: -1 }), 1);
+  });
+
+  it('returns zero for missing, empty, or mismatched anchors', () => {
+    assert.equal(normalizedAnchorSpeed(null, motionAnchors(0.3), metrics, 0.5), 0);
+    assert.equal(normalizedAnchorSpeed([], motionAnchors(0.3), metrics, 0.5), 0);
+    assert.equal(normalizedAnchorSpeed(
+      motionAnchors(0.2).slice(0, 7),
+      motionAnchors(0.3),
+      metrics,
+      0.5,
+    ), 0);
+  });
+
+  it('returns zero unless every motion metric is finite and positive', () => {
+    const previous = motionAnchors(0.2);
+    const next = motionAnchors(0.3);
+
+    assert.equal(normalizedAnchorSpeed(previous, next, null, 0.5), 0);
+    for (const key of [
+      'stageWidth',
+      'stageHeight',
+      'displayWidth',
+      'displayHeight',
+    ]) {
+      for (const value of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+        assert.equal(
+          normalizedAnchorSpeed(previous, next, { ...metrics, [key]: value }, 0.5),
+          0,
+          `${key} must reject ${value}`,
+        );
+      }
+    }
+  });
+
+  it('returns zero for non-finite or non-positive elapsed time', () => {
+    const previous = motionAnchors(0.2);
+    const next = motionAnchors(0.3);
+
+    for (const deltaSeconds of [
+      0,
+      -0.1,
+      Number.NaN,
+      Number.POSITIVE_INFINITY,
+      Number.NEGATIVE_INFINITY,
+    ]) {
+      assert.equal(
+        normalizedAnchorSpeed(previous, next, metrics, deltaSeconds),
+        0,
+        `deltaSeconds must reject ${deltaSeconds}`,
+      );
+    }
+  });
+});
+
 describe('facet buffers', () => {
   const metrics = coverMetrics(540, 960, 1920, 1080);
   const camera = { fov: 50, z: 3, depthScale: 0.32, aspect: 540 / 960 };
 
-  it('creates four quads with consistent vertex and UV ordering', () => {
+  it('creates three connected quads with consistent vertex and UV ordering', () => {
     const aRail = railFixture({ x: 0.3, u: 0.1 });
     const bRail = railFixture({ x: 0.7, u: 0.6 });
     const facets = buildFacetBuffers(bufferState(aRail, bRail), metrics, camera);
 
-    assert.equal(facets.length, 4);
+    assert.equal(facets.length, 3);
     assert.equal(facets[0].positions.length, 18);
     assert.equal(facets[0].uvs.length, 12);
-    assert.deepEqual(facets[0].uvs, [
+    assert.deepEqual(facets[0].uvs.map((value) => Number(value.toFixed(6))), [
       0.1, 0.75,
       0.6, 0.75,
-      0.61, 0.65,
+      0.613333, 0.616667,
       0.1, 0.75,
-      0.61, 0.65,
-      0.11, 0.65,
+      0.613333, 0.616667,
+      0.113333, 0.616667,
     ]);
+    assert.deepEqual(
+      facets[0].positions.slice(6, 9),
+      facets[1].positions.slice(3, 6),
+    );
+    assert.deepEqual(
+      facets[0].positions.slice(15, 18),
+      facets[1].positions.slice(0, 3),
+    );
   });
 
   it('maps mirrored video coordinates through object-cover cropping', () => {

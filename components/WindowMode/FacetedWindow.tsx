@@ -8,9 +8,13 @@ import * as THREE from 'three';
 import {
   buildFacetBuffers,
   coverMetrics,
+  dampMotionEnergy,
+  expireStaleMotionTarget,
   handMeshInputFromLandmarks,
   initialFacetedWindowState,
+  motionAnchorsForCurrentHands,
   updateFacetedWindowState,
+  updateMotionSampleLifecycle,
 } from './facetedWindowGeometry.mjs';
 import {
   FACET_FRAGMENT_SHADER,
@@ -18,8 +22,8 @@ import {
 } from './facetedWindowShaders';
 
 const CAMERA = { fov: 50, z: 3, depthScale: 0.32 } as const;
-const FACET_MODES = [0, 1, 2, 3] as const;
-const BLUSH = '#F8BCB2';
+const FACET_MODES = [0, 1, 2] as const;
+const PEARL_SEAM = '#EAF5FF';
 const MIRRORED_INPUT = Object.freeze({ mirrored: true });
 const EMPTY_HANDEDNESS: HandLandmarkerResult['handedness'][number] = [];
 
@@ -34,8 +38,17 @@ type FacetUniforms = Record<string, THREE.IUniform> & {
   uOpacity: { value: number };
   uMode: { value: number };
   uTime: { value: number };
+  uMotion: { value: number };
   uViewport: { value: THREE.Vector2 };
 };
+
+interface RenderAnchor {
+  x: number;
+  y: number;
+  z: number;
+  u: number;
+  v: number;
+}
 
 interface VideoResources {
   videoTexture: THREE.VideoTexture;
@@ -54,6 +67,7 @@ function createUniforms(mode: number): FacetUniforms {
     uOpacity: { value: 0 },
     uMode: { value: mode },
     uTime: { value: 0 },
+    uMotion: { value: 0 },
     uViewport: { value: new THREE.Vector2(1, 1) },
   };
 }
@@ -136,6 +150,10 @@ function FacetedScene({ landmarksRef, videoRef, enabled }: FacetedWindowProps) {
   });
   const metricsRef = useRef<ReturnType<typeof coverMetrics>>(null);
   const cameraContractRef = useRef({ ...CAMERA, aspect: 1 });
+  const motionEnergyRef = useRef(0);
+  const motionTargetRef = useRef(0);
+  const previousMotionAnchorsRef = useRef<RenderAnchor[] | null>(null);
+  const lastMotionSampleMsRef = useRef<number | null>(null);
 
   const positionArrays = useMemo(
     () => FACET_MODES.map(() => new Float32Array(18)),
@@ -185,7 +203,7 @@ function FacetedScene({ landmarksRef, videoRef, enabled }: FacetedWindowProps) {
     }
 
     const seamMaterial = new THREE.LineBasicMaterial({
-      color: BLUSH,
+      color: PEARL_SEAM,
       transparent: true,
       opacity: 0,
       depthTest: false,
@@ -242,7 +260,7 @@ function FacetedScene({ landmarksRef, videoRef, enabled }: FacetedWindowProps) {
     };
   }, [normalArrays, positionArrays, uvArrays]);
 
-  useFrame((frameState) => {
+  useFrame((frameState, deltaSeconds) => {
     const elapsedMilliseconds = frameState.clock.elapsedTime * 1000;
     const seamMaterial = seamMaterialRef.current;
     const video = videoRef.current;
@@ -254,6 +272,10 @@ function FacetedScene({ landmarksRef, videoRef, enabled }: FacetedWindowProps) {
         handInputsRef.current.length = 0;
         lastLandmarkerResultRef.current = null;
       }
+      motionEnergyRef.current = 0;
+      motionTargetRef.current = 0;
+      previousMotionAnchorsRef.current = null;
+      lastMotionSampleMsRef.current = null;
       wasEnabledRef.current = false;
       for (let mode = 0; mode < FACET_MODES.length; mode += 1) {
         const material = materialRefs.current[mode];
@@ -334,6 +356,40 @@ function FacetedScene({ landmarksRef, videoRef, enabled }: FacetedWindowProps) {
 
     const cameraContract = cameraContractRef.current;
     cameraContract.aspect = frameState.size.width / Math.max(1, frameState.size.height);
+    const motionMetrics = metricsRef.current;
+    if (resultChanged || dimensionsChanged) {
+      const currentAnchors = motionAnchorsForCurrentHands(
+        facetedState.pair,
+        motionMetrics,
+        handInputs.length,
+      ) as RenderAnchor[] | null;
+      const nextMotionSample = updateMotionSampleLifecycle(
+        {
+          target: motionTargetRef.current,
+          anchors: previousMotionAnchorsRef.current,
+          timestampMs: lastMotionSampleMsRef.current,
+        },
+        currentAnchors,
+        motionMetrics,
+        elapsedMilliseconds,
+        resultChanged,
+        dimensionsChanged,
+      );
+      motionTargetRef.current = nextMotionSample.target;
+      previousMotionAnchorsRef.current = nextMotionSample.anchors;
+      lastMotionSampleMsRef.current = nextMotionSample.timestampMs;
+    }
+
+    motionTargetRef.current = expireStaleMotionTarget(
+      motionTargetRef.current,
+      lastMotionSampleMsRef.current,
+      elapsedMilliseconds,
+    );
+    motionEnergyRef.current = dampMotionEnergy(
+      motionEnergyRef.current,
+      motionTargetRef.current,
+      deltaSeconds,
+    );
     if (
       (resultChanged || dimensionsChanged)
       && facetedState.pair
@@ -372,9 +428,10 @@ function FacetedScene({ landmarksRef, videoRef, enabled }: FacetedWindowProps) {
       if (!material) continue;
       material.uniforms.uOpacity.value = renderOpacity;
       material.uniforms.uTime.value = frameState.clock.elapsedTime;
+      material.uniforms.uMotion.value = motionEnergyRef.current;
       material.uniforms.uViewport.value.copy(drawingBufferSizeRef.current);
     }
-    if (seamMaterial) seamMaterial.opacity = renderOpacity * 0.72;
+    if (seamMaterial) seamMaterial.opacity = renderOpacity * 0.55;
   });
 
   return (

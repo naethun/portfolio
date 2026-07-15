@@ -5,9 +5,18 @@ export const FACET_VERTEX_SHADER = /* glsl */ `
   varying vec3 vNormal;
   varying vec3 vWorldPosition;
 
+  vec3 safeFacetNormal(vec3 candidate, vec3 fallbackDirection) {
+    float normalLength = length(candidate);
+    if (normalLength <= 0.0001) {
+      return fallbackDirection;
+    }
+    return candidate / max(normalLength, 0.0001);
+  }
+
   void main() {
     vUv = uv;
-    vNormal = normalize(mat3(modelMatrix) * normal);
+    vec3 transformedNormal = mat3(modelMatrix) * normal;
+    vNormal = safeFacetNormal(transformedNormal, vec3(0.0, 0.0, 1.0));
 
     vec4 worldPosition = modelMatrix * vec4(position, 1.0);
     vWorldPosition = worldPosition.xyz;
@@ -22,139 +31,185 @@ export const FACET_FRAGMENT_SHADER = /* glsl */ `
   uniform float uOpacity;
   uniform float uMode;
   uniform float uTime;
+  uniform float uMotion;
   uniform vec2 uViewport;
 
   varying vec2 vUv;
   varying vec3 vNormal;
   varying vec3 vWorldPosition;
 
-  const vec3 INK = vec3(0.02745098, 0.02745098, 0.03529412);
-  const vec3 POLKA_VIOLET = vec3(0.42352941, 0.16862745, 0.85098039);
-  const vec3 POLKA_WHITE = vec3(0.97254902, 0.96862745, 1.00000000);
-  const vec3 INDIGO = vec3(0.15686275, 0.20000000, 0.43529412);
-  const vec3 PEARL = vec3(0.94117647, 0.94901961, 0.91372549);
-  const vec3 CHROME_DARK = vec3(0.03529412, 0.04705882, 0.07058824);
-  const vec3 CHROME_SILVER = vec3(0.58039216, 0.63137255, 0.70196078);
-  const vec3 CHROME_WHITE = vec3(0.94901961, 0.98039216, 1.00000000);
-  const vec3 CHROME_CYAN = vec3(0.18039216, 0.85882353, 0.94117647);
-  const vec3 CHROME_VIOLET = vec3(0.52156863, 0.27843137, 0.92156863);
-  const vec3 BRICK = vec3(0.70980392, 0.28235294, 0.21176471);
-  const vec3 COOL_PAPER = vec3(0.90980392, 0.92941176, 0.94117647);
+  const vec3 OPTICAL_INK = vec3(0.03137255, 0.05098039, 0.07450980);
+  const vec3 ICE_WHITE = vec3(0.93725490, 0.98823529, 1.00000000);
+  const vec3 COOL_SILVER = vec3(0.70588235, 0.77647059, 0.83137255);
+  const vec3 PEARL = vec3(0.92549020, 0.91372549, 1.00000000);
+  const vec3 CYAN_INTERFERENCE = vec3(0.44313725, 0.94509804, 0.95294118);
+  const vec3 VIOLET_INTERFERENCE = vec3(0.50196078, 0.43137255, 1.00000000);
+
+  vec3 safeFacetNormal(vec3 candidate, vec3 fallbackDirection) {
+    float normalLength = length(candidate);
+    if (normalLength <= 0.0001) {
+      return fallbackDirection;
+    }
+    return candidate / max(normalLength, 0.0001);
+  }
 
   float facetLuminance(vec3 color) {
     return dot(color, vec3(0.2126, 0.7152, 0.0722));
   }
 
-  float hash21(vec2 p) {
-    p = fract(p * vec2(123.34, 456.21));
-    p += dot(p, p + 45.32);
-    return fract(p.x * p.y);
+  vec2 safeUv(vec2 uv) {
+    return clamp(uv, vec2(0.001), vec2(0.999));
+  }
+
+  vec3 sampleVideo(vec2 uv) {
+    return texture2D(uVideo, safeUv(uv)).rgb;
+  }
+
+  float sampleLuma(vec2 uv) {
+    return facetLuminance(sampleVideo(uv));
+  }
+
+  vec2 causticVector(vec2 uv, float energy, float grazing) {
+    float phase = uTime * 0.18;
+    vec2 wave = vec2(
+      sin(uv.y * 21.0 + phase * 1.7 + sin(uv.x * 8.0 + phase)),
+      cos(uv.x * 18.0 - phase * 1.4 + sin(uv.y * 9.0 - phase))
+    );
+    vec2 pixel = 1.0 / max(uViewport, vec2(1.0));
+    return wave * pixel * (0.85 + energy * 2.6 + grazing * 1.35);
   }
 
   void main() {
     if (uOpacity <= 0.001) discard;
 
-    // Task 1 UVs use the conventional bottom-left origin. Both live textures
-    // retain their DOM-source orientation, so sample them in top-left space.
     vec2 sourceUv = vec2(vUv.x, 1.0 - vUv.y);
-    vec3 videoColor = texture2D(uVideo, sourceUv).rgb;
-    float luma = facetLuminance(videoColor);
+    vec2 pixel = 1.0 / max(uViewport, vec2(1.0));
+    vec3 orientedNormal = gl_FrontFacing ? vNormal : -vNormal;
+    vec3 fallbackNormal = gl_FrontFacing
+      ? vec3(0.0, 0.0, 1.0)
+      : vec3(0.0, 0.0, -1.0);
+    vec3 faceNormal = safeFacetNormal(orientedNormal, fallbackNormal);
+    vec3 viewDirection = normalize(cameraPosition - vWorldPosition);
+    float facing = clamp(abs(dot(faceNormal, viewDirection)), 0.0, 1.0);
+    float grazing = 1.0 - facing;
+    float energy = clamp(uMotion, 0.0, 1.0);
+    vec2 caustic = causticVector(sourceUv, energy, grazing);
+    vec2 opticalUv = safeUv(sourceUv + caustic);
+    vec3 centerColor = sampleVideo(opticalUv);
+    float luma = facetLuminance(centerColor);
+    float leftLuma = sampleLuma(opticalUv - vec2(pixel.x * 1.5, 0.0));
+    float rightLuma = sampleLuma(opticalUv + vec2(pixel.x * 1.5, 0.0));
+    float downLuma = sampleLuma(opticalUv - vec2(0.0, pixel.y * 1.5));
+    float upLuma = sampleLuma(opticalUv + vec2(0.0, pixel.y * 1.5));
+    vec2 gradient = vec2(rightLuma - leftLuma, upLuma - downLuma);
+    float edge = clamp(length(gradient) * 4.4, 0.0, 1.0);
     vec3 color;
 
     if (uMode < 0.5) {
-      // mode 0: camera-reactive violet polka
-      vec2 polkaGrid = gl_FragCoord.xy / 10.0;
-      float polkaRow = floor(polkaGrid.y);
-      polkaGrid.x += mod(polkaRow, 2.0) * 0.5;
-      vec2 polkaCell = fract(polkaGrid) - 0.5;
-      float polkaAmount = clamp(1.0 - luma, 0.0, 1.0);
-      float polkaRadius = mix(
-        0.08,
-        0.47,
-        smoothstep(0.06, 0.94, polkaAmount)
+      // mode 0: frosted diffusion
+      float blurPixels = mix(0.8, 2.9, energy) * (1.0 + grazing * 0.55);
+      vec2 blurStep = pixel * blurPixels;
+      vec3 frostSample = (
+        centerColor * 2.0
+        + sampleVideo(opticalUv + vec2(blurStep.x, 0.0))
+        + sampleVideo(opticalUv - vec2(blurStep.x, 0.0))
+        + sampleVideo(opticalUv + vec2(0.0, blurStep.y))
+        + sampleVideo(opticalUv - vec2(0.0, blurStep.y))
+      ) / 6.0;
+      float frostLuma = facetLuminance(frostSample);
+      vec3 frost = mix(
+        OPTICAL_INK,
+        ICE_WHITE,
+        smoothstep(0.04, 0.94, frostLuma)
       );
-      float dotMask = 1.0 - smoothstep(
-        polkaRadius - 0.055,
-        polkaRadius,
-        length(polkaCell)
+      frost = mix(
+        frost,
+        COOL_SILVER,
+        (1.0 - smoothstep(0.22, 0.82, frostLuma)) * 0.34
       );
-      color = mix(POLKA_WHITE, POLKA_VIOLET, dotMask);
+      float frostEdge = edge * (0.035 + energy * 0.045);
+      frost = mix(frost, ICE_WHITE, frostEdge);
+      float ridgeCoordinate = sourceUv.x + sourceUv.y * 0.62
+        + grazing * 0.09;
+      float ridgeWave = sin(ridgeCoordinate * 15.0 - uTime * 0.42);
+      float ridge = pow(max(0.0, 1.0 - abs(ridgeWave)), 6.0);
+      color = mix(frost, PEARL, ridge * (0.12 + grazing * 0.12));
     } else if (uMode < 1.5) {
-      // mode 1: indigo riso cyanotype
-      vec2 risoCell = floor(gl_FragCoord.xy * 0.42);
-      float grain = hash21(risoCell);
-      float fiber = sin(
-        gl_FragCoord.y * 0.38
-        + hash21(floor(gl_FragCoord.xy * vec2(0.12, 0.05))) * 6.28318
-      );
-      float threshold = smoothstep(
-        0.32,
-        0.72,
-        luma + (grain - 0.5) * 0.075 + fiber * 0.012
-          + sin(uTime * 0.28) * 0.006
-      );
-      color = mix(INDIGO, PEARL, threshold);
-    } else if (uMode < 2.5) {
-      // mode 2: camera-reactive liquid chrome
-      float chromePixel = 1.35 / max(uViewport.x, 1.0);
-      float leftLuma = facetLuminance(
-        texture2D(uVideo, sourceUv - vec2(chromePixel, 0.0)).rgb
-      );
-      float rightLuma = facetLuminance(
-        texture2D(uVideo, sourceUv + vec2(chromePixel, 0.0)).rgb
-      );
-      float chromeEdge = clamp(abs(rightLuma - leftLuma) * 4.2, 0.0, 1.0);
+      // mode 1: liquid mercury
       float reflectionBand = 0.5 + 0.5 * cos(
-        (luma * 1.34 + sourceUv.y * 0.18) * 18.0
+        (luma * 1.35 + opticalUv.y * 0.20 + caustic.y * uViewport.y * 0.014)
+          * 19.0
       );
-      reflectionBand = pow(reflectionBand, 1.7);
-      vec3 chrome = mix(
-        CHROME_DARK,
-        CHROME_SILVER,
+      reflectionBand = pow(reflectionBand, 1.75);
+      vec3 mercury = mix(
+        OPTICAL_INK,
+        COOL_SILVER,
         smoothstep(0.04, 0.72, luma)
       );
-      chrome = mix(chrome, CHROME_WHITE, reflectionBand * 0.76);
-      float sweepPosition = fract(uTime * 0.07) * 1.7 - 0.35;
+      mercury = mix(
+        mercury,
+        ICE_WHITE,
+        reflectionBand * (0.54 + grazing * 0.25)
+      );
+      mercury = mix(mercury, PEARL, edge * 0.20);
+      float sweepPosition = fract(
+        uTime * (0.045 + energy * 0.025) + grazing * 0.22
+      ) * 1.55 - 0.25;
+      float sweepCoordinate = opticalUv.x + opticalUv.y * 0.33
+        + caustic.x * uViewport.x * 0.035 * (1.0 + energy);
+      float sweepWidth = mix(0.035, 0.070, grazing);
       float specularSweep = 1.0 - smoothstep(
-        0.0,
-        0.085,
-        abs(sourceUv.x + sourceUv.y * 0.38 - sweepPosition)
+        sweepWidth,
+        sweepWidth + 0.075,
+        abs(sweepCoordinate - sweepPosition)
       );
-      chrome = mix(chrome, CHROME_WHITE, specularSweep * 0.78);
-      chrome = mix(chrome, CHROME_CYAN, chromeEdge * 0.24);
-      chrome = mix(
-        chrome,
-        CHROME_VIOLET,
-        clamp((rightLuma - leftLuma) * 3.5, 0.0, 0.18)
-      );
-      color = chrome;
+      color = mix(mercury, ICE_WHITE, specularSweep * (0.48 + grazing * 0.28));
     } else {
-      // mode 3: brick elliptical stipple
-      vec2 safeViewport = max(uViewport, vec2(1.0));
-      vec2 viewportUv = gl_FragCoord.xy / safeViewport;
-      vec2 grid = viewportUv * safeViewport / vec2(7.0, 5.8);
-      vec2 cell = (fract(grid) - 0.5) * vec2(0.82, 1.18);
-      float grain = hash21(floor(grid));
-      float inkAmount = clamp(
-        1.0 - luma + (grain - 0.5) * 0.09,
+      // mode 2: interference membrane
+      float separationPixels = mix(
+        0.55,
+        2.5,
+        clamp(energy * 0.62 + grazing * 0.60, 0.0, 1.0)
+      );
+      float gradientMagnitude = max(length(gradient), 0.0001);
+      vec2 gradientDirection = gradient / gradientMagnitude;
+      vec2 separation = gradientDirection * pixel * separationPixels;
+      float positiveLuma = sampleLuma(opticalUv + separation);
+      float negativeLuma = sampleLuma(opticalUv - separation);
+      vec3 membrane = mix(
+        OPTICAL_INK,
+        PEARL,
+        smoothstep(0.04, 0.90, luma)
+      );
+      membrane = mix(
+        membrane,
+        COOL_SILVER,
+        (1.0 - smoothstep(0.28, 0.82, luma)) * 0.30
+      );
+      float cyanMask = clamp(
+        max(positiveLuma - luma, 0.0) * 5.0
+          + edge * (0.08 + energy * 0.30),
         0.0,
-        1.0
+        0.72
       );
-      float radius = mix(0.07, 0.46, inkAmount);
-      float dotMask = 1.0 - smoothstep(
-        radius - 0.05,
-        radius,
-        length(cell)
+      float violetMask = clamp(
+        max(negativeLuma - luma, 0.0) * 5.0
+          + edge * grazing * 0.26,
+        0.0,
+        0.68
       );
-      color = mix(COOL_PAPER, BRICK, dotMask);
+      membrane = mix(membrane, CYAN_INTERFERENCE, cyanMask);
+      membrane = mix(membrane, VIOLET_INTERFERENCE, violetMask);
+      float film = 0.5 + 0.5 * sin(
+        (sourceUv.x * 0.8 + sourceUv.y) * 18.0 + uTime * 0.30
+      );
+      color = mix(membrane, PEARL, film * 0.08);
     }
 
-    vec3 faceNormal = normalize(gl_FrontFacing ? vNormal : -vNormal);
     vec3 lightDirection = normalize(vec3(-0.45, 0.58, 0.68));
     float faceLight = 0.88 + 0.12 * max(dot(faceNormal, lightDirection), 0.0);
     float depthLift = clamp(vWorldPosition.z * 0.015, -0.012, 0.012);
-    color = max(INK, color * (faceLight + depthLift));
-
+    color = clamp(color * (faceLight + depthLift), OPTICAL_INK, vec3(1.0));
     gl_FragColor = vec4(color, uOpacity);
   }
 `;

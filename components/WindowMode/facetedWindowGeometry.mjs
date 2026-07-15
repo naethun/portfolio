@@ -129,6 +129,111 @@ export function damp(current, target, lambda, deltaSeconds) {
   return target + (current - target) * Math.exp(-lambda * Math.max(0, deltaSeconds));
 }
 
+export function normalizedAnchorSpeed(
+  previousAnchors,
+  nextAnchors,
+  metrics,
+  deltaSeconds,
+) {
+  if (
+    !Array.isArray(previousAnchors)
+    || !Array.isArray(nextAnchors)
+    || previousAnchors.length === 0
+    || previousAnchors.length !== nextAnchors.length
+    || !metrics
+    || !Number.isFinite(metrics.stageWidth)
+    || metrics.stageWidth <= 0
+    || !Number.isFinite(metrics.stageHeight)
+    || metrics.stageHeight <= 0
+    || !Number.isFinite(metrics.displayWidth)
+    || metrics.displayWidth <= 0
+    || !Number.isFinite(metrics.displayHeight)
+    || metrics.displayHeight <= 0
+    || !Number.isFinite(deltaSeconds)
+    || deltaSeconds <= 0
+  ) {
+    return 0;
+  }
+
+  const averagePixels = previousAnchors.reduce((total, point, index) => {
+    const next = nextAnchors[index];
+    return total + Math.hypot(
+      (next.x - point.x) * metrics.displayWidth,
+      (next.y - point.y) * metrics.displayHeight,
+    );
+  }, 0) / previousAnchors.length;
+  const stageDiagonal = Math.hypot(metrics.stageWidth, metrics.stageHeight);
+  return averagePixels / Math.max(1, stageDiagonal) / deltaSeconds;
+}
+
+export function motionTargetForSpeed(speed) {
+  return smoothstep(0.03, 0.45, Number.isFinite(speed) ? speed : 0);
+}
+
+export function updateMotionSampleLifecycle(
+  previous,
+  currentAnchors,
+  metrics,
+  timestampMs,
+  resultChanged,
+  dimensionsChanged,
+) {
+  if (!resultChanged && !dimensionsChanged) return previous;
+  if (Array.isArray(currentAnchors) && currentAnchors.length > 0 && metrics) {
+    let target = 0;
+    if (
+      resultChanged
+      && !dimensionsChanged
+      && previous?.anchors
+      && previous.timestampMs !== null
+    ) {
+      const speed = normalizedAnchorSpeed(
+        previous.anchors,
+        currentAnchors,
+        metrics,
+        Math.max(0, timestampMs - previous.timestampMs) / 1000,
+      );
+      target = motionTargetForSpeed(speed);
+    }
+    return {
+      target,
+      anchors: currentAnchors,
+      timestampMs,
+    };
+  }
+  if (resultChanged) {
+    return {
+      target: 0,
+      anchors: null,
+      timestampMs: null,
+    };
+  }
+  return previous;
+}
+
+export function expireStaleMotionTarget(target, lastSampleMs, timestampMs) {
+  const sampleAgeMs = lastSampleMs === null
+    ? Number.POSITIVE_INFINITY
+    : timestampMs - lastSampleMs;
+  return sampleAgeMs > 100 ? 0 : target;
+}
+
+export function dampMotionEnergy(
+  current,
+  target,
+  deltaSeconds,
+  optionsArg,
+) {
+  const attackLambda = optionsArg?.attackLambda ?? 14;
+  const releaseLambda = optionsArg?.releaseLambda ?? 5;
+  const safeCurrent = clamp(Number.isFinite(current) ? current : 0);
+  const safeTarget = clamp(Number.isFinite(target) ? target : 0);
+  const lambda = safeTarget > safeCurrent
+    ? attackLambda
+    : releaseLambda;
+  return clamp(damp(safeCurrent, safeTarget, lambda, deltaSeconds));
+}
+
 function interpolatePoint(point, pinch, collapse) {
   return {
     x: point.x + (pinch.x - point.x) * collapse,
@@ -290,6 +395,101 @@ export function coverMetrics(stageWidth, stageHeight, videoWidth, videoHeight) {
   };
 }
 
+const RENDER_ANCHOR_COUNT = 4;
+const MIN_RAIL_LENGTH = 1e-6;
+
+function interpolateRailPoint(a, b, t) {
+  return {
+    x: a.x + (b.x - a.x) * t,
+    y: a.y + (b.y - a.y) * t,
+    z: a.z + (b.z - a.z) * t,
+    u: a.u + (b.u - a.u) * t,
+    v: a.v + (b.v - a.v) * t,
+  };
+}
+
+function sampleRailByIndex(rail, sourcePosition) {
+  const startIndex = Math.min(
+    rail.length - 1,
+    Math.max(0, Math.floor(sourcePosition)),
+  );
+  const endIndex = Math.min(rail.length - 1, startIndex + 1);
+  return interpolateRailPoint(
+    rail[startIndex],
+    rail[endIndex],
+    sourcePosition - startIndex,
+  );
+}
+
+export function resampleRailToAnchors(rail, metrics) {
+  if (
+    !Array.isArray(rail)
+    || rail.length < 2
+    || !metrics
+    || metrics.displayWidth <= 0
+    || metrics.displayHeight <= 0
+  ) {
+    return [];
+  }
+
+  const cumulative = [0];
+  for (let index = 1; index < rail.length; index += 1) {
+    const dx = (rail[index].x - rail[index - 1].x) * metrics.displayWidth;
+    const dy = (rail[index].y - rail[index - 1].y) * metrics.displayHeight;
+    cumulative.push(cumulative[index - 1] + Math.hypot(dx, dy));
+  }
+
+  const totalLength = cumulative[cumulative.length - 1];
+  if (totalLength <= MIN_RAIL_LENGTH) {
+    return Array.from({ length: RENDER_ANCHOR_COUNT }, (_, anchorIndex) => {
+      const sourcePosition = (
+        anchorIndex * (rail.length - 1) / (RENDER_ANCHOR_COUNT - 1)
+      );
+      return sampleRailByIndex(rail, sourcePosition);
+    });
+  }
+
+  return Array.from({ length: RENDER_ANCHOR_COUNT }, (_, anchorIndex) => {
+    if (anchorIndex === 0) return { ...rail[0] };
+    if (anchorIndex === RENDER_ANCHOR_COUNT - 1) {
+      return { ...rail[rail.length - 1] };
+    }
+
+    const targetLength = totalLength * anchorIndex / (RENDER_ANCHOR_COUNT - 1);
+    let segmentIndex = 0;
+    while (
+      segmentIndex < cumulative.length - 2
+      && cumulative[segmentIndex + 1] < targetLength
+    ) {
+      segmentIndex += 1;
+    }
+    const segmentLength = cumulative[segmentIndex + 1] - cumulative[segmentIndex];
+    const localT = (targetLength - cumulative[segmentIndex])
+      / Math.max(MIN_RAIL_LENGTH, segmentLength);
+    return interpolateRailPoint(
+      rail[segmentIndex],
+      rail[segmentIndex + 1],
+      localT,
+    );
+  });
+}
+
+export function motionAnchorsForCurrentHands(pair, metrics, currentHandCount) {
+  if (
+    !Number.isFinite(currentHandCount)
+    || currentHandCount < 2
+    || !pair?.a?.rail
+    || !pair?.b?.rail
+    || !metrics
+  ) {
+    return null;
+  }
+  const aAnchors = resampleRailToAnchors(pair.a.rail, metrics);
+  const bAnchors = resampleRailToAnchors(pair.b.rail, metrics);
+  if (aAnchors.length !== 4 || bAnchors.length !== 4) return null;
+  return [...aAnchors, ...bAnchors];
+}
+
 function projectedWorldPoint(point, metrics, camera) {
   const px = metrics.offsetX + point.x * metrics.displayWidth;
   const py = metrics.offsetY + point.y * metrics.displayHeight;
@@ -306,10 +506,19 @@ export function buildFacetBuffers(state, metrics, camera) {
   const aRail = state?.pair?.a?.rail;
   const bRail = state?.pair?.b?.rail;
   if (!metrics || !camera || aRail?.length < 5 || bRail?.length < 5) return [];
-  const triangleOrder = [0, 1, 2, 0, 2, 3];
 
-  return Array.from({ length: 4 }, (_, index) => {
-    const corners = [aRail[index], bRail[index], bRail[index + 1], aRail[index + 1]];
+  const aAnchors = resampleRailToAnchors(aRail, metrics);
+  const bAnchors = resampleRailToAnchors(bRail, metrics);
+  if (aAnchors.length !== 4 || bAnchors.length !== 4) return [];
+
+  const triangleOrder = [0, 1, 2, 0, 2, 3];
+  return Array.from({ length: 3 }, (_, index) => {
+    const corners = [
+      aAnchors[index],
+      bAnchors[index],
+      bAnchors[index + 1],
+      aAnchors[index + 1],
+    ];
     const positions = [];
     const uvs = [];
     triangleOrder.forEach((cornerIndex) => {
