@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  getHighlightMeta,
   getWorkRowMeta,
   partitionWorkItems,
   workItemId,
@@ -61,5 +62,27 @@ test('getWorkRowMeta formats roles and projects without losing dates', () => {
   assert.deepEqual(getWorkRowMeta(items[7]), {
     label: 'Chrome Extension @ Telios AIO',
     date: 'Dec 2022 - April 2023',
+  });
+});
+
+test('getHighlightMeta exposes the correct image and a compact editorial date', () => {
+  const aesthetic = {
+    ...items[0],
+    data: { ...items[0].data, img: '/aedemo1.gif' },
+  };
+  const redacted = {
+    ...items[6],
+    data: { ...items[6].data, image: '/redacted.png' },
+  };
+
+  assert.deepEqual(getHighlightMeta(aesthetic), {
+    title: 'Aesthetic',
+    image: '/aedemo1.gif',
+    date: 'Dec 2025 — now',
+  });
+  assert.deepEqual(getHighlightMeta(redacted), {
+    title: 'Redacted CLI',
+    image: '/redacted.png',
+    date: 'Jul 2022 — Jan 2023',
   });
 });
