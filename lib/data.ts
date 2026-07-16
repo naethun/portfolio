@@ -4,7 +4,7 @@ export const Bio = {
   name: "Nathan",
   github: "https://github.com/naethun",
   resume:
-    "https://drive.google.com/file/d/1N3kuuJif2t6-Ne9_n8QFMu-uywxGdaNn/view?usp=sharing",
+    "https://drive.google.com/file/d/1dXH2o6HOp3X6Pr5aMPaT3GttSuygP4Bn/view?usp=sharing",
   linkedin: "https://www.linkedin.com/in/naethun/",
 };
 
