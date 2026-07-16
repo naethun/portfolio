@@ -11,6 +11,7 @@ import ReadmePreview from '@/components/ReadmePreview';
 import WorkGrid, { workItemId } from '@/components/Work/WorkGrid';
 import CaseStudyDetail from '@/components/Work/CaseStudyDetail';
 import ContactCard from '@/components/ContactCard';
+import StatusRail from '@/components/Home/StatusRail';
 
 import { Bio, experiences, projects } from '@/lib/data';
 import type { Folder, WorkItem } from '@/types/portfolio';
@@ -61,10 +62,10 @@ export default function HomeClient({ media, shoppable }: Props) {
   const titlebar = `naethun.dev — /${folder}`;
 
   return (
-    <main className="min-h-screen w-full overflow-x-hidden px-5 py-6 md:px-10 md:py-10">
-      <div className="mx-auto grid max-w-[1700px] grid-cols-1 gap-6 md:gap-8 lg:grid-cols-[minmax(280px,38%)_1fr]">
+    <main className="min-h-screen w-full overflow-x-hidden px-5 py-6 md:px-8 md:py-8 xl:px-6">
+      <div className="mx-auto grid max-w-[1800px] grid-cols-1 gap-y-8 xl:grid-cols-[minmax(240px,1fr)_minmax(620px,780px)_minmax(240px,1fr)] xl:gap-x-8 2xl:gap-x-10">
         {/* Left identity column */}
-        <section className="flex flex-col gap-6 lg:gap-8">
+        <section className="flex min-w-0 flex-col gap-6 xl:sticky xl:top-8 xl:h-[calc(100vh-4rem)] xl:min-h-[680px] xl:max-h-[900px] xl:border-r xl:border-black/[0.07] xl:pr-8 2xl:pr-10">
           <button
             type="button"
             onClick={() => selectFolder('work')}
@@ -77,15 +78,15 @@ export default function HomeClient({ media, shoppable }: Props) {
               width={2172}
               height={937}
               priority
-              className="h-auto w-full max-w-[420px] md:h-52 md:w-auto md:max-w-none lg:h-60"
+              className="h-auto w-full max-w-[420px]"
             />
           </button>
           <ReadmePreview />
         </section>
 
-        {/* Right Finder column */}
-        <section className="lg:sticky lg:top-10 lg:self-start">
-          <div className="h-[calc(100svh-3rem)] min-h-[560px] md:h-[calc(100vh-5rem)] md:min-h-[640px]">
+        {/* Centered Finder column */}
+        <section className="min-w-0 xl:sticky xl:top-8 xl:self-start">
+          <div className="h-[calc(100svh-3rem)] min-h-[560px] md:h-[calc(100vh-4rem)] md:min-h-[680px] xl:max-h-[900px]">
             <FinderWindow
               title={titlebar}
               sidebar={<FinderSidebar active={folder} onSelect={selectFolder} />}
@@ -119,6 +120,8 @@ export default function HomeClient({ media, shoppable }: Props) {
             </FinderWindow>
           </div>
         </section>
+
+        <StatusRail />
       </div>
     </main>
   );
