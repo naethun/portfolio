@@ -30,12 +30,21 @@ export interface CaseStudy {
   sections: CaseStudySection[];
 }
 
+/** A headline number shown at the top of a case study, e.g. "100k+" users. */
+export interface CaseStudyFigure {
+  value: string;
+  label: string;
+}
+
 export interface Experience {
   id: number;
   img: string;
   role: string;
   company: string;
   date: string;
+  /** Short line after the role on work cards, e.g. "AI shopping platform". */
+  summary?: string;
+  figures?: CaseStudyFigure[];
   desc: string;
   skills: string[];
   caseStudy?: CaseStudy;
@@ -45,6 +54,9 @@ export interface Project {
   id: number;
   title: string;
   date: string;
+  /** Short line after the category on work cards. */
+  summary?: string;
+  figures?: CaseStudyFigure[];
   description: string;
   image: string;
   tags: string[];

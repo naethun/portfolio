@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { HandLandmarkerResult } from '@mediapipe/tasks-vision';
 
 import type { UniverseMedia } from '@/lib/getUniverseMedia';
@@ -15,6 +16,7 @@ import {
 } from '@/components/ImageUniverse/useUniverseGestures';
 import type { ShoppableManifest } from '@/lib/shoppable/types';
 import { ShoppableBreakdown } from '@/components/ShoppableBreakdown/ShoppableBreakdown';
+import { HandIcon } from '@/components/Finder/icons';
 
 // three.js + WebGL is client-only, so load with SSR disabled.
 const ImageUniverse = dynamic(
@@ -22,12 +24,43 @@ const ImageUniverse = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex min-h-screen items-center justify-center font-mono text-xs tracking-[0.2em] text-neutral-500">
-        LOADING…
+      <div role="status" className="flex h-full min-h-0 items-center justify-center text-sm text-neutral-500">
+        Loading…
       </div>
     ),
   },
 );
+
+// Sentence-case labels for the home Finder, where the camera toggle sits in the toolbar.
+function toolbarCameraLabel(state: CameraState): string {
+  switch (state) {
+    case 'requesting':
+      return 'Starting camera…';
+    case 'denied':
+      return 'Camera blocked · retry';
+    case 'unsupported':
+      return 'Camera unavailable';
+    case 'insecure':
+      return 'Needs HTTPS';
+    default:
+      return 'Hand gestures';
+  }
+}
+
+function toolbarGestureHint(state: GestureState): string {
+  switch (state) {
+    case 'armed':
+      return 'Now open both hands into an L';
+    case 'globe':
+      return 'Globe · relax your hands to release';
+    case 'helix':
+      return 'Helix · relax your hands to release';
+    case 'flat':
+      return 'Flat · relax your hands to release';
+    default:
+      return 'Pinch, then L for globe · both backs for helix · palm and back for flat';
+  }
+}
 
 function cameraLabel(state: CameraState): string {
   switch (state) {
@@ -75,6 +108,7 @@ export default function UniverseExperience({
   hideChrome = false,
   hideGuidance = false,
   background,
+  toolbarSlot,
 }: {
   media: UniverseMedia[];
   shoppable: ShoppableManifest;
@@ -101,7 +135,14 @@ export default function UniverseExperience({
   hideGuidance?: boolean;
   /** Scene background color; defaults to the universe's warm off-white. */
   background?: string;
+  /**
+   * Set by the home Finder: the camera toggle renders into this toolbar element
+   * (once it exists) and the in-scene guidance uses sentence case. Leave it
+   * undefined for the full-screen bottom strip used by `/loop` and `/reels`.
+   */
+  toolbarSlot?: HTMLElement | null;
 }) {
+  const embedded = toolbarSlot !== undefined;
   const external = externalLandmarksRef != null;
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const landmarksRef = useRef<HandLandmarkerResult | null>(null);
@@ -110,7 +151,7 @@ export default function UniverseExperience({
   const flatTargetRef = useRef(0);
   const debugRef = useRef<GestureDebug | null>(null);
   const [gesture, setGesture] = useState<GestureState>('natural');
-  const [showDebug, setShowDebug] = useState(!hideChrome);
+  const [showDebug, setShowDebug] = useState(false);
   const [selected, setSelected] = useState<UniverseMedia | null>(null);
 
   const { state: cameraState, enable, disable } = useCameraStream({ videoRef });
@@ -223,10 +264,42 @@ export default function UniverseExperience({
         <HUD videoRef={videoRef} landmarksRef={landmarksRef} cameraEnabled={internalCameraEnabled} />
       )}
 
+      {/* Home Finder: the camera toggle lives in the window toolbar and the
+          scene only carries guidance while the camera is on. */}
+      {embedded &&
+        toolbarSlot &&
+        createPortal(
+          <button
+            type="button"
+            onClick={internalCameraEnabled ? disable : enable}
+            disabled={cameraState === 'requesting'}
+            aria-pressed={internalCameraEnabled}
+            className={`relative flex h-9 items-center gap-1.5 rounded-lg px-3 text-[13px] font-medium transition-colors before:absolute before:-inset-1 before:content-[''] disabled:opacity-60 ${
+              internalCameraEnabled
+                ? 'bg-neutral-900 text-white hover:bg-neutral-800'
+                : 'bg-black/5 text-neutral-900 hover:bg-black/10'
+            }`}
+          >
+            <HandIcon />
+            {toolbarCameraLabel(cameraState)}
+          </button>,
+          toolbarSlot,
+        )}
+      {embedded && internalCameraEnabled && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-4">
+          <p
+            role="status"
+            className="rounded-full bg-white/85 px-4 py-2 text-center text-[13px] text-neutral-700 shadow-sm ring-1 ring-black/10 backdrop-blur"
+          >
+            {ready ? toolbarGestureHint(gesture) : 'Loading hand model…'}
+          </p>
+        </div>
+      )}
+
       {/* Bottom-center control / guidance strip. With hideGuidance, only the
           initial enable button shows — once the camera is on the strip (hint +
           ✕ CAMERA) is dropped entirely for a clean recording frame. */}
-      {!hideChrome && (!internalCameraEnabled || !hideGuidance) && (
+      {!embedded && !hideChrome && (!internalCameraEnabled || !hideGuidance) && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-5">
           {!internalCameraEnabled ? (
             <button

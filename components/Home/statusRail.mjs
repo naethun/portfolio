@@ -4,10 +4,8 @@ export const statusRoles = [
   {
     index: '01',
     title: 'Founding Engineer @ Aesthetic',
-    details: [
-      'changing how influencers monetize content',
-      '100k+ MAU · $250k+ GMV · 160k+ on Instagram',
-    ],
+    // "changing how influencers monetize content" lives in the readme; listing it here repeated it.
+    details: ['100k+ MAU · $250k+ GMV · 160k+ on Instagram'],
   },
   {
     index: '02',

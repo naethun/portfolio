@@ -1,55 +1,29 @@
-'use client';
+import { DocIcon, TrafficLights } from '@/components/Finder/icons';
 
-import { Bio } from '@/lib/data';
-
+/** The readme as an inactive TextEdit window sitting on the desktop. */
 export default function ReadmePreview() {
   return (
-    <div className="rounded-xl bg-neutral-50 px-5 py-5 ring-1 ring-black/10 shadow-sm md:px-6 md:py-6">
-      <p className="mb-3 font-mono text-[11px] tracking-wider text-neutral-500">
-        readme.txt — preview
-      </p>
-      <div className="space-y-3 font-mono text-[12.5px] leading-relaxed text-neutral-800 md:text-sm">
-        <p>
-          hello, i&apos;m nathan. based in san diego &amp; los angeles — california.
+    <section
+      aria-label="readme.txt"
+      className="overflow-hidden rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_16px_34px_-16px_rgba(0,0,0,0.3)]"
+    >
+      <div className="relative flex h-[38px] items-center border-b border-black/[0.08] bg-[#f6f6f6] px-3">
+        <TrafficLights inactive />
+        <p className="absolute left-1/2 flex -translate-x-1/2 items-center gap-1.5 text-[12.5px] font-semibold text-[#6e6e6e]">
+          <DocIcon />
+          readme.txt
         </p>
-        <p>
-          former sneaker bot dev. reverse-engineered anti-bot measures on nike,
-          shopify, supreme &amp; many more. generated 7-figures in profit for
-          users.
-        </p>
-        <p>
-          currently changing how influencers monetize content @ aesthetic.
-          backed by tier 1 vcs alongside the greatest tastemakers.
-        </p>
-        <p>im also studying cognitive science (design &amp; interaction) + computer science @ ucsd on a full ride.</p>
       </div>
-
-      <div className="mt-5 flex gap-5">
-        <a
-          href={Bio.github}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-mono text-xs text-neutral-700 underline underline-offset-4 transition-colors hover:text-black"
-        >
-          github
-        </a>
-        <a
-          href={Bio.linkedin}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-mono text-xs text-neutral-700 underline underline-offset-4 transition-colors hover:text-black"
-        >
-          linkedin
-        </a>
-        <a
-          href={Bio.resume}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-mono text-xs text-neutral-700 underline underline-offset-4 transition-colors hover:text-black"
-        >
-          resume
-        </a>
+      <div className="space-y-3.5 px-5 pb-[22px] pt-[18px] text-[15px] leading-[1.55] text-[#1f1f1f] text-pretty">
+        <p>
+          former sneaker bot dev. reverse-engineered anti-bot measures on nike, shopify, supreme &amp; many more.
+          generated 7-figures in profit for users.
+        </p>
+        <p>
+          currently changing how influencers monetize content @ aesthetic. backed by tier 1 vcs alongside the greatest
+          tastemakers.
+        </p>
       </div>
-    </div>
+    </section>
   );
 }

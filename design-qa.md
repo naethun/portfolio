@@ -1,3 +1,27 @@
+# Current QA: desktop direction (2026-10-14)
+
+final result: passed
+
+Scope: direction B from the Portfolio Polish canvas (https://claude.ai/artifact/CEsoDsMDmYNLwkeuDqYqqZ). The three-rail contract holds: identity on the left, the Finder window centered, current status on the right. The page is now a Mac desktop: the readme is an inactive TextEdit window, links are desktop file icons, and the status rail is a stack of widgets. The Finder gained a toolbar (back, forward, icons/list), sentence-case "Favorites" with folder glyphs, card descriptors from `summary` in `lib/data.ts`, a list view with columns, one date format, and a path bar. Case studies render your own text as paragraphs and real lists, with figures from `figures` in `lib/data.ts`. Contact is a Get Info panel. The moodboard's gesture toggle moved into the toolbar.
+
+Fixed: without WebGL the moodboard used to throw inside `ImageUniverse` and blank the whole page. `MoodboardPanel` now checks for WebGL up front and wraps the scene in an error boundary that falls back to a flat grid of the same images ([no-WebGL capture](docs/audits/2026-10-14/assets/06-desktop-1440-moodboard-no-webgl.jpg)).
+
+Evidence (Chrome over CDP, Next dev indicator hidden): [1440 work](docs/audits/2026-10-14/assets/01-desktop-1440-work.jpg), [list view](docs/audits/2026-10-14/assets/02-desktop-1440-list.jpg), [case study](docs/audits/2026-10-14/assets/03-desktop-1440-case-study.jpg), [contact](docs/audits/2026-10-14/assets/04-desktop-1440-contact.jpg), [moodboard with WebGL](docs/audits/2026-10-14/assets/05-desktop-1440-moodboard.jpg), [1280 × 800](docs/audits/2026-10-14/assets/07-desktop-1280x800.jpg), [1920 × 1080](docs/audits/2026-10-14/assets/08-desktop-1920x1080.jpg), [390 home](docs/audits/2026-10-14/assets/09-mobile-390-home.jpg), [390 case study](docs/audits/2026-10-14/assets/10-mobile-390-case-study.jpg). No horizontal overflow at 390, 1024, 1280, 1440 or 1920. Back returns focus to the card that opened the case study. On screens under 840px tall the moodboard widget hides so the right column fits; the sidebar still opens the moodboard.
+
+Checks: `node --test` for work, case-study and status-rail logic (18 pass), `universe:test` (6) and `shoppable:test` (9) pass, `tsc --noEmit` and ESLint clean, `next build` generates all 14 routes. Camera hand-gesture flows were not exercised.
+
+---
+
+# QA: native identity and portfolio cleanup (2026-09-12)
+
+final result: passed
+
+Scope: user-supplied identity image converted into native markup with the site's Helvetica Neue stack, plus repairs to the existing portfolio. Source and final render were inspected together in [the comparison](docs/audits/2026-09-12/assets/12-header-comparison.png). The source's blank right margin is excluded for comparison. The native version preserves the two-column lockup, star and bars, heading, location, rules and four roles; glyph metrics intentionally follow the existing font. No claim of exact vector tracing is made.
+
+Desktop (1440 × 900), mobile (390 × 844), and narrow contact (320 × 568) captures are in the [audit report](docs/audits/2026-09-12/audit.md). During verification, narrow card captions and focus restoration failed; both were corrected and retested. Header text is native, desktop titles fit, contact details are reachable, and the debug panel no longer covers the moodboard. Existing automated tests and build checks pass. Camera/provider flows and OS reduced-motion emulation remain outside verified scope.
+
+---
+
 # Homepage three-rail design QA
 
 ## Evidence

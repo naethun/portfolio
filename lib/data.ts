@@ -2,11 +2,16 @@ import type { Experience, Project } from "@/types/portfolio";
 
 export const Bio = {
   name: "Nathan",
+  fullName: "Nathan Tran",
+  email: "hello@naethun.dev",
   github: "https://github.com/naethun",
   resume:
     "https://drive.google.com/file/d/1dXH2o6HOp3X6Pr5aMPaT3GttSuygP4Bn/view?usp=sharing",
   linkedin: "https://www.linkedin.com/in/naethun/",
 };
+
+/** File in public/portfolio/loop-imgs shown on the desktop's moodboard widget. */
+export const moodboardCover = "hedi_cali.jpg";
 
 export const experiences: Experience[] = [
   {
@@ -15,15 +20,21 @@ export const experiences: Experience[] = [
     role: "Founding Engineer",
     company: "Aesthetic",
     date: "December 2025 - Present",
-    desc: `Aesthetic is a all-in-one shopping platform that allows users to buy products through our fully autounomus shopping assistant. 100k+ users, 250k+ GMV, 160k+ on Instagram
+    summary: "AI shopping platform",
+    figures: [
+      { value: "100k+", label: "users" },
+      { value: "$250k+", label: "GMV" },
+      { value: "160k+", label: "on Instagram" },
+    ],
+    desc: `Aesthetic is an all-in-one shopping platform that allows users to buy products through our fully autonomous shopping assistant.
 
-    - Users can upload a image, send social media links of posts, and our app finds all similar products on the web that is inside of the image or posts. Users can then buy the products directly from the app, never having to leave the app.
+    - Users can upload an image, send social media links of posts, and our app finds all similar products on the web that appear in the image or posts. Users can then buy the products directly from the app, never having to leave the app.
 
     - We are mapping human taste by analyzing user's internet activity into vectorized identity models. Scraping user's Instagram, Pinterest, and Gmail data to recommend products to users based on their taste profiles.
 
     - Built the core visual search experience across web and mobile — interactive gesture-driven bounding box selection (60fps via Reanimated shared values), coordinate system transformation between platforms, race condition elimination via AbortController lifecycle management, and a product condition classifier with 40+ domain priors — plus an app-wide offline resilience layer with graceful degradation
 
-    - Architected a full-stack AI product intelligence pipeline across 3 codebases — Firecrawl web scraping → LLM-powered structured extraction (Schematron 8B) → two-tier async caching (sync top-5 + backgroundLambda for 6-15) → mobile delivery with graceful fallback, reducing product detail load times from seconds toinstant for returning users
+    - Architected a full-stack AI product intelligence pipeline across 3 codebases — Firecrawl web scraping → LLM-powered structured extraction (Schematron 8B) → two-tier async caching (sync top-5 + background Lambda for 6-15) → mobile delivery with graceful fallback, reducing product detail load times from seconds to instant for returning users
 
     - Led zero-downtime migration from DynamoDB to PostgreSQL for the entire backend, built migration that processed 4.6M + records, feature flags for safe rollout, & comprehensive tests.
     `,
@@ -35,6 +46,7 @@ export const experiences: Experience[] = [
     role: "Software Engineer",
     company: "EnergeX AI",
     date: "September 2025 - April 2026",
+    summary: "AI sales CRM",
     desc: `EnergeX AI is an AI-driven CRM platform that automates outbound sales calls & real-time analytics for high-volume teams.
 
     - Architected & shipped a multi-campaign calling system, enabling concurrent campaign execution with isolated queue runners, safe concurrency controls, & automated pause/resume logic based on real-time agent availability. Increased effective call throughput by 2-3x without additional infrastructure.
@@ -77,7 +89,7 @@ export const experiences: Experience[] = [
 
         - Developed a predictive machine learning model using logistic regression (scikit-learn) to classify voters based on their likelihood of consistent turnout. The model incorporated demographic, geographic, & behavioral features sourced from multiple datasets. Achieving measurable improvements in prediction accuracy over baseline heuristics.
 
-        - Built a scalable Python data pipeline for historical election analysis. Utilizing P&as & NumPy to ingest, clean, & transform voter turnout data from seven election cycles. The pipeline supported real-time querying & streamlined exploratory data analysis for civic trend detection.
+        - Built a scalable Python data pipeline for historical election analysis. Utilizing Pandas & NumPy to ingest, clean, & transform voter turnout data from seven election cycles. The pipeline supported real-time querying & streamlined exploratory data analysis for civic trend detection.
 
         - Quantified civic engagement patterns using conditional probability analysis & tier-based classification.
 
@@ -119,6 +131,7 @@ export const experiences: Experience[] = [
     role: "Software Developer",
     company: "LightningATC",
     date: "May 2022 - Jun 2023",
+    summary: "checkout automation",
     desc: `A software that focuses on automating checkout proccesses for sneaker resellers to maximize profits.
 
         - Developed a high-performance Chrome extension optimized for low-latency data relaying & scalable concurrent user management, supporting a large active user base.
@@ -143,6 +156,7 @@ export const projects: Project[] = [
     id: 9,
     title: "Redacted CLI",
     date: "July 2022 - Jan 2023",
+    summary: "Discord & NFT automation",
     description: `A software that automated tasks for our users on Discord & across the NFT space. I focused on the backend modules, specifically the NFT ones. We built a community of 2,600+ members throughout the whole process.
 
       Some features that we had:

@@ -1,73 +1,63 @@
 'use client';
 
 import type { Folder } from '@/types/portfolio';
+import { FolderIcon } from './icons';
 
-const items: { id: Folder; label: string; color: string }[] = [
-  { id: 'work', label: 'work', color: '#7aa2e3' },
-  { id: 'moodboard', label: 'moodboard', color: '#7aa2e3' },
-  { id: 'contact', label: 'contact', color: '#7aa2e3' },
-];
+const folders: Folder[] = ['work', 'moodboard', 'contact'];
 
-interface FinderSidebarProps {
+interface FolderNavProps {
   active: Folder;
   onSelect: (id: Folder) => void;
 }
 
-export default function FinderSidebar({ active, onSelect }: FinderSidebarProps) {
+/** The Finder sidebar, from md up. */
+export default function FinderSidebar({ active, onSelect }: FolderNavProps) {
   return (
-    <nav aria-label="Finder favorites">
-      <p className="mb-3 hidden font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500 md:block">
-        Favorites
-      </p>
-
-      {/* Mobile: horizontal pills */}
-      <ul className="flex flex-row gap-2 overflow-x-auto md:hidden">
-        {items.map((item) => {
-          const isActive = active === item.id;
+    <nav aria-label="Folders">
+      <p className="mb-1.5 mt-2 pl-2.5 text-xs font-semibold text-[#6e6e6e]">Favorites</p>
+      <ul className="flex flex-col gap-0.5">
+        {folders.map((id) => {
+          const isActive = active === id;
           return (
-            <li key={item.id}>
+            <li key={id}>
               <button
                 type="button"
-                onClick={() => onSelect(item.id)}
-                className={`flex shrink-0 items-center gap-2 rounded-md px-3 py-1.5 font-mono text-xs transition-colors ${
-                  isActive
-                    ? 'bg-black/8 text-neutral-900'
-                    : 'text-neutral-600 hover:bg-black/5'
-                }`}
+                onClick={() => onSelect(id)}
                 aria-current={isActive ? 'page' : undefined}
+                className={`flex h-11 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-sm transition-colors ${
+                  isActive ? 'bg-black/[0.07] text-neutral-950' : 'text-neutral-800 hover:bg-black/[0.04]'
+                }`}
               >
-                <span
-                  className="h-2.5 w-2.5 rounded-sm"
-                  style={{ backgroundColor: item.color }}
-                />
-                {item.label}
+                <FolderIcon />
+                {id}
               </button>
             </li>
           );
         })}
       </ul>
+    </nav>
+  );
+}
 
-      {/* Desktop: vertical list */}
-      <ul className="hidden flex-col gap-1 md:flex">
-        {items.map((item) => {
-          const isActive = active === item.id;
+/** The same folders as a segmented switcher under the toolbar on phones. */
+export function FolderTabs({ active, onSelect }: FolderNavProps) {
+  return (
+    <nav aria-label="Folders">
+      <ul className="grid grid-cols-3 gap-0.5 rounded-[10px] bg-black/5 p-[3px]">
+        {folders.map((id) => {
+          const isActive = active === id;
           return (
-            <li key={item.id}>
+            <li key={id}>
               <button
                 type="button"
-                onClick={() => onSelect(item.id)}
-                className={`flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left font-mono text-sm transition-colors ${
-                  isActive
-                    ? 'bg-black/8 text-neutral-900'
-                    : 'text-neutral-600 hover:bg-black/5'
-                }`}
+                onClick={() => onSelect(id)}
                 aria-current={isActive ? 'page' : undefined}
+                className={`flex h-11 w-full items-center justify-center gap-1.5 rounded-lg text-[13.5px] transition-colors ${
+                  isActive ? 'bg-white text-neutral-950 shadow-[0_1px_2px_rgba(0,0,0,0.14)]' : 'text-neutral-700'
+                }`}
               >
-                <span
-                  className="h-3 w-3 rounded-sm"
-                  style={{ backgroundColor: item.color }}
-                />
-                {item.label}
+                <FolderIcon className="h-[13px] w-4" />
+                {id}
               </button>
             </li>
           );

@@ -1,99 +1,79 @@
 'use client';
 
-import { useState } from 'react';
 import { Bio } from '@/lib/data';
+import { CheckIcon, CopyIcon, StarMark } from '@/components/Finder/icons';
+import { useCopyText } from '@/hooks/useCopyText';
 
-interface Row {
-  label: string;
-  value: string;
-  href?: string;
-  copy?: string;
-}
-
-const rows: Row[] = [
-  { label: 'name', value: 'nathan tran' },
-  { label: 'based in', value: 'san diego & los angeles, ca' },
-  {
-    label: 'email',
-    value: 'hello@naethun.dev',
-    href: 'mailto:hello@naethun.dev',
-    copy: 'hello@naethun.dev',
-  },
-  {
-    label: 'github',
-    value: 'github.com/naethun',
-    href: Bio.github,
-    copy: Bio.github,
-  },
-  {
-    label: 'linkedin',
-    value: 'linkedin.com/in/naethun',
-    href: Bio.linkedin,
-    copy: Bio.linkedin,
-  },
-  {
-    label: 'resume',
-    value: 'view resume',
-    href: Bio.resume,
-  },
+const links = [
+  { label: 'GitHub', value: 'github.com/naethun', href: Bio.github },
+  { label: 'LinkedIn', value: 'linkedin.com/in/naethun', href: Bio.linkedin },
+  { label: 'Resume', value: 'View resume', href: Bio.resume },
 ];
 
-export default function ContactCard() {
-  const [copied, setCopied] = useState<string | null>(null);
+const row = 'grid min-h-[52px] grid-cols-[76px_minmax(0,1fr)_44px] items-center border-b border-black/10';
 
-  const handleCopy = async (label: string, value: string) => {
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopied(label);
-      setTimeout(() => setCopied((cur) => (cur === label ? null : cur)), 1400);
-    } catch {
-      // ignore
-    }
-  };
+/** Contact as a Get Info panel: the mark as the icon, then the ways to reach Nathan. */
+export default function ContactCard() {
+  const { copied, failed, copy } = useCopyText();
 
   return (
-    <div className="flex h-full items-center justify-center px-5 py-8 md:px-10">
-      <div className="w-full max-w-md rounded-xl bg-white px-6 py-7 ring-1 ring-black/10 shadow-sm md:px-8 md:py-8">
-        <p className="mb-4 font-mono text-[11px] tracking-wider text-neutral-500">
-          always open to new opportunities!
-        </p>
-        <ul className="divide-y divide-black/5">
-          {rows.map((row) => (
-            <li
-              key={row.label}
-              className="flex items-center justify-between gap-3 py-3"
-            >
-              <div className="min-w-0">
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500">
-                  {row.label}
-                </p>
-                {row.href ? (
-                  <a
-                    href={row.href}
-                    target={row.href.startsWith('http') ? '_blank' : undefined}
-                    rel={row.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                    className="block truncate font-mono text-sm text-neutral-900 underline decoration-neutral-300 underline-offset-4 transition-colors hover:decoration-neutral-700"
-                  >
-                    {row.value}
-                  </a>
-                ) : (
-                  <p className="truncate font-mono text-sm text-neutral-900">
-                    {row.value}
-                  </p>
-                )}
-              </div>
-              {row.copy && (
-                <button
-                  type="button"
-                  onClick={() => handleCopy(row.label, row.copy!)}
-                  className="shrink-0 rounded-md border border-black/10 bg-white px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-neutral-600 transition hover:border-black/30 hover:text-neutral-900"
+    <div className="flex min-h-full items-center justify-center px-5 py-10 md:px-6">
+      <div className="w-full max-w-[400px]">
+        <div className="flex items-center gap-4">
+          <span aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center bg-black text-white">
+            <StarMark className="h-[41px] w-10" />
+          </span>
+          <div className="min-w-0">
+            <h3 className="text-2xl font-normal leading-tight tracking-[-0.03em] text-neutral-950">{Bio.fullName}</h3>
+            <p className="mt-1 text-sm text-[#6b6b6b]">always open to new opportunities!</p>
+          </div>
+        </div>
+
+        <dl className="mt-7 border-t border-black/10">
+          <div className={row}>
+            <dt className="text-[13px] text-[#6b6b6b]">Email</dt>
+            <dd className="min-w-0">
+              <a
+                href={`mailto:${Bio.email}`}
+                className="text-sm text-neutral-950 underline-offset-4 [overflow-wrap:anywhere] hover:underline"
+              >
+                {Bio.email}
+              </a>
+            </dd>
+            <dd className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => copy(Bio.email)}
+                aria-label={copied ? 'Email copied' : 'Copy email'}
+                className="flex h-11 w-11 items-center justify-center rounded-[10px] text-neutral-800 transition-colors hover:bg-black/5"
+              >
+                {copied ? <CheckIcon /> : <CopyIcon />}
+              </button>
+            </dd>
+          </div>
+          {links.map((link) => (
+            <div key={link.label} className={row}>
+              <dt className="text-[13px] text-[#6b6b6b]">{link.label}</dt>
+              <dd className="col-span-2 min-w-0">
+                <a
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex min-h-[52px] items-center justify-between gap-3 text-sm text-neutral-950 underline-offset-4 hover:underline"
                 >
-                  {copied === row.label ? 'copied' : 'copy'}
-                </button>
-              )}
-            </li>
+                  <span className="min-w-0 [overflow-wrap:anywhere]">{link.value}</span>
+                  <span aria-hidden="true" className="w-11 shrink-0 text-center text-[15px]">
+                    ↗
+                  </span>
+                </a>
+              </dd>
+            </div>
           ))}
-        </ul>
+        </dl>
+
+        <p role="status" className={failed ? 'mt-3 text-[13px] text-[#6b6b6b]' : 'sr-only'}>
+          {failed ? 'Couldn’t copy. Select the address above to copy it.' : copied ? 'Email copied to clipboard.' : ''}
+        </p>
       </div>
     </div>
   );

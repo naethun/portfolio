@@ -1,29 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, DM_Sans } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["200", "300", "400", "500", "600"],
-  display: "swap",
-});
-
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  display: "swap",
-});
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export const metadata: Metadata = {
   title: "Nathan Tran | Portfolio",
+  description: "Nathan Tran — software engineer, product engineer, and designer based in San Diego and Los Angeles. Explore selected work and get in touch.",
   keywords: ["Nathan", "Software Engineer", "Portfolio", "Full Stack Developer", "Blockchain Developer", "Automation Developer", "Cognitive Science", "Machine Learning", "Neural Computation", "Computer Science", "Engineering", "UCSD",  "React", "Next.js", "TypeScript"],
   authors: [{ name: "Nathan" }],
   creator: "Nathan",
@@ -41,9 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body
-        className={`${inter.variable} ${dmSans.variable} antialiased`}
-      >
+      <body className="antialiased">
         {children}
       </body>
     </html>
