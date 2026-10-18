@@ -52,7 +52,7 @@ export const experiences: Experience[] = [
       { value: "63", label: "Dolphin reads" },
       { value: "21,852", label: "fields audited" },
     ],
-    desc: `Zatanna (YC W26) turns legacy healthcare software into dependable APIs, so client apps can work with dental practice data without dealing with each vendor's protocols. I joined on contract & owned two integrations end to end.
+    desc: `Zatanna (YC W26) turns legacy healthcare software into dependable APIs, so client apps can work with dental practice data without dealing with each vendor's protocols.
 
     - Owned end-to-end delivery of 2 healthcare integrations, giving client applications access to dental patient, scheduling, billing, & insurance data through one unified API across cloud & on-premise systems.
 
