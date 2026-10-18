@@ -22,6 +22,7 @@ const project = (id, title, category, date, extra = {}) => ({
 
 const items = [
   role(0, 'Founding Engineer', 'Aesthetic', 'December 2025 - Present'),
+  role(3, 'Software Engineer', 'Zatanna', 'September 2026 - October 2026'),
   role(1, 'Software Engineer', 'EnergeX AI', 'September 2025 - April 2026'),
   role(2, 'Software Engineer', 'Daedastream', 'June 2025 - December 2025'),
   role(4, 'Data Engineer', 'Viet Voices', 'Jan 2024 - Jul 2025'),
@@ -33,16 +34,16 @@ const items = [
 
 test('workItemId produces the stable kind-id identity', () => {
   assert.equal(workItemId(items[0]), 'role-0');
-  assert.equal(workItemId(items[6]), 'project-9');
+  assert.equal(workItemId(items[7]), 'project-9');
 });
 
 test('partitionWorkItems selects exactly the four approved highlights in source order', () => {
   const { highlights } = partitionWorkItems(items);
   assert.deepEqual(highlights.map(workItemId), [
     'role-0',
+    'role-3',
     'role-1',
     'role-6',
-    'project-9',
   ]);
 });
 
@@ -52,6 +53,7 @@ test('partitionWorkItems keeps every non-highlighted item in source order', () =
     'role-2',
     'role-4',
     'role-5',
+    'project-9',
     'project-1',
   ]);
 });
@@ -64,15 +66,16 @@ test('formatDateRange gives every range one compact format', () => {
   assert.equal(formatDateRange('May 2022 - Jun 2023'), 'May 2022 — Jun 2023');
   assert.equal(formatDateRange('July 2022 - Jan 2023'), 'Jul 2022 — Jan 2023');
   assert.equal(formatDateRange('Dec 2022 - April 2023'), 'Dec 2022 — Apr 2023');
+  assert.equal(formatDateRange('September 2026 - October 2026'), 'Sep 2026 — Oct 2026');
 });
 
 test('getWorkRowMeta splits name, role and date into list-view columns', () => {
-  assert.deepEqual(getWorkRowMeta(items[2]), {
+  assert.deepEqual(getWorkRowMeta(items[3]), {
     name: 'Daedastream',
     role: 'Software Engineer',
     date: 'Jun 2025 — Dec 2025',
   });
-  assert.deepEqual(getWorkRowMeta(items[7]), {
+  assert.deepEqual(getWorkRowMeta(items[8]), {
     name: 'Telios AIO',
     role: 'Chrome Extension',
     date: 'Dec 2022 — Apr 2023',
@@ -111,7 +114,8 @@ test('getHighlightMeta falls back to the role alone when there is no summary', (
 });
 
 test('nextWorkItemId steps through the work in order and wraps around', () => {
-  assert.equal(nextWorkItemId(items, 'role-0'), 'role-1');
+  assert.equal(nextWorkItemId(items, 'role-0'), 'role-3');
+  assert.equal(nextWorkItemId(items, 'role-3'), 'role-1');
   assert.equal(nextWorkItemId(items, 'project-9'), 'project-1');
   assert.equal(nextWorkItemId(items, 'project-1'), 'role-0');
   assert.equal(nextWorkItemId(items, 'missing'), null);

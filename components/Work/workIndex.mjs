@@ -1,4 +1,4 @@
-const HIGHLIGHT_IDS = new Set(['role-0', 'role-1', 'role-6', 'project-9']);
+const HIGHLIGHT_IDS = new Set(['role-0', 'role-3', 'role-1', 'role-6']);
 
 const MONTH_ABBREVIATIONS = new Map([
   ['January', 'Jan'],

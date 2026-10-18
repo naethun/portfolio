@@ -38,7 +38,7 @@ export default function WorkGrid({ items, onSelect, view }: WorkGridProps) {
         >
           selected work
         </h3>
-        <div className="grid grid-cols-2 gap-x-3 gap-y-[18px] md:gap-x-4 md:gap-y-5">
+        <div className="grid grid-cols-2 items-start gap-x-3 gap-y-[18px] md:gap-x-4 md:gap-y-5">
           {highlights.map((item) => (
             <WorkCard key={workItemId(item)} item={item} onClick={(opener) => onSelect(workItemId(item), opener)} />
           ))}

@@ -41,6 +41,28 @@ export const experiences: Experience[] = [
     skills: ["Node.js", "Expo", "Next.js", "AWS", "PostgreSQL", "DynamoDB"],
   },
   {
+    id: 3,
+    img: "/zatanna.gif",
+    role: "Software Engineer",
+    company: "Zatanna (YC W26)",
+    date: "September 2026 - October 2026",
+    summary: "healthcare data APIs",
+    figures: [
+      { value: "110", label: "Greyfinch operations" },
+      { value: "63", label: "Dolphin reads" },
+      { value: "21,852", label: "fields audited" },
+    ],
+    desc: `Zatanna (YC W26) turns legacy healthcare software into dependable APIs, so client apps can work with dental practice data without dealing with each vendor's protocols. I joined on contract & owned two integrations end to end.
+
+    - Owned end-to-end delivery of 2 healthcare integrations, giving client applications access to dental patient, scheduling, billing, & insurance data through one unified API across cloud & on-premise systems.
+
+    - Reverse-engineered vendor APIs & built persistent authentication & session management, exposing 110 Greyfinch operations & 63 Dolphin reads so client teams could build workflows without vendor-specific protocols or a fresh login for every request.
+
+    - Implemented 1,000-record pagination for larger client data syncs & audited 21,852 field comparisons across 44 operations, catching missing claim details & precision defects that could have compromised downstream reporting.
+    `,
+    skills: ["TypeScript", "Go", "Python", "Vite", "AWS", "Redis", "PostgreSQL"],
+  },
+  {
     id: 1,
     img: "/energex.gif",
     role: "Software Engineer",
