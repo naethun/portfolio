@@ -16,7 +16,7 @@ export const moodboardCover = "hedi_cali.jpg";
 export const experiences: Experience[] = [
   {
     id: 0,
-    img: "/aedemo1.gif",
+    img: "/aesthetic.gif",
     role: "Founding Engineer",
     company: "Aesthetic",
     date: "December 2025 - Present",

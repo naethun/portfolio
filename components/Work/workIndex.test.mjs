@@ -84,7 +84,7 @@ test('getWorkRowMeta splits name, role and date into list-view columns', () => {
 
 test('getHighlightMeta exposes the image, a compact date and a descriptor from the data', () => {
   const aesthetic = role(0, 'Founding Engineer', 'Aesthetic', 'December 2025 - Present', {
-    img: '/aedemo1.gif',
+    img: '/aesthetic.gif',
     summary: 'AI shopping platform',
   });
   const redacted = project(9, 'Redacted CLI', 'CLI Software', 'July 2022 - Jan 2023', {
@@ -94,7 +94,7 @@ test('getHighlightMeta exposes the image, a compact date and a descriptor from t
 
   assert.deepEqual(getHighlightMeta(aesthetic), {
     title: 'Aesthetic',
-    image: '/aedemo1.gif',
+    image: '/aesthetic.gif',
     date: 'Dec 2025 — now',
     descriptor: 'Founding Engineer · AI shopping platform',
   });
